@@ -480,6 +480,9 @@ class SpecificationController {
     // Ironmongery - pobierz z IronmongeryController
     const ironmongeryProducts = window.IronmongeryController?.selectedProducts || {};
     const hasIronmongery = Object.keys(ironmongeryProducts).length > 0;
+    
+    console.log('applyDetails - ironmongeryProducts:', ironmongeryProducts);
+    console.log('applyDetails - hasIronmongery:', hasIronmongery);
 
     document.getElementById('spec-details').style.display = 'block';
 
@@ -498,8 +501,10 @@ class SpecificationController {
         .map(item => `${item.quantity}x ${item.product.name}`)
         .join(', ');
       document.getElementById('spec-ironmongery').textContent = productNames;
+      console.log('Ironmongery displayed:', productNames);
     } else {
       document.getElementById('spec-ironmongery-item').style.display = 'none';
+      console.log('No ironmongery to display');
     }
 
     // Hide section if both are none
