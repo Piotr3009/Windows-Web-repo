@@ -468,8 +468,16 @@ class SpecificationController {
   }
 
   applyDetails() {
-    const horns = document.getElementById('horns').value;
-    const ironmongery = document.getElementById('ironmongery').value;
+    const hornsEl = document.getElementById('horns');
+    const ironmongeryEl = document.getElementById('ironmongery');
+    
+    if (!hornsEl || !ironmongeryEl) {
+      console.warn('Details elements not found');
+      return;
+    }
+    
+    const horns = hornsEl.value;
+    const ironmongery = ironmongeryEl.value;
 
     document.getElementById('spec-details').style.display = 'block';
 
