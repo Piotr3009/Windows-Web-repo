@@ -5,7 +5,7 @@ const IronmongeryController = {
   selectedStopperType: null, // 'stopper' lub 'weekes' - tylko jeden
   hasPAS24: false,
   windowWidth: 800,
-  hasTransom: false,
+  hasBars: false, // Czy okno ma Georgian bars
 
   init: function() {
     console.log('Ironmongery Controller initialized');
@@ -206,7 +206,7 @@ const IronmongeryController = {
       quantityDisabled = true;
     } else if (category.autoQuantity === true) {
       // Locks - wylicz automatycznie
-      quantity = IronmongeryHelper.calculateLocksQuantity(this.windowWidth, this.hasTransom);
+      quantity = IronmongeryHelper.calculateLocksQuantity(this.windowWidth, this.hasBars);
       quantityDisabled = true;
     } else if (typeof category.autoQuantity === 'number') {
       // Stoppers - zawsze 2
@@ -345,7 +345,26 @@ const IronmongeryController = {
       });
     }
 
-    // TODO: Nasłuchuj zmian transoma jeśli będzie taka opcja
+    // Nasłuchuj zmian Georgian bars
+    const upperBarsSelect = document.getElementById('upper-bars');
+    const lowerBarsSelect = document.getElementById('lower-bars');
+    
+    const checkBars = () => {
+      const upperBars = upperBarsSelect?.value || 'none';
+      const lowerBars = lowerBarsSelect?.value || 'none';
+      this.hasBars = (upperBars !== 'none' || lowerBars !== 'none');
+      console.log('Bars changed - hasBars:', this.hasBars);
+      if (this.selectedFinish && this.selectedFinish !== 'client-supply') {
+        this.renderProducts(this.selectedFinish);
+      }
+    };
+    
+    if (upperBarsSelect) {
+      upperBarsSelect.addEventListener('change', checkBars);
+    }
+    if (lowerBarsSelect) {
+      lowerBarsSelect.addEventListener('change', checkBars);
+    }
   },
 
   loadConfiguration: function() {

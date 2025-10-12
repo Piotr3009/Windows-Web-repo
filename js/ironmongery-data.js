@@ -15,8 +15,8 @@ const IRONMONGERY_DATA = {
   categories: {
     fingerLifts: {
       name: 'Sash Finger Lifts',
-      autoQuantity: 2, // Zawsze 2 sztuki, obowiązkowe
-      mandatory: true,
+      autoQuantity: 2, // Zawsze 2 sztuki
+      mandatory: false, // Opcjonalne ale zalecane
       products: [
         {
           id: 'finger-lift-chrome',
@@ -24,7 +24,7 @@ const IRONMONGERY_DATA = {
           color: 'chrome',
           prices: { net: 8.50, vat: 10.20 },
           image: 'img/ironmongery/finger-lift-chrome.jpg',
-          description: 'Always 2 per window (mandatory)'
+          description: 'Recommended - Always 2 per window'
         },
         {
           id: 'finger-lift-satin',
@@ -32,7 +32,7 @@ const IRONMONGERY_DATA = {
           color: 'satin',
           prices: { net: 8.50, vat: 10.20 },
           image: 'img/ironmongery/finger-lift-satin.jpg',
-          description: 'Always 2 per window (mandatory)'
+          description: 'Recommended - Always 2 per window'
         },
         {
           id: 'finger-lift-brass',
@@ -40,7 +40,7 @@ const IRONMONGERY_DATA = {
           color: 'brass',
           prices: { net: 9.50, vat: 11.40 },
           image: 'img/ironmongery/finger-lift-brass.jpg',
-          description: 'Always 2 per window (mandatory)'
+          description: 'Recommended - Always 2 per window'
         },
         {
           id: 'finger-lift-antique-brass',
@@ -48,7 +48,7 @@ const IRONMONGERY_DATA = {
           color: 'antique-brass',
           prices: { net: 9.50, vat: 11.40 },
           image: 'img/ironmongery/finger-lift-antique-brass.jpg',
-          description: 'Always 2 per window (mandatory)'
+          description: 'Recommended - Always 2 per window'
         },
         {
           id: 'finger-lift-black',
@@ -56,7 +56,7 @@ const IRONMONGERY_DATA = {
           color: 'black',
           prices: { net: 8.50, vat: 10.20 },
           image: 'img/ironmongery/finger-lift-black.jpg',
-          description: 'Always 2 per window (mandatory)'
+          description: 'Recommended - Always 2 per window'
         },
         {
           id: 'finger-lift-white',
@@ -64,7 +64,7 @@ const IRONMONGERY_DATA = {
           color: 'white',
           prices: { net: 8.50, vat: 10.20 },
           image: 'img/ironmongery/finger-lift-white.jpg',
-          description: 'Always 2 per window (mandatory)'
+          description: 'Recommended - Always 2 per window'
         }
       ]
     },
@@ -313,8 +313,9 @@ const IRONMONGERY_DATA = {
 // Helper functions
 const IronmongeryHelper = {
   // Wylicza ilość locków na podstawie konfiguracji okna
-  calculateLocksQuantity: function(windowWidth, hasTransom) {
-    if (windowWidth > 1200 || hasTransom) {
+  calculateLocksQuantity: function(windowWidth, hasBars) {
+    // 2 locki jeśli szerokość frame > 1200mm LUB ma Georgian bars
+    if (windowWidth > 1200 || hasBars) {
       return 2;
     }
     return 1;
