@@ -13,294 +13,297 @@ const IRONMONGERY_DATA = {
 
   // Product categories
   categories: {
+    fingerLifts: {
+      name: 'Sash Finger Lifts',
+      autoQuantity: 2, // Zawsze 2 sztuki, obowiązkowe
+      mandatory: true,
+      products: [
+        {
+          id: 'finger-lift-chrome',
+          name: 'Sash Finger Lift',
+          color: 'chrome',
+          prices: { net: 8.50, vat: 10.20 },
+          image: 'img/ironmongery/finger-lift-chrome.jpg',
+          description: 'Always 2 per window (mandatory)'
+        },
+        {
+          id: 'finger-lift-satin',
+          name: 'Sash Finger Lift',
+          color: 'satin',
+          prices: { net: 8.50, vat: 10.20 },
+          image: 'img/ironmongery/finger-lift-satin.jpg',
+          description: 'Always 2 per window (mandatory)'
+        },
+        {
+          id: 'finger-lift-brass',
+          name: 'Sash Finger Lift',
+          color: 'brass',
+          prices: { net: 9.50, vat: 11.40 },
+          image: 'img/ironmongery/finger-lift-brass.jpg',
+          description: 'Always 2 per window (mandatory)'
+        },
+        {
+          id: 'finger-lift-antique-brass',
+          name: 'Sash Finger Lift',
+          color: 'antique-brass',
+          prices: { net: 9.50, vat: 11.40 },
+          image: 'img/ironmongery/finger-lift-antique-brass.jpg',
+          description: 'Always 2 per window (mandatory)'
+        },
+        {
+          id: 'finger-lift-black',
+          name: 'Sash Finger Lift',
+          color: 'black',
+          prices: { net: 8.50, vat: 10.20 },
+          image: 'img/ironmongery/finger-lift-black.jpg',
+          description: 'Always 2 per window (mandatory)'
+        },
+        {
+          id: 'finger-lift-white',
+          name: 'Sash Finger Lift',
+          color: 'white',
+          prices: { net: 8.50, vat: 10.20 },
+          image: 'img/ironmongery/finger-lift-white.jpg',
+          description: 'Always 2 per window (mandatory)'
+        }
+      ]
+    },
+
     locks: {
-      name: 'Locks',
-      autoQuantity: true, // Ilość wyliczana automatycznie
+      name: 'Sash Locks',
+      autoQuantity: true, // Ilość wyliczana automatycznie (1 lub 2)
       products: [
         {
-          id: 'standard-lock-pas24-chrome',
-          name: 'Standard Lock PAS24',
+          id: 'sash-lock-pas24-chrome',
+          name: 'Sash Lock PAS24',
           color: 'chrome',
           isPAS24: true,
           recommended: true,
-          prices: {
-            net: 25.00,
-            vat: 30.00
-          },
-          image: 'img/locks/standard-lock-chrome.jpg',
-          description: 'PAS24 certified lock'
+          prices: { net: 25.00, vat: 30.00 },
+          image: 'img/ironmongery/lock-pas24-chrome.jpg',
+          description: 'PAS24 certified security lock'
         },
         {
-          id: 'standard-lock-pas24-satin',
-          name: 'Standard Lock PAS24',
+          id: 'sash-lock-pas24-satin',
+          name: 'Sash Lock PAS24',
           color: 'satin',
           isPAS24: true,
           recommended: true,
-          prices: {
-            net: 25.00,
-            vat: 30.00
-          },
-          image: 'img/locks/standard-lock-satin.jpg',
-          description: 'PAS24 certified lock'
+          prices: { net: 25.00, vat: 30.00 },
+          image: 'img/ironmongery/lock-pas24-satin.jpg',
+          description: 'PAS24 certified security lock'
         },
         {
-          id: 'standard-lock-pas24-brass',
-          name: 'Standard Lock PAS24',
+          id: 'sash-lock-pas24-brass',
+          name: 'Sash Lock PAS24',
           color: 'brass',
           isPAS24: true,
           recommended: true,
-          prices: {
-            net: 27.00,
-            vat: 32.40
-          },
-          image: 'img/locks/standard-lock-brass.jpg',
-          description: 'PAS24 certified lock'
+          prices: { net: 27.00, vat: 32.40 },
+          image: 'img/ironmongery/lock-pas24-brass.jpg',
+          description: 'PAS24 certified security lock'
         },
         {
-          id: 'standard-lock-pas24-black',
-          name: 'Standard Lock PAS24',
+          id: 'sash-lock-pas24-antique-brass',
+          name: 'Sash Lock PAS24',
+          color: 'antique-brass',
+          isPAS24: true,
+          recommended: true,
+          prices: { net: 27.00, vat: 32.40 },
+          image: 'img/ironmongery/lock-pas24-antique-brass.jpg',
+          description: 'PAS24 certified security lock'
+        },
+        {
+          id: 'sash-lock-pas24-black',
+          name: 'Sash Lock PAS24',
           color: 'black',
           isPAS24: true,
           recommended: true,
-          prices: {
-            net: 25.00,
-            vat: 30.00
-          },
-          image: 'img/locks/standard-lock-black.jpg',
-          description: 'PAS24 certified lock'
+          prices: { net: 25.00, vat: 30.00 },
+          image: 'img/ironmongery/lock-pas24-black.jpg',
+          description: 'PAS24 certified security lock'
         },
         {
-          id: 'standard-lock-pas24-white',
-          name: 'Standard Lock PAS24',
+          id: 'sash-lock-pas24-white',
+          name: 'Sash Lock PAS24',
           color: 'white',
           isPAS24: true,
           recommended: true,
-          prices: {
-            net: 25.00,
-            vat: 30.00
-          },
-          image: 'img/locks/standard-lock-white.jpg',
-          description: 'PAS24 certified lock'
+          prices: { net: 25.00, vat: 30.00 },
+          image: 'img/ironmongery/lock-pas24-white.jpg',
+          description: 'PAS24 certified security lock'
         }
-        // TODO: Dodać inne locki (non-PAS24)
+        // TODO: Dodać inne locki (non-PAS24) jeśli będą potrzebne
       ]
     },
-    
-    restrictors: {
-      name: 'Restrictors',
+
+    pullHandles: {
+      name: 'Sash Pull Handles',
+      autoQuantity: false, // User wybiera ilość
+      products: [
+        {
+          id: 'pull-handle-chrome',
+          name: 'Sash Pull Handle',
+          color: 'chrome',
+          prices: { net: 12.50, vat: 15.00 },
+          image: 'img/ironmongery/pull-handle-chrome.jpg',
+          description: 'Choose quantity as needed'
+        },
+        {
+          id: 'pull-handle-satin',
+          name: 'Sash Pull Handle',
+          color: 'satin',
+          prices: { net: 12.50, vat: 15.00 },
+          image: 'img/ironmongery/pull-handle-satin.jpg',
+          description: 'Choose quantity as needed'
+        },
+        {
+          id: 'pull-handle-brass',
+          name: 'Sash Pull Handle',
+          color: 'brass',
+          prices: { net: 14.00, vat: 16.80 },
+          image: 'img/ironmongery/pull-handle-brass.jpg',
+          description: 'Choose quantity as needed'
+        },
+        {
+          id: 'pull-handle-antique-brass',
+          name: 'Sash Pull Handle',
+          color: 'antique-brass',
+          prices: { net: 14.00, vat: 16.80 },
+          image: 'img/ironmongery/pull-handle-antique-brass.jpg',
+          description: 'Choose quantity as needed'
+        },
+        {
+          id: 'pull-handle-black',
+          name: 'Sash Pull Handle',
+          color: 'black',
+          prices: { net: 12.50, vat: 15.00 },
+          image: 'img/ironmongery/pull-handle-black.jpg',
+          description: 'Choose quantity as needed'
+        },
+        {
+          id: 'pull-handle-white',
+          name: 'Sash Pull Handle',
+          color: 'white',
+          prices: { net: 12.50, vat: 15.00 },
+          image: 'img/ironmongery/pull-handle-white.jpg',
+          description: 'Choose quantity as needed'
+        }
+      ]
+    },
+
+    stoppers: {
+      name: 'Window Stoppers',
       autoQuantity: 2, // Zawsze 2 sztuki
+      exclusive: true, // Można wybrać TYLKO JEDEN typ (stopper LUB weekes)
       products: [
         {
-          id: 'angel-restrictor-chrome',
-          name: 'Angel Restrictor Air Ventlock',
+          id: 'window-stopper-chrome',
+          name: 'Sash Window Stopper',
           color: 'chrome',
-          prices: {
-            net: 13.10,
-            vat: 15.72
-          },
-          image: 'img/restrictors/angel-restrictor-chrome.jpg',
-          description: 'Sash hooks, pulleys or spiral balances included'
+          type: 'stopper',
+          prices: { net: 11.00, vat: 13.20 },
+          image: 'img/ironmongery/window-stopper-chrome.jpg',
+          description: 'Always 2 per window - Choose this OR Weekes Stop'
         },
         {
-          id: 'angel-restrictor-satin',
-          name: 'Angel Restrictor Air Ventlock',
+          id: 'window-stopper-satin',
+          name: 'Sash Window Stopper',
           color: 'satin',
-          prices: {
-            net: 13.10,
-            vat: 15.72
-          },
-          image: 'img/restrictors/angel-restrictor-satin.jpg',
-          description: 'Sash hooks, pulleys or spiral balances included'
+          type: 'stopper',
+          prices: { net: 11.00, vat: 13.20 },
+          image: 'img/ironmongery/window-stopper-satin.jpg',
+          description: 'Always 2 per window - Choose this OR Weekes Stop'
         },
         {
-          id: 'angel-restrictor-brass',
-          name: 'Angel Restrictor Air Ventlock',
+          id: 'window-stopper-brass',
+          name: 'Sash Window Stopper',
           color: 'brass',
-          prices: {
-            net: 14.50,
-            vat: 17.40
-          },
-          image: 'img/restrictors/angel-restrictor-brass.jpg',
-          description: 'Sash hooks, pulleys or spiral balances included'
+          type: 'stopper',
+          prices: { net: 12.50, vat: 15.00 },
+          image: 'img/ironmongery/window-stopper-brass.jpg',
+          description: 'Always 2 per window - Choose this OR Weekes Stop'
         },
         {
-          id: 'angel-restrictor-antique-brass',
-          name: 'Angel Restrictor Air Ventlock',
+          id: 'window-stopper-antique-brass',
+          name: 'Sash Window Stopper',
           color: 'antique-brass',
-          prices: {
-            net: 14.50,
-            vat: 17.40
-          },
-          image: 'img/restrictors/angel-restrictor-antique-brass.jpg',
-          description: 'Sash hooks, pulleys or spiral balances included'
+          type: 'stopper',
+          prices: { net: 12.50, vat: 15.00 },
+          image: 'img/ironmongery/window-stopper-antique-brass.jpg',
+          description: 'Always 2 per window - Choose this OR Weekes Stop'
         },
         {
-          id: 'angel-restrictor-black',
-          name: 'Angel Restrictor Air Ventlock',
+          id: 'window-stopper-black',
+          name: 'Sash Window Stopper',
           color: 'black',
-          prices: {
-            net: 13.10,
-            vat: 15.72
-          },
-          image: 'img/restrictors/angel-restrictor-black.jpg',
-          description: 'Sash hooks, pulleys or spiral balances included'
+          type: 'stopper',
+          prices: { net: 11.00, vat: 13.20 },
+          image: 'img/ironmongery/window-stopper-black.jpg',
+          description: 'Always 2 per window - Choose this OR Weekes Stop'
         },
         {
-          id: 'angel-restrictor-white',
-          name: 'Angel Restrictor Air Ventlock',
+          id: 'window-stopper-white',
+          name: 'Sash Window Stopper',
           color: 'white',
-          prices: {
-            net: 13.10,
-            vat: 15.72
-          },
-          image: 'img/restrictors/angel-restrictor-white.jpg',
-          description: 'Sash hooks, pulleys or spiral balances included'
-        }
-      ]
-    },
-
-    fasteners: {
-      name: 'Fasteners',
-      autoQuantity: false, // User wybiera ilość
-      products: [
+          type: 'stopper',
+          prices: { net: 11.00, vat: 13.20 },
+          image: 'img/ironmongery/window-stopper-white.jpg',
+          description: 'Always 2 per window - Choose this OR Weekes Stop'
+        },
         {
-          id: 'fitch-fastener-chrome',
-          name: 'Fitch Fastener',
+          id: 'weekes-stop-chrome',
+          name: 'Weekes Sash Stop',
           color: 'chrome',
-          prices: {
-            net: 9.25,
-            vat: 11.10
-          },
-          image: 'img/fasteners/fitch-fastener-chrome.jpg',
-          description: 'Please choose 1 or 2 per sash'
+          type: 'weekes',
+          prices: { net: 13.50, vat: 16.20 },
+          image: 'img/ironmongery/weekes-stop-chrome.jpg',
+          description: 'Always 2 per window - Choose this OR Window Stopper'
         },
         {
-          id: 'fitch-fastener-satin',
-          name: 'Fitch Fastener',
+          id: 'weekes-stop-satin',
+          name: 'Weekes Sash Stop',
           color: 'satin',
-          prices: {
-            net: 9.25,
-            vat: 11.10
-          },
-          image: 'img/fasteners/fitch-fastener-satin.jpg',
-          description: 'Please choose 1 or 2 per sash'
+          type: 'weekes',
+          prices: { net: 13.50, vat: 16.20 },
+          image: 'img/ironmongery/weekes-stop-satin.jpg',
+          description: 'Always 2 per window - Choose this OR Window Stopper'
         },
         {
-          id: 'fitch-fastener-brass',
-          name: 'Fitch Fastener',
+          id: 'weekes-stop-brass',
+          name: 'Weekes Sash Stop',
           color: 'brass',
-          prices: {
-            net: 10.50,
-            vat: 12.60
-          },
-          image: 'img/fasteners/fitch-fastener-brass.jpg',
-          description: 'Please choose 1 or 2 per sash'
+          type: 'weekes',
+          prices: { net: 15.00, vat: 18.00 },
+          image: 'img/ironmongery/weekes-stop-brass.jpg',
+          description: 'Always 2 per window - Choose this OR Window Stopper'
         },
         {
-          id: 'fitch-fastener-antique-brass',
-          name: 'Fitch Fastener',
+          id: 'weekes-stop-antique-brass',
+          name: 'Weekes Sash Stop',
           color: 'antique-brass',
-          prices: {
-            net: 10.50,
-            vat: 12.60
-          },
-          image: 'img/fasteners/fitch-fastener-antique-brass.jpg',
-          description: 'Please choose 1 or 2 per sash'
+          type: 'weekes',
+          prices: { net: 15.00, vat: 18.00 },
+          image: 'img/ironmongery/weekes-stop-antique-brass.jpg',
+          description: 'Always 2 per window - Choose this OR Window Stopper'
         },
         {
-          id: 'fitch-fastener-black',
-          name: 'Fitch Fastener',
+          id: 'weekes-stop-black',
+          name: 'Weekes Sash Stop',
           color: 'black',
-          prices: {
-            net: 9.25,
-            vat: 11.10
-          },
-          image: 'img/fasteners/fitch-fastener-black.jpg',
-          description: 'Please choose 1 or 2 per sash'
+          type: 'weekes',
+          prices: { net: 13.50, vat: 16.20 },
+          image: 'img/ironmongery/weekes-stop-black.jpg',
+          description: 'Always 2 per window - Choose this OR Window Stopper'
         },
         {
-          id: 'fitch-fastener-white',
-          name: 'Fitch Fastener',
+          id: 'weekes-stop-white',
+          name: 'Weekes Sash Stop',
           color: 'white',
-          prices: {
-            net: 9.25,
-            vat: 11.10
-          },
-          image: 'img/fasteners/fitch-fastener-white.jpg',
-          description: 'Please choose 1 or 2 per sash'
-        }
-      ]
-    },
-
-    hooks: {
-      name: 'Hooks',
-      autoQuantity: false, // User wybiera ilość
-      products: [
-        {
-          id: 'mighton-hooking-chrome',
-          name: 'Mighton Hooking',
-          color: 'chrome',
-          prices: {
-            net: 4.98,
-            vat: 5.98
-          },
-          image: 'img/hooks/mighton-hooking-chrome.jpg',
-          description: 'Please choose 1 or 2 per sash'
-        },
-        {
-          id: 'mighton-hooking-satin',
-          name: 'Mighton Hooking',
-          color: 'satin',
-          prices: {
-            net: 4.98,
-            vat: 5.98
-          },
-          image: 'img/hooks/mighton-hooking-satin.jpg',
-          description: 'Please choose 1 or 2 per sash'
-        },
-        {
-          id: 'mighton-hooking-brass',
-          name: 'Mighton Hooking',
-          color: 'brass',
-          prices: {
-            net: 5.50,
-            vat: 6.60
-          },
-          image: 'img/hooks/mighton-hooking-brass.jpg',
-          description: 'Please choose 1 or 2 per sash'
-        },
-        {
-          id: 'mighton-hooking-antique-brass',
-          name: 'Mighton Hooking',
-          color: 'antique-brass',
-          prices: {
-            net: 5.50,
-            vat: 6.60
-          },
-          image: 'img/hooks/mighton-hooking-antique-brass.jpg',
-          description: 'Please choose 1 or 2 per sash'
-        },
-        {
-          id: 'mighton-hooking-black',
-          name: 'Mighton Hooking',
-          color: 'black',
-          prices: {
-            net: 4.98,
-            vat: 5.98
-          },
-          image: 'img/hooks/mighton-hooking-black.jpg',
-          description: 'Please choose 1 or 2 per sash'
-        },
-        {
-          id: 'mighton-hooking-white',
-          name: 'Mighton Hooking',
-          color: 'white',
-          prices: {
-            net: 4.98,
-            vat: 5.98
-          },
-          image: 'img/hooks/mighton-hooking-white.jpg',
-          description: 'Please choose 1 or 2 per sash'
+          type: 'weekes',
+          prices: { net: 13.50, vat: 16.20 },
+          image: 'img/ironmongery/weekes-stop-white.jpg',
+          description: 'Always 2 per window - Choose this OR Window Stopper'
         }
       ]
     }
