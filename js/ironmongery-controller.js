@@ -186,7 +186,7 @@ const IronmongeryController = {
 
     const priceEl = document.createElement('div');
     priceEl.className = 'product-price';
-    priceEl.innerHTML = `£${product.prices.net.toFixed(2)} <span class="vat-price">incl. VAT £${product.prices.vat.toFixed(2)}</span>`;
+    priceEl.innerHTML = `£${product.prices.net.toFixed(2)}`;
 
     infoDiv.appendChild(nameEl);
     infoDiv.appendChild(descEl);
@@ -284,7 +284,7 @@ const IronmongeryController = {
       product: product,
       quantity: quantity,
       category: categoryKey,
-      totalPrice: product.prices.vat * quantity
+      totalPrice: product.prices.net * quantity
     };
 
     console.log('Product added:', product.name, 'Quantity:', quantity);

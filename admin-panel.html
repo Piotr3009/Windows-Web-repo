@@ -68,19 +68,25 @@
       <h2>Section 6: Opening Mechanism</h2>
     </div>
     <div class="section-content">
+      <p style="margin-bottom: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107;">
+        <strong>💡 How it works:</strong> Standard (Top & Bottom open) = base price (£0 adjustment).<br>
+        Bottom only and Fixed are CHEAPER options. Enter positive numbers below - they will be SUBTRACTED from the window price.
+      </p>
       <div class="form-group-inline">
         <label>Bottom open only:</label>
+        <span>Base: £</span>
         <input type="number" id="bottom-base" step="0.01" placeholder="50.00" style="width: 100px;">
         <span>+ £</span>
         <input type="number" id="bottom-per-sqm" step="0.01" placeholder="20.00" style="width: 100px;">
-        <span>per m²</span>
+        <span>per m² (discount)</span>
       </div>
       <div class="form-group-inline">
-        <label>Top & Bottom open:</label>
+        <label>Fixed (no opening):</label>
+        <span>Base: £</span>
         <input type="number" id="both-base" step="0.01" placeholder="100.00" style="width: 100px;">
-        <span>- £</span>
+        <span>+ £</span>
         <input type="number" id="both-per-sqm" step="0.01" placeholder="40.00" style="width: 100px;">
-        <span>per m²</span>
+        <span>per m² (discount)</span>
       </div>
       <button class="btn-save" onclick="AdminController.saveOpeningPrices()">Save</button>
     </div>
