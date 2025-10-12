@@ -312,7 +312,10 @@ const IronmongeryController = {
   },
 
   updateSpecification: function() {
-    // TODO: Integracja z specification-controller.js
+    // Wywołaj applyDetails z SpecificationController
+    if (window.SpecificationController) {
+      window.SpecificationController.applyDetails();
+    }
   },
 
   listenToWindowConfig: function() {

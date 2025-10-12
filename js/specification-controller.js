@@ -43,7 +43,7 @@ class SpecificationController {
     this.watchSection(['pas24'], 'apply-pas24');
 
     // Sekcja 8: Details
-    this.watchSection(['horns', 'ironmongery'], 'apply-details');
+    this.watchSection(['horns'], 'apply-details');
 
     // Sekcja 9: Glass Spec
     this.watchSection(['glass-spec', 'glass-finish', 'frosted-location'], 'apply-glass-spec');
@@ -469,15 +469,17 @@ class SpecificationController {
 
   applyDetails() {
     const hornsEl = document.getElementById('horns');
-    const ironmongeryEl = document.getElementById('ironmongery');
     
-    if (!hornsEl || !ironmongeryEl) {
-      console.warn('Details elements not found');
+    if (!hornsEl) {
+      console.warn('Horns element not found');
       return;
     }
     
     const horns = hornsEl.value;
-    const ironmongery = ironmongeryEl.value;
+    
+    // Ironmongery - pobierz z IronmongeryController
+    const ironmongeryProducts = window.IronmongeryController?.selectedProducts || {};
+    const hasIronmongery = Object.keys(ironmongeryProducts).length > 0;
 
     document.getElementById('spec-details').style.display = 'block';
 
@@ -489,16 +491,19 @@ class SpecificationController {
       document.getElementById('spec-horns-item').style.display = 'none';
     }
 
-    // Ironmongery
-    if (ironmongery && ironmongery !== 'none') {
+    // Ironmongery - wyświetl listę produktów
+    if (hasIronmongery) {
       document.getElementById('spec-ironmongery-item').style.display = 'flex';
-      document.getElementById('spec-ironmongery').textContent = this.formatName(ironmongery) + ' Ironmongery';
+      const productNames = Object.values(ironmongeryProducts)
+        .map(item => `${item.quantity}x ${item.product.name}`)
+        .join(', ');
+      document.getElementById('spec-ironmongery').textContent = productNames;
     } else {
       document.getElementById('spec-ironmongery-item').style.display = 'none';
     }
 
     // Hide section if both are none
-    if ((!horns || horns === 'none') && (!ironmongery || ironmongery === 'none')) {
+    if ((!horns || horns === 'none') && !hasIronmongery) {
       document.getElementById('spec-details').style.display = 'none';
     }
 
