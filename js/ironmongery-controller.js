@@ -308,7 +308,25 @@ const IronmongeryController = {
     
     console.log('Ironmongery total price:', ironmongeryTotal);
     
-    // TODO: Integracja z price-calculator.js
+    // Wywołaj przeliczenie ceny
+    if (window.priceCalculator) {
+      const config = this.getCurrentConfiguration();
+      window.priceCalculator.calculate(config);
+    }
+  },
+  
+  getCurrentConfiguration: function() {
+    // Pobierz aktualną konfigurację okna
+    return {
+      width: parseInt(document.getElementById('width')?.value) || 800,
+      height: parseInt(document.getElementById('height')?.value) || 1000,
+      upperBars: document.getElementById('upper-bars')?.value || 'none',
+      lowerBars: document.getElementById('lower-bars')?.value || 'none',
+      horns: document.getElementById('horns')?.value || 'none',
+      pas24: document.querySelector('input[name="pas24"]:checked')?.value || 'no',
+      openingType: document.querySelector('input[name="opening-type"]:checked')?.value || 'both',
+      // Dodaj inne pola jeśli potrzebne
+    };
   },
 
   updateSpecification: function() {

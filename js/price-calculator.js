@@ -186,11 +186,17 @@ class PriceCalculator {
       console.log('Horns (' + configuration.horns + '): £' + hornsPrice);
     }
     
-    // Ironmongery
-    if (configuration.ironmongery && options.ironmongery[configuration.ironmongery]) {
-      const ironPrice = options.ironmongery[configuration.ironmongery];
-      additionalPrice += ironPrice;
-      console.log('Ironmongery (' + configuration.ironmongery + '): £' + ironPrice);
+    // Ironmongery - pobierz z IronmongeryController
+    if (window.IronmongeryController?.selectedProducts) {
+      let ironmongeryTotal = 0;
+      Object.values(window.IronmongeryController.selectedProducts).forEach(item => {
+        ironmongeryTotal += item.totalPrice;
+      });
+      
+      if (ironmongeryTotal > 0) {
+        additionalPrice += ironmongeryTotal;
+        console.log('Ironmongery total: £' + ironmongeryTotal);
+      }
     }
     
     // Opening type
