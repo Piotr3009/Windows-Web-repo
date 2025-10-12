@@ -145,9 +145,11 @@ const AdminController = {
     form.reset();
     
     // Reset tytułu i przycisku
-    document.querySelector('#add-product-modal h3').textContent = 'Add New Product';
+    const titleEl = document.querySelector('#add-product-modal h2');
+    if (titleEl) titleEl.textContent = 'Add Ironmongery Product';
+    
     const submitBtn = document.querySelector('#add-product-form button[type="submit"]');
-    submitBtn.textContent = 'Add Product';
+    if (submitBtn) submitBtn.textContent = 'Add Product';
     
     // Usuń editId
     delete form.dataset.editId;
@@ -351,9 +353,11 @@ const AdminController = {
     this.openAddProductModal();
     
     // Zmień tytuł i przycisk
-    document.querySelector('#add-product-modal h3').textContent = 'Edit Product';
+    const titleEl = document.querySelector('#add-product-modal h2');
+    if (titleEl) titleEl.textContent = 'Edit Product';
+    
     const submitBtn = document.querySelector('#add-product-form button[type="submit"]');
-    submitBtn.textContent = 'Update Product';
+    if (submitBtn) submitBtn.textContent = 'Update Product';
     
     // Zapisz ID edytowanego produktu
     document.getElementById('add-product-form').dataset.editId = productId;
