@@ -401,6 +401,9 @@ const IronmongeryController = {
   }
 };
 
+// Eksportuj do window żeby inne moduły mogły używać
+window.IronmongeryController = IronmongeryController;
+
 // Inicjalizacja po załadowaniu DOM
 document.addEventListener('DOMContentLoaded', function() {
   console.log('DOM loaded, initializing Ironmongery Controller');
