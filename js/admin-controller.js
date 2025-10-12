@@ -138,11 +138,25 @@ const AdminController = {
   },
 
   closeAddProductModal: function() {
-    document.getElementById('add-product-modal').classList.remove('active');
-    document.getElementById('add-product-form').reset();
+    const modal = document.getElementById('add-product-modal');
+    const form = document.getElementById('add-product-form');
+    
+    modal.classList.remove('active');
+    form.reset();
+    
+    // Reset tytułu i przycisku
+    document.querySelector('#add-product-modal h3').textContent = 'Add New Product';
+    const submitBtn = document.querySelector('#add-product-form button[type="submit"]');
+    submitBtn.textContent = 'Add Product';
+    
+    // Usuń editId
+    delete form.dataset.editId;
   },
 
   addProduct: function() {
+    const form = document.getElementById('add-product-form');
+    const editId = form.dataset.editId; // Sprawdź czy to edycja
+    
     const category = document.getElementById('product-category').value;
     const name = document.getElementById('product-name').value;
     const color = document.getElementById('product-color').value;
@@ -169,13 +183,34 @@ const AdminController = {
         return;
       }
     }
+    
+    // Jeśli edycja i nie ma nowego zdjęcia, zachowaj stare
+    if (editId && !imageFile) {
+      const products = JSON.parse(localStorage.getItem(this.STORAGE_KEYS.IRONMONGERY_PRODUCTS) || '[]');
+      const oldProduct = products.find(p => p.id === editId);
+      
+      this.saveProduct({
+        id: editId, // Użyj starego ID
+        category,
+        name,
+        color,
+        prices: { net: priceNet, vat: priceVat },
+        description,
+        isPAS24,
+        recommended,
+        mandatory,
+        type: stopperType,
+        image: oldProduct?.image || 'img/placeholder.png'
+      }, editId);
+      return;
+    }
 
     // Read image
     if (imageFile) {
       const reader = new FileReader();
       reader.onload = (e) => {
         this.saveProduct({
-          id: Date.now().toString(),
+          id: editId || Date.now().toString(),
           category,
           name,
           color,
@@ -186,12 +221,12 @@ const AdminController = {
           mandatory,
           type: stopperType,
           image: e.target.result // Base64
-        });
+        }, editId);
       };
       reader.readAsDataURL(imageFile);
     } else {
       this.saveProduct({
-        id: Date.now().toString(),
+        id: editId || Date.now().toString(),
         category,
         name,
         color,
@@ -202,21 +237,28 @@ const AdminController = {
         mandatory,
         type: stopperType,
         image: 'img/placeholder.png'
-      });
+      }, editId);
     }
   },
 
-  saveProduct: function(product) {
+  saveProduct: function(product, editId) {
     // Get existing products
-    const products = JSON.parse(localStorage.getItem(this.STORAGE_KEYS.IRONMONGERY_PRODUCTS) || '[]');
+    let products = JSON.parse(localStorage.getItem(this.STORAGE_KEYS.IRONMONGERY_PRODUCTS) || '[]');
     
-    // Add new product
-    products.push(product);
+    if (editId) {
+      // Edycja - usuń stary i dodaj nowy
+      products = products.filter(p => p.id !== editId);
+      products.push(product);
+      alert('Product updated successfully!');
+    } else {
+      // Dodawanie nowego
+      products.push(product);
+      alert('Product added successfully!');
+    }
     
     // Save
     localStorage.setItem(this.STORAGE_KEYS.IRONMONGERY_PRODUCTS, JSON.stringify(products));
     
-    alert('Product added successfully!');
     this.closeAddProductModal();
     this.renderIronmongeryTable();
   },
@@ -280,8 +322,41 @@ const AdminController = {
   },
 
   editProduct: function(productId) {
-    alert('Edit functionality coming soon!');
-    // TODO: Implement edit
+    const products = JSON.parse(localStorage.getItem(this.STORAGE_KEYS.IRONMONGERY_PRODUCTS) || '[]');
+    const product = products.find(p => p.id === productId);
+    
+    if (!product) {
+      alert('Product not found');
+      return;
+    }
+    
+    // Wypełnij formularz danymi produktu
+    document.getElementById('product-category').value = product.category;
+    document.getElementById('product-name').value = product.name;
+    document.getElementById('product-color').value = product.color;
+    document.getElementById('product-price-net').value = product.prices.net;
+    document.getElementById('product-price-vat').value = product.prices.vat;
+    document.getElementById('product-description').value = product.description || '';
+    document.getElementById('product-pas24').checked = product.isPAS24 || false;
+    document.getElementById('product-recommended').checked = product.recommended || false;
+    document.getElementById('product-mandatory').checked = product.mandatory || false;
+    
+    // Pokaż stopper type jeśli stopper
+    if (product.category === 'stoppers') {
+      document.getElementById('stopper-type-group').style.display = 'block';
+      document.getElementById('product-stopper-type').value = product.type;
+    }
+    
+    // Otwórz modal
+    this.openAddProductModal();
+    
+    // Zmień tytuł i przycisk
+    document.querySelector('#add-product-modal h3').textContent = 'Edit Product';
+    const submitBtn = document.querySelector('#add-product-form button[type="submit"]');
+    submitBtn.textContent = 'Update Product';
+    
+    // Zapisz ID edytowanego produktu
+    document.getElementById('add-product-form').dataset.editId = productId;
   },
 
   // SECTION 8: HORNS

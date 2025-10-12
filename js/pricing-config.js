@@ -1,7 +1,7 @@
 // pricing-config.js - Zaawansowana konfiguracja cennika
 const pricingConfig = {
   // Cena bazowa za m²
-  basePricePerSqm: 900,
+  basePricePerSqm: 1000,
   
   // Mnożniki degresywne - im większe okno, tym taniej za m²
   sizeMultipliers: [
@@ -58,12 +58,12 @@ const pricingConfig = {
       'frosted': 80       // +80£
     },
     
-    // Horns
+    // Horns - bez dopłaty (w cenie okna)
     horns: {
       'none': 0,
-      'standard': 20,
-      'deep': 35,
-      'traditional': 50
+      'standard': 0,
+      'deep': 0,
+      'traditional': 0
     },
     
     // Ironmongery
