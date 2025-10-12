@@ -347,8 +347,8 @@ const IronmongeryController = {
 
   loadConfiguration: function() {
     // Załaduj zapisaną konfigurację
-    if (typeof StorageManager !== 'undefined') {
-      const savedConfig = StorageManager.getConfiguration();
+    if (typeof storageManager !== 'undefined') {
+      const savedConfig = storageManager.loadConfig();
       if (savedConfig && savedConfig.ironmongery) {
         this.selectedFinish = savedConfig.ironmongery.finish;
         this.selectedProducts = savedConfig.ironmongery.products || {};
