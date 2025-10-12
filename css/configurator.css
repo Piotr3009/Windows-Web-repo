@@ -976,19 +976,57 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .ironmongery-category {
-  margin-bottom: 30px;
-  padding: 20px;
+  margin-bottom: 15px;
   background: var(--white);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
+  overflow: hidden;
 }
 
-.ironmongery-category h5 {
-  color: var(--primary-color);
-  margin-bottom: 10px;
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: var(--primary-color);
+  color: white;
+  cursor: pointer;
+  user-select: none;
+  transition: var(--transition);
+}
+
+.category-header:hover {
+  background: #0a2418;
+}
+
+.category-header h5 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.category-toggle {
   font-size: 1.2rem;
-  border-bottom: 2px solid var(--secondary-color);
-  padding-bottom: 5px;
+  transition: transform 0.3s;
+}
+
+.category-toggle.open {
+  transform: rotate(180deg);
+}
+
+.category-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.category-content.open {
+  max-height: 2000px;
+  transition: max-height 0.5s ease-in;
+}
+
+.category-inner {
+  padding: 20px;
 }
 
 .auto-quantity-info {
@@ -996,6 +1034,9 @@ h1, h2, h3, h4, h5, h6 {
   color: #666;
   font-style: italic;
   margin-bottom: 15px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-left: 3px solid var(--secondary-color);
 }
 
 .products-list {

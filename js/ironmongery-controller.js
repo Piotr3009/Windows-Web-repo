@@ -10,6 +10,7 @@ const IronmongeryController = {
   init: function() {
     console.log('Ironmongery Controller initialized');
     this.bindEvents();
+    this.initAccordion();
     this.loadConfiguration();
   },
 
@@ -25,6 +26,26 @@ const IronmongeryController = {
 
     // Nasłuchuj zmian w konfiguracji okna
     this.listenToWindowConfig();
+  },
+
+  initAccordion: function() {
+    // Obsługa klikania na nagłówki kategorii
+    const headers = document.querySelectorAll('.category-header');
+    headers.forEach(header => {
+      header.addEventListener('click', () => {
+        const content = header.nextElementSibling;
+        const toggle = header.querySelector('.category-toggle');
+        
+        // Toggle open/close
+        if (content.classList.contains('open')) {
+          content.classList.remove('open');
+          toggle.classList.remove('open');
+        } else {
+          content.classList.add('open');
+          toggle.classList.add('open');
+        }
+      });
+    });
   },
 
   onFinishChange: function(finishId) {
@@ -54,11 +75,23 @@ const IronmongeryController = {
 
   renderProducts: function(colorId) {
     console.log('Rendering all products for color:', colorId);
+    
+    // Zamknij wszystkie accordion przed przeładowaniem
+    this.closeAllAccordions();
+    
     // Renderuj każdą kategorię
     this.renderCategory('fingerLifts', colorId);
     this.renderCategory('locks', colorId);
     this.renderCategory('pullHandles', colorId);
     this.renderCategory('stoppers', colorId);
+  },
+
+  closeAllAccordions: function() {
+    const contents = document.querySelectorAll('.category-content');
+    const toggles = document.querySelectorAll('.category-toggle');
+    
+    contents.forEach(content => content.classList.remove('open'));
+    toggles.forEach(toggle => toggle.classList.remove('open'));
   },
 
   renderCategory: function(categoryKey, colorId) {
