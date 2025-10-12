@@ -343,7 +343,15 @@ const IronmongeryHelper = {
   // Ładuje produkty z localStorage (dodane przez admin panel)
   loadProductsFromStorage: function() {
     const stored = localStorage.getItem('admin_ironmongery_products');
-    if (!stored) return;
+    
+    if (!stored) {
+      // Jeśli nie ma produktów w localStorage, wyczyść domyślne
+      Object.keys(IRONMONGERY_DATA.categories).forEach(categoryKey => {
+        IRONMONGERY_DATA.categories[categoryKey].products = [];
+      });
+      console.log('No products in localStorage - cleared default products');
+      return;
+    }
 
     const products = JSON.parse(stored);
     
@@ -356,10 +364,14 @@ const IronmongeryHelper = {
       grouped[product.category].push(product);
     });
 
-    // Aktualizuj IRONMONGERY_DATA
+    // Wyczyść wszystkie kategorie najpierw
+    Object.keys(IRONMONGERY_DATA.categories).forEach(categoryKey => {
+      IRONMONGERY_DATA.categories[categoryKey].products = [];
+    });
+
+    // Aktualizuj IRONMONGERY_DATA tylko produktami z localStorage
     Object.keys(grouped).forEach(categoryKey => {
       if (IRONMONGERY_DATA.categories[categoryKey]) {
-        // Zastąp produkty w kategorii
         IRONMONGERY_DATA.categories[categoryKey].products = grouped[categoryKey];
       }
     });
