@@ -1,7 +1,7 @@
 // pricing-config.js - Zaawansowana konfiguracja cennika
 const pricingConfig = {
   // Cena bazowa za m²
-  basePricePerSqm: 1000,
+  basePricePerSqm: 900,
   
   // Mnożniki degresywne - im większe okno, tym taniej za m²
   sizeMultipliers: [
@@ -105,6 +105,47 @@ const pricingConfig = {
   // VAT
   vatRate: 0.20  // 20% VAT
 };
+
+// Funkcja do ładowania cen z Admin Panelu (localStorage)
+function loadAdminPrices() {
+  // 1. Bars price
+  const barsPrice = localStorage.getItem('admin_bars_price');
+  if (barsPrice) {
+    pricingConfig.barPricing.pricePerBar = parseFloat(barsPrice);
+    console.log('Loaded bars price from admin:', barsPrice);
+  }
+
+  // 2. Glass prices
+  const glassPrices = localStorage.getItem('admin_glass_prices');
+  if (glassPrices) {
+    const prices = JSON.parse(glassPrices);
+    if (prices.triple) {
+      pricingConfig.additionalOptions.glassTypes.triple = parseFloat(prices.triple);
+    }
+    if (prices.passive) {
+      pricingConfig.additionalOptions.glassTypes.passive = parseFloat(prices.passive);
+    }
+    console.log('Loaded glass prices from admin:', prices);
+  }
+
+  // 3. Opening mechanism prices
+  const openingPrices = localStorage.getItem('admin_opening_prices');
+  if (openingPrices) {
+    const prices = JSON.parse(openingPrices);
+    // TODO: Dodać logikę dla opening prices (wymaga zmiany w price-calculator)
+    console.log('Loaded opening prices from admin:', prices);
+  }
+
+  // 4. Frosted price
+  const frostedPrice = localStorage.getItem('admin_frosted_price');
+  if (frostedPrice) {
+    pricingConfig.additionalOptions.glassFinish.frosted = parseFloat(frostedPrice);
+    console.log('Loaded frosted price from admin:', frostedPrice);
+  }
+}
+
+// Załaduj ceny z admin panelu przy starcie
+loadAdminPrices();
 
 // Export dla użycia w innych modułach
 window.pricingConfig = pricingConfig;
