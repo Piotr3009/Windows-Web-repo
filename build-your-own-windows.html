@@ -862,7 +862,9 @@
       </div>
       
       <div class="config-section">
-        <h3>Step 8: Window Details</h3>
+        <h3>Step 8: Window Details & Ironmongery</h3>
+        
+        <!-- Horn Style -->
         <div class="input-group">
           <label for="horns">Select Horn Style:</label>
           <select id="horns" name="horns">
@@ -872,15 +874,58 @@
             <option value="traditional">Traditional Horns</option>
           </select>
         </div>
-        <div class="input-group">
-          <label for="ironmongery">Select Ironmongery Finish:</label>
-          <select id="ironmongery" name="ironmongery">
-            <option value="none">No Ironmongery</option>
-            <option value="black">Black Ironmongery</option>
-            <option value="gold">Gold Ironmongery</option>
-            <option value="chrome">Chrome Ironmongery</option>
-          </select>
+
+        <!-- Ironmongery Section -->
+        <div class="ironmongery-section">
+          <h4>Ironmongery</h4>
+          <div class="input-group">
+            <label for="furniture-finish">Furniture Finish:</label>
+            <select id="furniture-finish" class="furniture-finish-select">
+              <option value="">-- Select Finish --</option>
+              <option value="client-supply">Client Supply (Special Design)</option>
+              <option value="chrome">Chrome</option>
+              <option value="satin">Satin</option>
+              <option value="brass">Brass (Gold)</option>
+              <option value="antique-brass">Antique Brass</option>
+              <option value="black">Black</option>
+              <option value="white">White</option>
+            </select>
+          </div>
+
+          <div id="client-supply-message" class="info-message" style="display: none;">
+            <p><strong>Client Supply Selected</strong></p>
+            <p>Please provide details or links for your custom ironmongery. This will be quoted and invoiced separately.</p>
+          </div>
+
+          <div id="ironmongery-products" class="ironmongery-products" style="display: none;">
+            <!-- Locks Section -->
+            <div class="ironmongery-category">
+              <h5>Locks</h5>
+              <p class="auto-quantity-info">Quantity calculated automatically based on window width and configuration</p>
+              <div id="locks-list" class="products-list"></div>
+            </div>
+
+            <!-- Restrictors Section -->
+            <div class="ironmongery-category">
+              <h5>Restrictors</h5>
+              <p class="auto-quantity-info">Always 2 per window</p>
+              <div id="restrictors-list" class="products-list"></div>
+            </div>
+
+            <!-- Fasteners Section -->
+            <div class="ironmongery-category">
+              <h5>Fasteners</h5>
+              <div id="fasteners-list" class="products-list"></div>
+            </div>
+
+            <!-- Hooks Section -->
+            <div class="ironmongery-category">
+              <h5>Hooks</h5>
+              <div id="hooks-list" class="products-list"></div>
+            </div>
+          </div>
         </div>
+
         <button class="btn btn-apply" id="apply-details">Apply Details</button>
       </div>
       
@@ -1000,6 +1045,7 @@
 <script src="js/helpers.js"></script>
 <!-- 2. Pricing config -->
 <script src="js/ironmongery-data.js"></script>
+<script src="js/ironmongery-controller.js"></script>
 <script src="js/pricing-config.js"></script>
 <script src="js/config.js"></script>
 <script src="js/price-calculator.js"></script>
