@@ -338,5 +338,44 @@ const IronmongeryHelper = {
   getAllProducts: function(category) {
     if (!IRONMONGERY_DATA.categories[category]) return [];
     return IRONMONGERY_DATA.categories[category].products;
+  },
+
+  // Ładuje produkty z localStorage (dodane przez admin panel)
+  loadProductsFromStorage: function() {
+    const stored = localStorage.getItem('admin_ironmongery_products');
+    if (!stored) return;
+
+    const products = JSON.parse(stored);
+    
+    // Grupuj produkty po kategoriach
+    const grouped = {};
+    products.forEach(product => {
+      if (!grouped[product.category]) {
+        grouped[product.category] = [];
+      }
+      grouped[product.category].push(product);
+    });
+
+    // Aktualizuj IRONMONGERY_DATA
+    Object.keys(grouped).forEach(categoryKey => {
+      if (IRONMONGERY_DATA.categories[categoryKey]) {
+        // Zastąp produkty w kategorii
+        IRONMONGERY_DATA.categories[categoryKey].products = grouped[categoryKey];
+      }
+    });
+
+    console.log('Loaded products from localStorage:', products.length);
+  },
+
+  // Inicjalizacja - załaduj produkty przy starcie
+  init: function() {
+    this.loadProductsFromStorage();
   }
 };
+
+// Inicjalizacja helpera przy załadowaniu
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', function() {
+    IronmongeryHelper.init();
+  });
+}

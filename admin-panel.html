@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Configurator Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/admin-panel.css">
+</head>
+<body>
+
+<nav class="navigation">
+  <div class="nav-container">
+    <a href="index.html" class="logo">Skylon T&G</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="build-your-own-windows.html">Configurator</a></li>
+      <li><a href="admin-panel.html" class="active">Admin Panel</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="admin-header">
+  <h1>Admin Panel - Configurator Management</h1>
+  <p>Manage prices, products, and options for the window configurator</p>
+</header>
+
+<main class="admin-container">
+
+  <!-- SECTION 2: GEORGIAN BARS -->
+  <section class="admin-section">
+    <div class="section-header">
+      <h2>Section 2: Georgian Bars</h2>
+    </div>
+    <div class="section-content">
+      <div class="form-group">
+        <label for="bar-price">Price per bar (£):</label>
+        <input type="number" id="bar-price" step="0.01" min="0" placeholder="15.00">
+        <button class="btn-save" onclick="AdminController.saveBarsPrice()">Save</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5: GLASS TYPE -->
+  <section class="admin-section">
+    <div class="section-header">
+      <h2>Section 5: Glass Type</h2>
+    </div>
+    <div class="section-content">
+      <div class="form-group">
+        <label for="triple-price">Triple glazing price per m² (£):</label>
+        <input type="number" id="triple-price" step="0.01" min="0" placeholder="50.00">
+      </div>
+      <div class="form-group">
+        <label for="passive-price">Passive glass price per m² (£):</label>
+        <input type="number" id="passive-price" step="0.01" min="0" placeholder="100.00">
+      </div>
+      <button class="btn-save" onclick="AdminController.saveGlassPrices()">Save</button>
+    </div>
+  </section>
+
+  <!-- SECTION 6: OPENING MECHANISM -->
+  <section class="admin-section">
+    <div class="section-header">
+      <h2>Section 6: Opening Mechanism</h2>
+    </div>
+    <div class="section-content">
+      <div class="form-group-inline">
+        <label>Bottom open only:</label>
+        <input type="number" id="bottom-base" step="0.01" placeholder="50.00" style="width: 100px;">
+        <span>+ £</span>
+        <input type="number" id="bottom-per-sqm" step="0.01" placeholder="20.00" style="width: 100px;">
+        <span>per m²</span>
+      </div>
+      <div class="form-group-inline">
+        <label>Top & Bottom open:</label>
+        <input type="number" id="both-base" step="0.01" placeholder="100.00" style="width: 100px;">
+        <span>- £</span>
+        <input type="number" id="both-per-sqm" step="0.01" placeholder="40.00" style="width: 100px;">
+        <span>per m²</span>
+      </div>
+      <button class="btn-save" onclick="AdminController.saveOpeningPrices()">Save</button>
+    </div>
+  </section>
+
+  <!-- SECTION 8: IRONMONGERY -->
+  <section class="admin-section">
+    <div class="section-header">
+      <h2>Section 8: Ironmongery</h2>
+      <button class="btn-add" onclick="AdminController.openAddProductModal()">+ Add Product</button>
+    </div>
+    <div class="section-content">
+      <div class="products-table-container">
+        <table class="products-table" id="ironmongery-table">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Category</th>
+              <th>Name</th>
+              <th>Color</th>
+              <th>Price (NET)</th>
+              <th>Price (VAT)</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="ironmongery-tbody">
+            <!-- Products loaded by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 8: HORNS -->
+  <section class="admin-section">
+    <div class="section-header">
+      <h2>Section 8: Horns</h2>
+      <button class="btn-add" onclick="AdminController.openAddHornModal()">+ Add Horn Style</button>
+    </div>
+    <div class="section-content">
+      <div class="horns-grid" id="horns-grid">
+        <!-- Horns loaded by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 9: FROSTED GLASS -->
+  <section class="admin-section">
+    <div class="section-header">
+      <h2>Section 9: Frosted Glass</h2>
+    </div>
+    <div class="section-content">
+      <div class="form-group">
+        <label for="frosted-price">Frosted glass price per m² (£):</label>
+        <input type="number" id="frosted-price" step="0.01" min="0" placeholder="25.00">
+        <button class="btn-save" onclick="AdminController.saveFrostedPrice()">Save</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- MODAL: Add Product -->
+<div id="add-product-modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="AdminController.closeAddProductModal()">&times;</span>
+    <h2>Add Ironmongery Product</h2>
+    <form id="add-product-form">
+      <div class="form-group">
+        <label>Category:</label>
+        <select id="product-category" required>
+          <option value="">-- Select Category --</option>
+          <option value="fingerLifts">Sash Finger Lifts</option>
+          <option value="locks">Sash Locks</option>
+          <option value="pullHandles">Sash Pull Handles</option>
+          <option value="stoppers">Window Stoppers</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Product Name:</label>
+        <input type="text" id="product-name" required placeholder="e.g. Sash Lock PAS24">
+      </div>
+      <div class="form-group">
+        <label>Color:</label>
+        <select id="product-color" required>
+          <option value="">-- Select Color --</option>
+          <option value="chrome">Chrome</option>
+          <option value="satin">Satin</option>
+          <option value="brass">Brass (Gold)</option>
+          <option value="antique-brass">Antique Brass</option>
+          <option value="black">Black</option>
+          <option value="white">White</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Price NET (£):</label>
+        <input type="number" id="product-price-net" step="0.01" min="0" required placeholder="25.00">
+      </div>
+      <div class="form-group">
+        <label>Price VAT (£):</label>
+        <input type="number" id="product-price-vat" step="0.01" min="0" required placeholder="30.00">
+      </div>
+      <div class="form-group">
+        <label>Description:</label>
+        <textarea id="product-description" rows="3" placeholder="Product description"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Upload Image:</label>
+        <input type="file" id="product-image" accept="image/*">
+      </div>
+      <div class="form-group-checkbox">
+        <label><input type="checkbox" id="product-pas24"> PAS24 Certified</label>
+        <label><input type="checkbox" id="product-recommended"> Recommended</label>
+        <label><input type="checkbox" id="product-mandatory"> Mandatory</label>
+      </div>
+      <div class="form-group" id="stopper-type-group" style="display: none;">
+        <label>Stopper Type:</label>
+        <select id="product-stopper-type">
+          <option value="">-- Select Type --</option>
+          <option value="stopper">Window Stopper</option>
+          <option value="weekes">Weekes Stop</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-save">Add Product</button>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Add Horn -->
+<div id="add-horn-modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="AdminController.closeAddHornModal()">&times;</span>
+    <h2>Add Horn Style</h2>
+    <form id="add-horn-form">
+      <div class="form-group">
+        <label>Horn Name:</label>
+        <input type="text" id="horn-name" required placeholder="e.g. Standard Horns">
+      </div>
+      <div class="form-group">
+        <label>Upload Image:</label>
+        <input type="file" id="horn-image" accept="image/*">
+      </div>
+      <button type="submit" class="btn-save">Add Horn Style</button>
+    </form>
+  </div>
+</div>
+
+<script src="js/admin-controller.js"></script>
+
+</body>
+</html>

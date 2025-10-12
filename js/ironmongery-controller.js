@@ -76,6 +76,9 @@ const IronmongeryController = {
   renderProducts: function(colorId) {
     console.log('Rendering all products for color:', colorId);
     
+    // WAŻNE: Przeładuj produkty z localStorage przed renderowaniem
+    IronmongeryHelper.loadProductsFromStorage();
+    
     // Zamknij wszystkie accordion przed przeładowaniem
     this.closeAllAccordions();
     
