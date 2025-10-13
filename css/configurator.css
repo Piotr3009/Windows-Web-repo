@@ -149,6 +149,8 @@ h1, h2, h3, h4, h5, h6 {
 .configurator-options {
   flex: 1;
   min-width: 400px;
+  border-right: 1px solid #ddd;
+  padding-right: 20px;
 }
 
 .window-specification {
@@ -161,6 +163,8 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: var(--radius-lg);
   padding: 20px;
   box-shadow: var(--shadow-md);
+  border-right: 1px solid #ddd;
+  margin-right: 20px;
 }
 
 .configurator-preview {
