@@ -163,8 +163,6 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: var(--radius-lg);
   padding: 20px;
   box-shadow: var(--shadow-md);
-  border-right: 1px solid #ddd;
-  margin-right: 20px;
 }
 
 .configurator-preview {
@@ -178,6 +176,8 @@ h1, h2, h3, h4, h5, h6 {
   padding: 20px;
   background-color: var(--light-gray);
   border-radius: var(--radius);
+  border-left: 1px solid #ddd;
+  padding-left: 30px;
 }
 
 .window-specification h2 {
