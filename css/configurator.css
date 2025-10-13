@@ -142,8 +142,21 @@ h1, h2, h3, h4, h5, h6 {
 /* Configurator Grid */
 .configurator-grid {
   display: flex;
-  gap: 40px;
+  gap: 25px;
   align-items: flex-start;
+}
+
+.configurator-options {
+  flex: 0 0 400px;
+}
+
+.window-specification {
+  flex: 0 0 400px;
+  background-color: var(--white);
+  border: 2px solid var(--secondary-color);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-md);
 }
 
 .configurator-preview {
@@ -156,21 +169,6 @@ h1, h2, h3, h4, h5, h6 {
   padding: 20px;
   background-color: var(--light-gray);
   border-radius: var(--radius);
-}
-
-.configurator-options {
-  flex: 1;
-}
-
-/* Window Specification */
-.window-specification {
-  width: 100%;
-  background-color: var(--white);
-  border: 2px solid var(--secondary-color);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: var(--shadow-md);
 }
 
 .window-specification h2 {
@@ -875,6 +873,16 @@ h1, h2, h3, h4, h5, h6 {
 @media (max-width: 768px) {
   .configurator-grid {
     flex-direction: column;
+  }
+  
+  .configurator-options {
+    width: 100%;
+    flex: none;
+  }
+  
+  .window-specification {
+    width: 100%;
+    flex: none;
   }
   
   .configurator-preview {

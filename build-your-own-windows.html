@@ -32,144 +32,6 @@
 
 <main class="container">
   <div class="configurator-grid">
-    <div class="configurator-preview">
-      <div class="svg-window-visualization">
-        <div class="view">
-          <h3>External View</h3>
-          <div class="window-container" id="external-window-container">
-            <img src="configurator-overlay/img/window_external_base.png" class="base" alt="External Window">
-            <div class="opening-indicators" id="external-opening-indicators"></div>
-          </div>
-        </div>
-        <div class="view">
-          <h3>Internal View</h3>
-          <div class="window-container" id="internal-window-container">
-            <img src="configurator-overlay/img/window_internal_base.png" class="base" alt="Internal Window">
-            <div class="opening-indicators" id="internal-opening-indicators"></div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="window-specification">
-        <h2>Window Specification</h2>
-        <div class="spec-section" id="spec-dimensions" style="display: none;">
-          <h4>Dimensions</h4>
-          <div class="spec-item">
-            <span class="spec-label">Width:</span>
-            <span class="spec-value" id="spec-width">-</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Height:</span>
-            <span class="spec-value" id="spec-height">-</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Measurement Type:</span>
-            <span class="spec-value" id="spec-measurement">-</span>
-          </div>
-        </div>
-        
-        <div class="spec-section" id="spec-bars" style="display: none;">
-          <h4>Georgian Bars</h4>
-          <div class="spec-item">
-            <span class="spec-label">Upper Sash:</span>
-            <span class="spec-value" id="spec-upper-bars">-</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Lower Sash:</span>
-            <span class="spec-value" id="spec-lower-bars">-</span>
-          </div>
-        </div>
-        
-        <div class="spec-section" id="spec-frame" style="display: none;">
-          <h4>Frame</h4>
-          <div class="spec-item">
-            <span class="spec-label">Type:</span>
-            <span class="spec-value" id="spec-frame-type">-</span>
-          </div>
-        </div>
-        
-        <div class="spec-section" id="spec-color" style="display: none;">
-          <h4>Color</h4>
-          <div class="spec-single" id="spec-single-color" style="display: none;">
-            <div class="spec-item">
-              <span class="spec-label">Color:</span>
-              <span class="spec-value" id="spec-color-name">-</span>
-            </div>
-            <div class="spec-item">
-              <span class="spec-label">RAL:</span>
-              <span class="spec-value" id="spec-color-ral">-</span>
-            </div>
-          </div>
-          <div class="spec-dual" id="spec-dual-color" style="display: none;">
-            <div class="spec-item">
-              <span class="spec-label">Interior:</span>
-              <span class="spec-value" id="spec-interior-color">-</span>
-            </div>
-            <div class="spec-item">
-              <span class="spec-label">Exterior:</span>
-              <span class="spec-value" id="spec-exterior-color">-</span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="spec-section" id="spec-glass" style="display: none;">
-          <h4>Glass</h4>
-          <div class="spec-item">
-            <span class="spec-label">Type:</span>
-            <span class="spec-value" id="spec-glass-type">-</span>
-          </div>
-        </div>
-        
-        <div class="spec-section" id="spec-opening" style="display: none;">
-          <h4>Opening Mechanism</h4>
-          <div class="spec-item">
-            <span class="spec-label">Type:</span>
-            <span class="spec-value" id="spec-opening-type">-</span>
-          </div>
-        </div>
-        
-        <div class="spec-section" id="spec-pas24" style="display: none;">
-          <h4>Security Standard</h4>
-          <div class="spec-item">
-            <span class="spec-label">PAS 24:</span>
-            <span class="spec-value" id="spec-pas24-value">-</span>
-          </div>
-        </div>
-        
-        <div class="spec-section" id="spec-details" style="display: none;">
-          <h4>Details</h4>
-          <div class="spec-item" id="spec-horns-item" style="display: none;">
-            <span class="spec-label">Horns:</span>
-            <span class="spec-value" id="spec-horns">-</span>
-          </div>
-          <div class="spec-item" id="spec-ironmongery-item" style="display: none;">
-            <span class="spec-label">Ironmongery:</span>
-            <span class="spec-value" id="spec-ironmongery">-</span>
-          </div>
-        </div>
-        
-        <div class="spec-section" id="spec-glass-spec" style="display: none;">
-          <h4>Glass Specification</h4>
-          <div class="spec-item">
-            <span class="spec-label">Type:</span>
-            <span class="spec-value" id="spec-glass-spec-type">-</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Finish:</span>
-            <span class="spec-value" id="spec-glass-finish">-</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="price-summary">
-        <h3>Estimated Price</h3>
-        <p class="total-price">£<span id="total-price">0.00</span></p>
-        <div id="unit-price-display">
-          <p style="color: #bc9e00">excluding VAT</p>
-        </div>
-      </div>
-    </div>
-    
     <div class="configurator-options">
       <div class="config-section">
         <h3>Step 1: Window Dimensions</h3>
@@ -1016,6 +878,143 @@
       <button class="btn btn-secondary" id="save-configuration">Save Configuration</button>
       <button class="btn btn-secondary" id="save-as-variant">Save as Variant (MAX 3)</button>
       <button class="btn btn-secondary" id="view-estimate">View Your Estimate</button>
+    </div>
+    
+    <div class="window-specification">
+        <h2>Window Specification</h2>
+        <div class="spec-section" id="spec-dimensions" style="display: none;">
+          <h4>Dimensions</h4>
+          <div class="spec-item">
+            <span class="spec-label">Width:</span>
+            <span class="spec-value" id="spec-width">-</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Height:</span>
+            <span class="spec-value" id="spec-height">-</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Measurement Type:</span>
+            <span class="spec-value" id="spec-measurement">-</span>
+          </div>
+        </div>
+        
+        <div class="spec-section" id="spec-bars" style="display: none;">
+          <h4>Georgian Bars</h4>
+          <div class="spec-item">
+            <span class="spec-label">Upper Sash:</span>
+            <span class="spec-value" id="spec-upper-bars">-</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Lower Sash:</span>
+            <span class="spec-value" id="spec-lower-bars">-</span>
+          </div>
+        </div>
+        
+        <div class="spec-section" id="spec-frame" style="display: none;">
+          <h4>Frame</h4>
+          <div class="spec-item">
+            <span class="spec-label">Type:</span>
+            <span class="spec-value" id="spec-frame-type">-</span>
+          </div>
+        </div>
+        
+        <div class="spec-section" id="spec-color" style="display: none;">
+          <h4>Color</h4>
+          <div class="spec-single" id="spec-single-color" style="display: none;">
+            <div class="spec-item">
+              <span class="spec-label">Color:</span>
+              <span class="spec-value" id="spec-color-name">-</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">RAL:</span>
+              <span class="spec-value" id="spec-color-ral">-</span>
+            </div>
+          </div>
+          <div class="spec-dual" id="spec-dual-color" style="display: none;">
+            <div class="spec-item">
+              <span class="spec-label">Interior:</span>
+              <span class="spec-value" id="spec-interior-color">-</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Exterior:</span>
+              <span class="spec-value" id="spec-exterior-color">-</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="spec-section" id="spec-glass" style="display: none;">
+          <h4>Glass</h4>
+          <div class="spec-item">
+            <span class="spec-label">Type:</span>
+            <span class="spec-value" id="spec-glass-type">-</span>
+          </div>
+        </div>
+        
+        <div class="spec-section" id="spec-opening" style="display: none;">
+          <h4>Opening Mechanism</h4>
+          <div class="spec-item">
+            <span class="spec-label">Type:</span>
+            <span class="spec-value" id="spec-opening-type">-</span>
+          </div>
+        </div>
+        
+        <div class="spec-section" id="spec-pas24" style="display: none;">
+          <h4>Security Standard</h4>
+          <div class="spec-item">
+            <span class="spec-label">PAS 24:</span>
+            <span class="spec-value" id="spec-pas24-value">-</span>
+          </div>
+        </div>
+        
+        <div class="spec-section" id="spec-details" style="display: none;">
+          <h4>Details</h4>
+          <div class="spec-item" id="spec-horns-item" style="display: none;">
+            <span class="spec-label">Horns:</span>
+            <span class="spec-value" id="spec-horns">-</span>
+          </div>
+          <div class="spec-item" id="spec-ironmongery-item" style="display: none;">
+            <span class="spec-label">Ironmongery:</span>
+            <span class="spec-value" id="spec-ironmongery">-</span>
+          </div>
+        </div>
+        
+        <div class="spec-section" id="spec-glass-spec" style="display: none;">
+          <h4>Glass Specification</h4>
+          <div class="spec-item">
+            <span class="spec-label">Type:</span>
+            <span class="spec-value" id="spec-glass-spec-type">-</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Finish:</span>
+            <span class="spec-value" id="spec-glass-finish">-</span>
+          </div>
+        </div>
+    </div>
+    
+    <div class="configurator-preview">
+      <div class="svg-window-visualization">
+        <div class="view">
+          <h3>External View</h3>
+          <div class="window-container" id="external-window-container">
+            <img src="configurator-overlay/img/window_external_base.png" class="base" alt="External Window">
+            <div class="opening-indicators" id="external-opening-indicators"></div>
+          </div>
+        </div>
+        <div class="view">
+          <h3>Internal View</h3>
+          <div class="window-container" id="internal-window-container">
+            <img src="configurator-overlay/img/window_internal_base.png" class="base" alt="Internal Window">
+            <div class="opening-indicators" id="internal-opening-indicators"></div>
+          </div>
+        </div>
+      </div>
+      <div class="price-summary">
+        <h3>Estimated Price</h3>
+        <p class="total-price">£<span id="total-price">0.00</span></p>
+        <div id="unit-price-display">
+          <p style="color: #bc9e00">excluding VAT</p>
+        </div>
+      </div>
     </div>
   </div>
 </main>
