@@ -137,6 +137,13 @@ const IronmongeryController = {
       if (!canSelect) {
         disabledReason = 'PAS24 certified lock required';
       }
+      
+      // Sprawdź czy już wybrano lock
+      const selectedLock = Object.values(this.selectedProducts).find(item => item.category === 'locks');
+      if (selectedLock && selectedLock.product.id !== product.id) {
+        canSelect = false;
+        disabledReason = `Already selected ${selectedLock.product.name}`;
+      }
     }
 
     // Logika exclusive dla stoppers
