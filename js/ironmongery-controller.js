@@ -273,6 +273,15 @@ const IronmongeryController = {
   },
 
   addProduct: function(product, quantity, categoryKey) {
+    // Sprawdź czy locks już dodany
+    if (categoryKey === 'locks') {
+      const hasLock = Object.values(this.selectedProducts).some(item => item.category === 'locks');
+      if (hasLock) {
+        alert('Lock already selected. You can only choose one lock type per window.');
+        return;
+      }
+    }
+    
     // Dla stoppers - ustaw wybrany typ
     if (categoryKey === 'stoppers') {
       this.selectedStopperType = product.type;
@@ -289,9 +298,9 @@ const IronmongeryController = {
 
     console.log('Product added:', product.name, 'Quantity:', quantity);
     
-    // Odśwież renderowanie (żeby zablokować drugi typ stoppera)
-    if (categoryKey === 'stoppers') {
-      this.renderCategory('stoppers', this.selectedFinish);
+    // Odśwież renderowanie (żeby zablokować drugi typ stoppera lub drugi lock)
+    if (categoryKey === 'stoppers' || categoryKey === 'locks') {
+      this.renderCategory(categoryKey, this.selectedFinish);
     }
     
     this.updateTotalPrice();
@@ -309,24 +318,9 @@ const IronmongeryController = {
     console.log('Ironmongery total price:', ironmongeryTotal);
     
     // Wywołaj przeliczenie ceny
-    if (window.priceCalculator) {
-      const config = this.getCurrentConfiguration();
-      window.priceCalculator.calculate(config);
+    if (typeof window.updatePrice === 'function') {
+      window.updatePrice();
     }
-  },
-  
-  getCurrentConfiguration: function() {
-    // Pobierz aktualną konfigurację okna
-    return {
-      width: parseInt(document.getElementById('width')?.value) || 800,
-      height: parseInt(document.getElementById('height')?.value) || 1000,
-      upperBars: document.getElementById('upper-bars')?.value || 'none',
-      lowerBars: document.getElementById('lower-bars')?.value || 'none',
-      horns: document.getElementById('horns')?.value || 'none',
-      pas24: document.querySelector('input[name="pas24"]:checked')?.value || 'no',
-      openingType: document.querySelector('input[name="opening-type"]:checked')?.value || 'both',
-      // Dodaj inne pola jeśli potrzebne
-    };
   },
 
   updateSpecification: function() {
