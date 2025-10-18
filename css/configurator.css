@@ -252,7 +252,17 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--white);
   border-radius: var(--radius);
   border: 1px solid #ccc;
+/* --- POCZĄTEK ZMIAN --- */
+  
+  /* Grubsza, zielona ramka główna */
+  border: 2px solid var(--primary-color); 
+  
+  /* Cienka, złota obwódka na zewnątrz */
+  box-shadow: 0 0 0 1px var(--secondary-color); 
+  
+  /* --- KONIEC ZMIAN --- */
 }
+
 
 .window-container img.base {
   width: 100%;
