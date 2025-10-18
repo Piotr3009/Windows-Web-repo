@@ -18,9 +18,79 @@ class CustomerDashboard {
         }
 
         this.currentUser = user;
+        
+        // Import any saved estimates from localStorage (for existing users)
+        await this.importLocalStorageEstimates();
+        
         await this.loadCustomerData();
         await this.loadOrders();
         this.attachEventListeners();
+    }
+
+    // Import estimates from localStorage to database
+    async importLocalStorageEstimates() {
+        try {
+            const savedEstimates = JSON.parse(localStorage.getItem('savedEstimates') || '[]');
+            
+            if (savedEstimates.length === 0) {
+                return; // Nothing to import
+            }
+
+            console.log(`Found ${savedEstimates.length} estimates in localStorage, importing...`);
+
+            // Convert each estimate to order format
+            const orders = savedEstimates.map(estimate => ({
+                customer_id: this.currentUser.id,
+                status: 'estimate',
+                total_price: estimate.price || estimate.total_price || 0,
+                window_spec: estimate,
+                created_at: estimate.timestamp || new Date().toISOString()
+            }));
+
+            // Insert into database
+            const { data, error } = await supabaseClient
+                .from('orders')
+                .insert(orders)
+                .select();
+
+            if (error) throw error;
+
+            console.log(`Successfully imported ${data.length} estimates`);
+
+            // Clear localStorage after successful import
+            localStorage.removeItem('savedEstimates');
+            
+            // Show success message
+            this.showSuccessMessage(`${data.length} saved estimate(s) imported to your account!`);
+
+        } catch (error) {
+            console.error('Error importing localStorage estimates:', error);
+            // Don't show error to user - it's a background operation
+        }
+    }
+
+    // Show success message
+    showSuccessMessage(message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+        `;
+        alertDiv.textContent = message;
+        document.body.appendChild(alertDiv);
+
+        setTimeout(() => {
+            alertDiv.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => alertDiv.remove(), 300);
+        }, 3000);
     }
 
     // Load customer data from database

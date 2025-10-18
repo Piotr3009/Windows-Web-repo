@@ -274,18 +274,27 @@ class AuthSystem {
     }
 
     // Transfer local estimates to database after registration
-    async transferLocalEstimates(userId) {
+    async transferLocalEstimates(authUserId) {
         const savedEstimates = JSON.parse(localStorage.getItem('savedEstimates') || '[]');
         
         if (savedEstimates.length > 0) {
             try {
+                // Get customer ID from auth user ID
+                const { data: customer, error: customerError } = await supabaseClient
+                    .from('customers')
+                    .select('id')
+                    .eq('user_id', authUserId)
+                    .single();
+
+                if (customerError) throw customerError;
+
                 // Convert each estimate to order format
                 const orders = savedEstimates.map(estimate => ({
-                    customer_id: userId,
+                    customer_id: customer.id,
                     status: 'estimate',
-                    total_price: estimate.price,
-                    created_at: estimate.timestamp || new Date().toISOString(),
-                    window_spec: estimate
+                    total_price: estimate.price || estimate.total_price || 0,
+                    window_spec: estimate,
+                    created_at: estimate.timestamp || new Date().toISOString()
                 }));
 
                 const { error } = await supabaseClient
@@ -295,6 +304,7 @@ class AuthSystem {
                 if (!error) {
                     // Clear local storage after successful transfer
                     localStorage.removeItem('savedEstimates');
+                    console.log(`Transferred ${orders.length} estimates to database`);
                 }
             } catch (error) {
                 console.error('Error transferring estimates:', error);
