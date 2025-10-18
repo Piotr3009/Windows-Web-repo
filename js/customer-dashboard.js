@@ -1,0 +1,408 @@
+// Customer Dashboard JavaScript
+
+class CustomerDashboard {
+    constructor() {
+        this.currentUser = null;
+        this.customerData = null;
+        this.orders = [];
+        this.currentFilter = 'all';
+        this.init();
+    }
+
+    async init() {
+        // Check if user is logged in
+        const user = await getCurrentUser();
+        if (!user) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        this.currentUser = user;
+        await this.loadCustomerData();
+        await this.loadOrders();
+        this.attachEventListeners();
+    }
+
+    // Load customer data from database
+    async loadCustomerData() {
+        try {
+            const { data, error } = await supabaseClient
+                .from('customers')
+                .select('*')
+                .eq('user_id', this.currentUser.id)
+                .single();
+
+            if (error) throw error;
+
+            this.customerData = data;
+            this.updateCustomerInfo();
+        } catch (error) {
+            console.error('Error loading customer data:', error);
+            this.showError('Failed to load customer information');
+        }
+    }
+
+    // Update customer info in UI
+    updateCustomerInfo() {
+        if (!this.customerData) return;
+
+        document.getElementById('customer-name').textContent = 
+            `Welcome Back, ${this.customerData.full_name.split(' ')[0]}`;
+        document.getElementById('customer-fullname').textContent = this.customerData.full_name;
+        document.getElementById('customer-email').textContent = this.customerData.email;
+        document.getElementById('customer-phone').textContent = this.customerData.phone || 'Not provided';
+        
+        const memberSince = new Date(this.customerData.created_at);
+        document.getElementById('customer-since').textContent = 
+            memberSince.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+    }
+
+    // Load orders from database
+    async loadOrders() {
+        try {
+            const { data, error } = await supabaseClient
+                .from('orders')
+                .select(`
+                    *,
+                    order_items (*)
+                `)
+                .eq('customer_id', this.currentUser.id)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            this.orders = data || [];
+            this.updateStats();
+            this.renderOrders();
+        } catch (error) {
+            console.error('Error loading orders:', error);
+            this.showError('Failed to load orders');
+        }
+    }
+
+    // Update statistics
+    updateStats() {
+        const estimates = this.orders.filter(o => o.status === 'estimate').length;
+        const activeOrders = this.orders.filter(o => 
+            ['confirmed', 'production', 'transport'].includes(o.status)
+        ).length;
+        const completed = this.orders.filter(o => o.status === 'completed').length;
+
+        document.getElementById('stat-estimates').textContent = estimates;
+        document.getElementById('stat-orders').textContent = activeOrders;
+        document.getElementById('stat-completed').textContent = completed;
+    }
+
+    // Render orders list
+    renderOrders() {
+        const container = document.getElementById('orders-container');
+        
+        // Filter orders based on current filter
+        let filteredOrders = this.orders;
+        if (this.currentFilter !== 'all') {
+            filteredOrders = this.orders.filter(o => o.status === this.currentFilter);
+        }
+
+        if (filteredOrders.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📋</div>
+                    <h3>No orders found</h3>
+                    <p>Start by creating a new estimate for your windows</p>
+                    <a href="build-your-own-windows.html">
+                        <button class="btn">Create Estimate</button>
+                    </a>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = filteredOrders.map(order => this.renderOrderCard(order)).join('');
+    }
+
+    // Render single order card
+    renderOrderCard(order) {
+        const statusConfig = this.getStatusConfig(order.status);
+        const createdDate = new Date(order.created_at).toLocaleDateString('en-GB');
+        const itemCount = order.order_items?.length || 0;
+
+        return `
+            <div class="order-card" data-order-id="${order.id}">
+                <div class="order-header">
+                    <div>
+                        <h3>Order #${order.order_number || order.id.substring(0, 8).toUpperCase()}</h3>
+                        <p class="order-date">Created: ${createdDate}</p>
+                    </div>
+                    <span class="status-badge status-${order.status}">${statusConfig.label}</span>
+                </div>
+
+                <div class="order-body">
+                    <div class="order-info">
+                        <div class="info-row">
+                            <span class="info-label">Items:</span>
+                            <span class="info-value">${itemCount} window${itemCount !== 1 ? 's' : ''}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Total:</span>
+                            <span class="info-value price">£${this.formatPrice(order.total_price)}</span>
+                        </div>
+                        ${order.deposit_amount ? `
+                        <div class="info-row">
+                            <span class="info-label">Deposit:</span>
+                            <span class="info-value ${order.deposit_paid ? 'paid' : 'unpaid'}">
+                                £${this.formatPrice(order.deposit_amount)} 
+                                ${order.deposit_paid ? '✓ Paid' : '⚠ Pending'}
+                            </span>
+                        </div>
+                        ` : ''}
+                    </div>
+
+                    ${this.renderOrderProgress(order)}
+                </div>
+
+                <div class="order-footer">
+                    <button class="btn-secondary" onclick="dashboard.viewOrderDetails('${order.id}')">
+                        View Details
+                    </button>
+                    ${order.status === 'estimate' ? `
+                        <button class="btn" onclick="dashboard.confirmOrder('${order.id}')">
+                            Confirm Order
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    // Render order progress timeline
+    renderOrderProgress(order) {
+        const timeline = [
+            { status: 'estimate', label: 'Estimate', icon: '📋' },
+            { status: 'confirmed', label: 'Confirmed', icon: '✓' },
+            { status: 'production', label: 'Production', icon: '🔨' },
+            { status: 'transport', label: 'Transport', icon: '🚚' },
+            { status: 'completed', label: 'Delivered', icon: '✅' }
+        ];
+
+        const currentIndex = timeline.findIndex(t => t.status === order.status);
+
+        return `
+            <div class="order-timeline">
+                ${timeline.map((step, index) => `
+                    <div class="timeline-step ${index <= currentIndex ? 'active' : ''} ${index === currentIndex ? 'current' : ''}">
+                        <div class="timeline-icon">${step.icon}</div>
+                        <div class="timeline-label">${step.label}</div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    // Get status configuration
+    getStatusConfig(status) {
+        const configs = {
+            estimate: { label: 'Estimate', color: '#2196F3' },
+            confirmed: { label: 'Confirmed', color: '#4CAF50' },
+            production: { label: 'In Production', color: '#FF9800' },
+            transport: { label: 'In Transit', color: '#9C27B0' },
+            completed: { label: 'Completed', color: '#4CAF50' },
+            cancelled: { label: 'Cancelled', color: '#f44336' }
+        };
+        return configs[status] || configs.estimate;
+    }
+
+    // Format price
+    formatPrice(price) {
+        return new Intl.NumberFormat('en-GB', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(price);
+    }
+
+    // View order details
+    async viewOrderDetails(orderId) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('orders')
+                .select(`
+                    *,
+                    order_items (*),
+                    order_timeline (*)
+                `)
+                .eq('id', orderId)
+                .single();
+
+            if (error) throw error;
+
+            this.showOrderModal(data);
+        } catch (error) {
+            console.error('Error loading order details:', error);
+            this.showError('Failed to load order details');
+        }
+    }
+
+    // Show order detail modal
+    showOrderModal(order) {
+        const modal = document.getElementById('order-modal');
+        const content = document.getElementById('order-detail-content');
+
+        const itemsHTML = order.order_items.map(item => `
+            <div class="order-item-detail">
+                <h4>${item.window_type || 'Custom Window'}</h4>
+                <div class="item-specs">
+                    <p><strong>Dimensions:</strong> ${item.width}mm × ${item.height}mm</p>
+                    <p><strong>Glazing:</strong> ${item.glazing_type || 'Standard'}</p>
+                    <p><strong>Colour:</strong> ${item.colour || 'White'}</p>
+                    ${item.hardware ? `<p><strong>Hardware:</strong> ${item.hardware}</p>` : ''}
+                    <p class="item-price"><strong>Price:</strong> £${this.formatPrice(item.price)}</p>
+                </div>
+            </div>
+        `).join('');
+
+        const timelineHTML = order.order_timeline?.length > 0 ? `
+            <div class="detail-timeline">
+                <h3>Order History</h3>
+                ${order.order_timeline.map(event => `
+                    <div class="timeline-event">
+                        <span class="event-date">${new Date(event.created_at).toLocaleString('en-GB')}</span>
+                        <span class="event-text">${event.status_change}</span>
+                        ${event.notes ? `<p class="event-notes">${event.notes}</p>` : ''}
+                    </div>
+                `).join('')}
+            </div>
+        ` : '';
+
+        content.innerHTML = `
+            <h2>Order #${order.order_number || order.id.substring(0, 8).toUpperCase()}</h2>
+            <div class="detail-status">
+                <span class="status-badge status-${order.status}">${this.getStatusConfig(order.status).label}</span>
+            </div>
+            
+            <div class="detail-section">
+                <h3>Order Items</h3>
+                ${itemsHTML}
+            </div>
+
+            <div class="detail-section">
+                <h3>Order Summary</h3>
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span>£${this.formatPrice(order.total_price)}</span>
+                </div>
+                ${order.deposit_amount ? `
+                <div class="summary-row">
+                    <span>Deposit Required:</span>
+                    <span class="${order.deposit_paid ? 'paid' : 'unpaid'}">
+                        £${this.formatPrice(order.deposit_amount)}
+                        ${order.deposit_paid ? '✓' : '⚠'}
+                    </span>
+                </div>
+                ` : ''}
+                <div class="summary-row total">
+                    <span><strong>Total:</strong></span>
+                    <span><strong>£${this.formatPrice(order.total_price)}</strong></span>
+                </div>
+            </div>
+
+            ${timelineHTML}
+
+            <div class="modal-actions">
+                ${!order.deposit_paid && order.deposit_amount ? `
+                    <button class="btn" onclick="dashboard.payDeposit('${order.id}')">
+                        Pay Deposit
+                    </button>
+                ` : ''}
+                <button class="btn-secondary" onclick="dashboard.closeModal()">
+                    Close
+                </button>
+            </div>
+        `;
+
+        modal.style.display = 'block';
+    }
+
+    // Close modal
+    closeModal() {
+        document.getElementById('order-modal').style.display = 'none';
+    }
+
+    // Confirm order
+    async confirmOrder(orderId) {
+        if (!confirm('Are you sure you want to confirm this order? Our team will contact you shortly.')) {
+            return;
+        }
+
+        try {
+            const { error } = await supabaseClient
+                .from('orders')
+                .update({ status: 'confirmed' })
+                .eq('id', orderId);
+
+            if (error) throw error;
+
+            // Add timeline event
+            await supabaseClient
+                .from('order_timeline')
+                .insert([{
+                    order_id: orderId,
+                    status_change: 'Order confirmed by customer',
+                    created_at: new Date().toISOString()
+                }]);
+
+            alert('Order confirmed successfully! We will contact you soon.');
+            await this.loadOrders();
+        } catch (error) {
+            console.error('Error confirming order:', error);
+            this.showError('Failed to confirm order');
+        }
+    }
+
+    // Pay deposit (placeholder - would integrate with payment gateway)
+    async payDeposit(orderId) {
+        alert('Payment integration coming soon. Please contact us to arrange deposit payment.');
+        // TODO: Integrate with Stripe/PayPal
+    }
+
+    // Attach event listeners
+    attachEventListeners() {
+        // Logout button
+        document.getElementById('logout-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
+        });
+
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.currentFilter = btn.dataset.filter;
+                this.renderOrders();
+            });
+        });
+
+        // Modal close
+        document.querySelector('.modal-close').addEventListener('click', () => {
+            this.closeModal();
+        });
+
+        // Click outside modal to close
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('order-modal');
+            if (e.target === modal) {
+                this.closeModal();
+            }
+        });
+    }
+
+    // Show error message
+    showError(message) {
+        alert(message); // Simple for now, can be improved with toast notifications
+    }
+}
+
+// Initialize dashboard when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    window.dashboard = new CustomerDashboard();
+});
