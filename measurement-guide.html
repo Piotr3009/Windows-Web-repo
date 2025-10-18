@@ -1,28 +1,160 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Measurement Guide | Skylon Timber & Glazing House</title>
-  <!-- Fonts same as BYOSW -->
+  <title>Przewodnik Pomiarowy | Skylon Timber & Glazing House</title>
+  
+  <!-- Czcionki (takie same jak w oryginale) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Linki do głównych arkuszy stylów (zgodnie z prośbą, aby zachować spójność ze stroną index) -->
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/configurator.css">
+  
   <style>
-    .steps { counter-reset: step; list-style: none; padding: 0; }
-    .steps li { counter-increment: step; margin-bottom: 2rem; position: relative; padding-left: 2.5rem; }
-    .steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 1.8rem; height: 1.8rem; border-radius: 50%; background: #c9a648; color: #fff; text-align: center; line-height: 1.8rem; font-weight: bold; }
-    .step-image { margin-top: .8rem; }
-    .step-image img { max-width: 100%; border: 1px solid #ccc; border-radius: 6px; }
-    .cta { text-align:center; margin:3rem 0; }
-    .cta a { background:#c9a648; color:#fff; padding:1rem 2rem; border-radius:6px; text-decoration:none; font-weight:700; }
+    /* Style specyficzne dla tej podstrony. 
+      Zostały ulepszone, aby pasowały do eleganckiego wyglądu strony głównej.
+    */
+    body {
+      background-color: #fdfdfd; /* Delikatne tło dla spójności */
+    }
+
+    .guide-container {
+      max-width: 900px;
+      margin: 4rem auto;
+      padding: 2rem;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+
+    .guide-intro {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .guide-intro h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      color: #0f2d22;
+    }
+    
+    .steps-list {
+      list-style: none;
+      padding: 0;
+      counter-reset: step-counter;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 2rem;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid #e0e0e0;
+      counter-increment: step-counter;
+    }
+    .step-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+
+    .step-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 600;
+      color: #c9a648;
+      line-height: 1;
+      min-width: 60px;
+      text-align: center;
+    }
+    
+    .step-number::before {
+      content: counter(step-counter);
+    }
+
+    .step-content h3 {
+      margin-top: 0;
+      font-size: 1.5rem;
+      color: #0f2d22;
+    }
+
+    .step-content p {
+      margin-bottom: 1rem;
+      color: #555;
+    }
+
+    .step-image img {
+      max-width: 100%;
+      border-radius: 8px;
+      border: 1px solid #eee;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .tools-section {
+        background-color: #f7f9fa;
+        border-left: 5px solid #c9a648;
+        padding: 1.5rem 2rem;
+        margin: 3rem 0;
+        border-radius: 0 8px 8px 0;
+    }
+
+    .tools-section h3 {
+        margin-top: 0;
+        font-family: 'Playfair Display', serif;
+        color: #0f2d22;
+    }
+
+    .tools-section ul {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .tools-section li {
+        color: #333;
+        font-weight: 500;
+    }
+    
+    .tools-section li::before {
+        content: '✓';
+        color: #c9a648;
+        margin-right: 0.5rem;
+        font-weight: bold;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background: #c9a648;
+      color: #fff;
+      padding: 1rem 2.5rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+    .cta-button:hover {
+      background: #b08f3a;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      transform: translateY(-2px);
+    }
+    .cta-section {
+        text-align: center;
+        margin: 4rem 0 2rem;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Navigation and Hero copied from BYOSW -->
+  <!-- Nawigacja (bez zmian, dla spójności ze stroną główną) -->
   <nav class="navigation">
     <div class="nav-container">
       <a href="index.html" class="logo">Skylon T&G</a>
@@ -36,54 +168,108 @@
     </div>
   </nav>
 
+  <!-- Nagłówek (bez zmian, dla spójności) -->
   <header class="header">
-    <h1>Measurement Guide</h1>
-    <p>How to measure your sash windows correctly</p>
+    <h1>Przewodnik Pomiarowy</h1>
+    <p>Jak prawidłowo zmierzyć okna skrzynkowe</p>
   </header>
 
-  <!-- Instructions -->
-  <main class="container" style="max-width:1000px; margin:auto; padding:2rem;">
-    <h2>How to Measure Windows – Structural Opening</h2>
-    <ul class="steps">
-      <li>
-        Measure the width at the top, middle, and bottom. Record the smallest measurement.
-        <div class="step-image"><img src="img/measurement-guide/step1.png" alt="Step 1 diagram"></div>
-      </li>
-      <li>
-        Measure the height at the left, center, and right. Record the smallest measurement.
-        <div class="step-image"><img src="img/measurement-guide/step2.png" alt="Step 2 diagram"></div>
-      </li>
-      <li>
-        Measure the depth (reveal) from outside brick to inside surface, noting obstructions.
-        <div class="step-image"><img src="img/measurement-guide/step3.png" alt="Step 3 diagram"></div>
-      </li>
-      <li>
-        Check squareness by measuring diagonally from corner to corner.
-        <div class="step-image"><img src="img/measurement-guide/step4.png" alt="Step 4 diagram"></div>
-      </li>
-      <li>
-        Measure the structural opening (brick-to-brick) for both width and height.
-        <div class="step-image"><img src="img/measurement-guide/step5.png" alt="Step 5 diagram"></div>
-      </li>
-      <li>
-        Measure the frame dimension (inside frame width).
-        <div class="step-image"><img src="img/measurement-guide/step6.png" alt="Step 6 diagram"></div>
-      </li>
-    </ul>
+  <!-- Główna treść strony -->
+  <main class="guide-container">
+    <div class="guide-intro">
+      <h2>Jak Zmierzyć Okno – Otwór Strukturalny</h2>
+    </div>
 
-    <h2>Tools Needed</h2>
-    <ul>
-      <li>Tape measure</li>
-      <li>Spirit level</li>
-      <li>Pencil</li>
-      <li>Notepad</li>
-    </ul>
+    <ol class="steps-list">
+      <!-- Krok 1 -->
+      <li class="step-item">
+        <div class="step-number"></div>
+        <div class="step-content">
+          <h3>Zmierz szerokość</h3>
+          <p>Zmierz szerokość otworu na górze, na środku i na dole. Zapisz najmniejszy uzyskany wymiar.</p>
+          <div class="step-image">
+            <img src="img/measurement-guide/step1.png" alt="Krok 1: Pomiar szerokości okna w trzech punktach">
+          </div>
+        </div>
+      </li>
+      
+      <!-- Krok 2 -->
+      <li class="step-item">
+        <div class="step-number"></div>
+        <div class="step-content">
+          <h3>Zmierz wysokość</h3>
+          <p>Zmierz wysokość otworu po lewej stronie, na środku i po prawej. Zapisz najmniejszy uzyskany wymiar.</p>
+          <div class="step-image">
+            <img src="img/measurement-guide/step2.png" alt="Krok 2: Pomiar wysokości okna w trzech punktach">
+          </div>
+        </div>
+      </li>
 
-    <div class="cta">
-      <a href="appointment.html">Book Your Measurement Appointment</a>
+      <!-- Krok 3 -->
+      <li class="step-item">
+        <div class="step-number"></div>
+        <div class="step-content">
+          <h3>Zmierz głębokość</h3>
+          <p>Zmierz głębokość (od zewnętrznej cegły do wewnętrznej powierzchni), zwracając uwagę na ewentualne przeszkody.</p>
+          <div class="step-image">
+            <img src="img/measurement-guide/step3.png" alt="Krok 3: Pomiar głębokości ościeżnicy">
+          </div>
+        </div>
+      </li>
+
+      <!-- Krok 4 -->
+      <li class="step-item">
+        <div class="step-number"></div>
+        <div class="step-content">
+          <h3>Sprawdź kąty proste</h3>
+          <p>Sprawdź, czy otwór jest prostokątny, mierząc go po przekątnej od rogu do rogu. Oba wymiary powinny być równe.</p>
+          <div class="step-image">
+            <img src="img/measurement-guide/step4.png" alt="Krok 4: Pomiar przekątnych w celu sprawdzenia kątów prostych">
+          </div>
+        </div>
+      </li>
+
+      <!-- Krok 5 -->
+      <li class="step-item">
+        <div class="step-number"></div>
+        <div class="step-content">
+          <h3>Zmierz otwór strukturalny</h3>
+          <p>Zmierz otwór od cegły do cegły, zarówno dla szerokości, jak i wysokości, aby uzyskać wymiary konstrukcyjne.</p>
+          <div class="step-image">
+            <img src="img/measurement-guide/step5.png" alt="Krok 5: Pomiar otworu od cegły do cegły">
+          </div>
+        </div>
+      </li>
+
+      <!-- Krok 6 -->
+      <li class="step-item">
+        <div class="step-number"></div>
+        <div class="step-content">
+          <h3>Zmierz wymiar ramy</h3>
+          <p>Na koniec zmierz wewnętrzny wymiar istniejącej ramy okiennej (jeśli jest zamontowana).</p>
+          <div class="step-image">
+            <img src="img/measurement-guide/step6.png" alt="Krok 6: Pomiar wewnętrznego wymiaru ramy">
+          </div>
+        </div>
+      </li>
+    </ol>
+
+    <div class="tools-section">
+      <h3>Potrzebne Narzędzia</h3>
+      <ul>
+        <li>Miarka zwijana</li>
+        <li>Poziomica</li>
+        <li>Ołówek</li>
+        <li>Notes</li>
+      </ul>
+    </div>
+
+    <div class="cta-section">
+      <a href="appointment.html" class="cta-button">Umów się na Profesjonalny Pomiar</a>
     </div>
   </main>
 
+  <!-- Stopka (bez zmian, dla spójności) -->
   <footer style="background:#0f2d22; color:#fff; text-align:center; padding:2rem; margin-top:2rem;">
     <p>© 2025 Skylon Timber & Glazing House</p>
   </footer>
