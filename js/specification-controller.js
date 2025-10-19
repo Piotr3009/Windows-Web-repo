@@ -368,6 +368,12 @@ class SpecificationController {
     document.getElementById('spec-bars').style.display = 'block';
     document.getElementById('spec-upper-bars').textContent = barNames[upperBars] || upperBars;
     document.getElementById('spec-lower-bars').textContent = barNames[lowerBars] || lowerBars;
+    
+    // ✅ AKTUALIZUJ window.currentConfig
+    if (window.currentConfig) {
+      window.currentConfig.upperBars = upperBars;
+      window.currentConfig.lowerBars = lowerBars;
+    }
 
     this.showAppliedFeedback('apply-bars');
   }
@@ -396,6 +402,15 @@ class SpecificationController {
         document.getElementById('spec-dual-color').style.display = 'none';
         document.getElementById('spec-color-name').textContent = name;
         document.getElementById('spec-color-ral').textContent = ral;
+        
+        // ✅ AKTUALIZUJ window.currentConfig
+        if (window.currentConfig) {
+          window.currentConfig.colorType = 'single';
+          window.currentConfig.colorSingle = name;
+          window.currentConfig.colorInterior = null;
+          window.currentConfig.colorExterior = null;
+          window.currentConfig.customExteriorColor = null;
+        }
       }
     } else {
       // Dual color
@@ -412,6 +427,15 @@ class SpecificationController {
         document.getElementById('spec-dual-color').style.display = 'block';
         document.getElementById('spec-interior-color').textContent = `${intName} (${intRal})`;
         document.getElementById('spec-exterior-color').textContent = `${extName} (${extRal})`;
+        
+        // ✅ AKTUALIZUJ window.currentConfig
+        if (window.currentConfig) {
+          window.currentConfig.colorType = 'dual';
+          window.currentConfig.colorSingle = null;
+          window.currentConfig.colorInterior = intName;
+          window.currentConfig.colorExterior = extName;
+          window.currentConfig.customExteriorColor = extName === 'Custom' ? extName : null;
+        }
       }
     }
 
