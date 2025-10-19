@@ -273,21 +273,88 @@ class AuthSystem {
     }
 
     // Update UI based on authentication
-    updateUIForAuth(user) {
+    async updateUIForAuth(user) {
         const authButtons = document.querySelectorAll('.auth-required');
         
         if (user) {
-            // User is logged in
-            authButtons.forEach(btn => {
-                btn.textContent = 'My Dashboard';
-                btn.onclick = () => window.location.href = 'customer-dashboard.html';
-            });
+            // User is logged in - pobierz dane z bazy
+            try {
+                const { data: customer, error } = await supabaseClient
+                    .from('customers')
+                    .select('full_name')
+                    .eq('user_id', user.id)
+                    .single();
+
+                const displayName = customer?.full_name || user.email.split('@')[0];
+
+                // Zaktualizuj wszystkie przyciski auth
+                authButtons.forEach(btn => {
+                    btn.textContent = `👤 ${displayName}`;
+                    btn.onclick = () => window.location.href = 'customer-dashboard.html';
+                    btn.style.cursor = 'pointer';
+                });
+
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                // Fallback - pokaż email
+                authButtons.forEach(btn => {
+                    btn.textContent = `👤 ${user.email.split('@')[0]}`;
+                    btn.onclick = () => window.location.href = 'customer-dashboard.html';
+                });
+            }
         } else {
             // User is not logged in
             authButtons.forEach(btn => {
                 btn.textContent = 'Login / Register';
                 btn.onclick = () => this.showModal();
             });
+        }
+    }
+
+    // Dodaj dropdown menu dla zalogowanego użytkownika
+    addUserDropdown(displayName, getContainer) {
+        // Sprawdź czy dropdown już istnieje
+        const existingDropdown = document.querySelector('.user-dropdown-menu');
+        if (existingDropdown) return;
+
+        // Dodaj style dla dropdown
+        if (!document.getElementById('user-dropdown-styles')) {
+            const style = document.createElement('style');
+            style.id = 'user-dropdown-styles';
+            style.textContent = `
+                .user-menu-container {
+                    position: relative;
+                    display: inline-block;
+                }
+                .user-dropdown-menu {
+                    display: none;
+                    position: absolute;
+                    top: 100%;
+                    right: 0;
+                    background: white;
+                    border: 1px solid #ddd;
+                    border-radius: 5px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    min-width: 180px;
+                    margin-top: 5px;
+                    z-index: 1000;
+                }
+                .user-dropdown-menu.show {
+                    display: block;
+                }
+                .user-dropdown-item {
+                    padding: 12px 20px;
+                    cursor: pointer;
+                    border-bottom: 1px solid #f0f0f0;
+                }
+                .user-dropdown-item:last-child {
+                    border-bottom: none;
+                }
+                .user-dropdown-item:hover {
+                    background: #f5f5f5;
+                }
+            `;
+            document.head.appendChild(style);
         }
     }
 
