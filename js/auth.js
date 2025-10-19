@@ -287,6 +287,7 @@ class AuthSystem {
     // Update UI based on authentication
     async updateUIForAuth(user) {
         const authButtons = document.querySelectorAll('.auth-required');
+        const dashboardLink = document.getElementById('dashboard-link');
         
         if (user) {
             // User is logged in - pobierz dane z bazy
@@ -306,6 +307,14 @@ class AuthSystem {
                     btn.style.cursor = 'pointer';
                 });
 
+                // Dashboard link - zalogowany użytkownik
+                if (dashboardLink) {
+                    dashboardLink.onclick = (e) => {
+                        e.preventDefault();
+                        window.location.href = 'customer-dashboard.html';
+                    };
+                }
+
             } catch (error) {
                 console.error('Error fetching user data:', error);
                 // Fallback - pokaż email
@@ -313,6 +322,14 @@ class AuthSystem {
                     btn.textContent = `👤 ${user.email.split('@')[0]}`;
                     btn.onclick = () => window.location.href = 'customer-dashboard.html';
                 });
+                
+                // Dashboard link - zalogowany użytkownik (fallback)
+                if (dashboardLink) {
+                    dashboardLink.onclick = (e) => {
+                        e.preventDefault();
+                        window.location.href = 'customer-dashboard.html';
+                    };
+                }
             }
         } else {
             // User is not logged in
@@ -320,6 +337,14 @@ class AuthSystem {
                 btn.textContent = 'Login / Register';
                 btn.onclick = () => this.showModal();
             });
+            
+            // Dashboard link - niezalogowany użytkownik
+            if (dashboardLink) {
+                dashboardLink.onclick = (e) => {
+                    e.preventDefault();
+                    this.showModal();
+                };
+            }
         }
     }
 

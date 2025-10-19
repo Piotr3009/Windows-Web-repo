@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Customer Dashboard - Skylon Timber & Glazing House" />
+    <title>My Dashboard | Skylon Timber & Glazing House</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header class="hero">
+        <h1 class="logo-line1 gold-shimmer">MY DASHBOARD</h1>
+        <p class="logo-line2 gold-shimmer" id="customer-name">Welcome Back</p>
+        <p class="logo-line3 gold-shimmer">Track Your Orders & Estimates</p>
+    </header>
+
+    <div id="unified-menu-placeholder"></div>
+
+    <main class="container">
+        <!-- Customer Info Section -->
+        <section class="section dashboard-header">
+            <div class="customer-info">
+                <h2 class="section-title">Account Information</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Name:</span>
+                        <span class="info-value" id="customer-fullname">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value" id="customer-email">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Phone:</span>
+                        <span class="info-value" id="customer-phone">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Member Since:</span>
+                        <span class="info-value" id="customer-since">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-value" id="stat-estimates">0</div>
+                    <div class="stat-label">Total Estimates</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-value" id="stat-orders">0</div>
+                    <div class="stat-label">Active Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-value" id="stat-completed">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Orders/Estimates Section -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">My Orders & Estimates</h2>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="estimate">Estimates</button>
+                    <button class="filter-btn" data-filter="confirmed">Confirmed</button>
+                    <button class="filter-btn" data-filter="production">In Production</button>
+                    <button class="filter-btn" data-filter="completed">Completed</button>
+                </div>
+            </div>
+
+            <div id="orders-container">
+                <!-- Orders will be loaded here dynamically -->
+                <div class="loading-spinner">Loading your orders...</div>
+            </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="section quick-actions">
+            <h2 class="section-title">Quick Actions</h2>
+            <div class="actions-grid">
+                <a href="build-your-own-windows.html" class="action-card">
+                    <div class="action-icon">➕</div>
+                    <h3>Create New Estimate</h3>
+                    <p>Configure and price your windows</p>
+                </a>
+                <a href="certifications.html" class="action-card">
+                    <div class="action-icon">🔒</div>
+                    <h3>Our Certifications</h3>
+                    <p>PAS24 & FENSA certified</p>
+                </a>
+                <a href="contact.html" class="action-card">
+                    <div class="action-icon">💬</div>
+                    <h3>Contact Support</h3>
+                    <p>Get help with your order</p>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Order Detail Modal -->
+    <div id="order-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <div id="order-detail-content">
+                <!-- Order details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p>Email: info@skylontimber.com</p>
+                <p>Phone: +44 123 456 7890</p>
+            </div>
+            <div class="footer-section">
+                <h3>Visit Our Showroom</h3>
+                <p>123 Elegance Street</p>
+                <p>London, UK</p>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <p>Instagram | Facebook | LinkedIn</p>
+            </div>
+        </div>
+        <p>&copy; 2025 Skylon Timber & Glazing House. All rights reserved.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/supabase-config.js"></script>
+    <script src="js/menu-loader.js"></script>
+    <script src="js/customer-dashboard.js"></script>
+</body>
+</html>

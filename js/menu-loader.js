@@ -1,0 +1,97 @@
+// Menu Loader - ładuje unified menu i zarządza widocznością Admin Panel
+
+class MenuLoader {
+    constructor() {
+        this.init();
+    }
+
+    async init() {
+        await this.loadMenu();
+        await this.configureMenu();
+    }
+
+    async loadMenu() {
+        // Znajdź placeholder dla menu (będzie w każdym HTML)
+        const menuPlaceholder = document.getElementById('unified-menu-placeholder');
+        if (!menuPlaceholder) {
+            console.warn('Menu placeholder not found');
+            return;
+        }
+
+        try {
+            // Załaduj unified menu
+            const response = await fetch('unified-menu.html');
+            const menuHTML = await response.text();
+            menuPlaceholder.innerHTML = menuHTML;
+        } catch (error) {
+            console.error('Error loading menu:', error);
+        }
+    }
+
+    async configureMenu() {
+        // Sprawdź czy użytkownik jest zalogowany i czy jest adminem
+        const user = await this.getCurrentUser();
+        const adminLink = document.getElementById('admin-link');
+        
+        if (user && adminLink) {
+            // Sprawdź rolę użytkownika
+            const isAdmin = await this.checkIfAdmin(user.id);
+            
+            if (isAdmin) {
+                adminLink.style.display = 'inline-block';
+            }
+        }
+
+        // Podświetl aktywną stronę
+        this.highlightActivePage();
+    }
+
+    async getCurrentUser() {
+        try {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            return user;
+        } catch (error) {
+            console.error('Error getting user:', error);
+            return null;
+        }
+    }
+
+    async checkIfAdmin(userId) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('customers')
+                .select('role')
+                .eq('user_id', userId)
+                .single();
+
+            if (error) throw error;
+            return data?.role === 'admin';
+        } catch (error) {
+            console.error('Error checking admin status:', error);
+            return false;
+        }
+    }
+
+    highlightActivePage() {
+        const currentPage = window.location.pathname.split('/').pop();
+        const menuButtons = document.querySelectorAll('.menu-bar button');
+        
+        menuButtons.forEach(button => {
+            const link = button.parentElement;
+            const href = link.getAttribute('href');
+            
+            if (href === currentPage || (currentPage === '' && href === 'index.html')) {
+                button.classList.add('active');
+            }
+        });
+    }
+}
+
+// Inicjalizuj menu loader gdy DOM jest gotowy
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        new MenuLoader();
+    });
+} else {
+    new MenuLoader();
+}
