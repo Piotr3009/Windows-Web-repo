@@ -235,8 +235,8 @@ class CustomerDashboard {
                         View Details
                     </button>
                     ${order.status === 'saved' ? `
-                        <button class="btn" onclick="dashboard.confirmOrder('${order.id}')">
-                            Confirm Order
+                        <button class="btn" onclick="dashboard.placeOrder('${order.id}')">
+                            Place Order
                         </button>
                     ` : ''}
                 </div>
@@ -396,16 +396,16 @@ class CustomerDashboard {
         document.getElementById('order-modal').style.display = 'none';
     }
 
-    // Confirm order
-    async confirmOrder(orderId) {
-        if (!confirm('Are you sure you want to confirm this order? Our team will contact you shortly.')) {
+    // Place order (change status from saved to pending)
+    async placeOrder(orderId) {
+        if (!confirm('Are you sure you want to place this order? Our team will contact you shortly to arrange measurements.')) {
             return;
         }
 
         try {
             const { error } = await supabaseClient
                 .from('orders')
-                .update({ status: 'confirmed' })
+                .update({ status: 'pending' })
                 .eq('id', orderId);
 
             if (error) throw error;
@@ -415,15 +415,15 @@ class CustomerDashboard {
                 .from('order_timeline')
                 .insert([{
                     order_id: orderId,
-                    status_change: 'Order confirmed by customer',
+                    status_change: 'Order placed by customer - awaiting contact',
                     created_at: new Date().toISOString()
                 }]);
 
-            alert('Order confirmed successfully! We will contact you soon.');
+            alert('Order placed successfully! We will contact you soon to arrange measurements.');
             await this.loadOrders();
         } catch (error) {
-            console.error('Error confirming order:', error);
-            this.showError('Failed to confirm order');
+            console.error('Error placing order:', error);
+            this.showError('Failed to place order');
         }
     }
 

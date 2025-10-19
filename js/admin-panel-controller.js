@@ -133,7 +133,7 @@ class AdminPanel {
             const { count: estimatesCount } = await supabaseClient
                 .from('orders')
                 .select('*', { count: 'exact', head: true })
-                .eq('status', 'estimate');
+                .eq('status', 'saved');
             
             document.getElementById('total-estimates').textContent = estimatesCount || 0;
 
@@ -141,7 +141,7 @@ class AdminPanel {
             const { count: activeCount } = await supabaseClient
                 .from('orders')
                 .select('*', { count: 'exact', head: true })
-                .in('status', ['confirmed', 'production', 'transport']);
+                .in('status', ['pending', 'confirmed', 'in_production']);
             
             document.getElementById('active-orders').textContent = activeCount || 0;
 
@@ -187,7 +187,7 @@ class AdminPanel {
                         <span>${order.customers?.full_name || 'Unknown'}</span>
                     </div>
                     <div class="order-meta">
-                        <span class="status-badge status-${order.status}">${order.status}</span>
+                        <span class="status-badge status-${order.status}">${this.formatStatus(order.status)}</span>
                         <span class="price">£${this.formatPrice(order.total_price)}</span>
                     </div>
                 </div>
@@ -232,8 +232,8 @@ class AdminPanel {
 
         tbody.innerHTML = this.customers.map(customer => {
             const orders = customer.orders || [];
-            const totalOrders = orders.filter(o => o.status !== 'estimate').length;
-            const estimates = orders.filter(o => o.status === 'estimate').length;
+            const totalOrders = orders.filter(o => o.status !== 'saved').length;
+            const estimates = orders.filter(o => o.status === 'saved').length;
             const registeredDate = new Date(customer.created_at).toLocaleDateString('en-GB');
 
             return `
@@ -268,8 +268,8 @@ class AdminPanel {
 
         tbody.innerHTML = filtered.map(customer => {
             const orders = customer.orders || [];
-            const totalOrders = orders.filter(o => o.status !== 'estimate').length;
-            const estimates = orders.filter(o => o.status === 'estimate').length;
+            const totalOrders = orders.filter(o => o.status !== 'saved').length;
+            const estimates = orders.filter(o => o.status === 'saved').length;
             const registeredDate = new Date(customer.created_at).toLocaleDateString('en-GB');
 
             return `
@@ -342,7 +342,7 @@ class AdminPanel {
                     <td>${itemCount}</td>
                     <td>£${this.formatPrice(order.total_price)}</td>
                     <td>${order.deposit_amount ? depositStatus : 'N/A'}</td>
-                    <td><span class="status-badge status-${order.status}">${order.status}</span></td>
+                    <td><span class="status-badge status-${order.status}">${this.formatStatus(order.status)}</span></td>
                     <td>
                         <button class="btn-small" onclick="adminPanel.editOrder('${order.id}')">Edit</button>
                     </td>
@@ -393,10 +393,10 @@ class AdminPanel {
             <div class="order-edit-section">
                 <h3>Order Status</h3>
                 <select id="order-status-select" class="status-select">
-                    <option value="estimate" ${order.status === 'estimate' ? 'selected' : ''}>Estimate</option>
+                    <option value="saved" ${order.status === 'saved' ? 'selected' : ''}>Saved Estimate</option>
+                    <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
                     <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-                    <option value="production" ${order.status === 'production' ? 'selected' : ''}>In Production</option>
-                    <option value="transport" ${order.status === 'transport' ? 'selected' : ''}>In Transit</option>
+                    <option value="in_production" ${order.status === 'in_production' ? 'selected' : ''}>In Production</option>
                     <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Completed</option>
                     <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
                 </select>
@@ -478,6 +478,19 @@ class AdminPanel {
         }).format(price);
     }
 
+    // Format status for display
+    formatStatus(status) {
+        const statusLabels = {
+            'saved': 'Saved Estimate',
+            'pending': 'Pending',
+            'confirmed': 'Confirmed',
+            'in_production': 'In Production',
+            'completed': 'Completed',
+            'cancelled': 'Cancelled'
+        };
+        return statusLabels[status] || status;
+    }
+
     // Export customers to CSV
     exportCustomers() {
         const csv = [
@@ -487,8 +500,8 @@ class AdminPanel {
                 c.email,
                 c.phone || '',
                 new Date(c.created_at).toLocaleDateString('en-GB'),
-                c.orders?.filter(o => o.status !== 'estimate').length || 0,
-                c.orders?.filter(o => o.status === 'estimate').length || 0
+                c.orders?.filter(o => o.status !== 'saved').length || 0,
+                c.orders?.filter(o => o.status === 'saved').length || 0
             ])
         ].map(row => row.join(',')).join('\n');
 
@@ -566,7 +579,7 @@ class AdminPanel {
             const { count: orders } = await supabaseClient
                 .from('orders')
                 .select('*', { count: 'exact', head: true })
-                .in('status', ['confirmed', 'production', 'transport', 'completed']);
+                .in('status', ['pending', 'confirmed', 'in_production', 'completed']);
 
             // Update UI
             document.getElementById('analytics-visitors').textContent = visitors || 0;
@@ -852,7 +865,7 @@ class AdminPanel {
                     <td>${itemCount}</td>
                     <td>£${this.formatPrice(order.total_price)}</td>
                     <td>${order.deposit_amount ? depositStatus : 'N/A'}</td>
-                    <td><span class="status-badge status-${order.status}">${order.status}</span></td>
+                    <td><span class="status-badge status-${order.status}">${this.formatStatus(order.status)}</span></td>
                     <td>
                         <button class="btn-small" onclick="adminPanel.editOrder('${order.id}')">Edit</button>
                     </td>
@@ -866,4 +879,3 @@ class AdminPanel {
 document.addEventListener('DOMContentLoaded', () => {
     window.adminPanel = new AdminPanel();
 });
-

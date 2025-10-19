@@ -291,7 +291,7 @@ class AuthSystem {
                 // Convert each estimate to order format
                 const orders = savedEstimates.map(estimate => ({
                     customer_id: customer.id,
-                    status: 'estimate',
+                    status: 'saved',
                     total_price: estimate.price || estimate.total_price || 0,
                     window_spec: estimate,
                     created_at: estimate.timestamp || new Date().toISOString()
