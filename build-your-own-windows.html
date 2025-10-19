@@ -1084,6 +1084,32 @@
   </div>
 </div>
 
+<!-- Modal tworzenia nowej wyceny -->
+<div id="create-estimate-modal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>Create New Estimate</h2>
+    <p style="margin-bottom: 20px; color: #666;">Start a new estimate for your project</p>
+    <form id="create-estimate-form">
+      <div style="margin-bottom: 15px;">
+        <label for="project-name" style="display: block; margin-bottom: 5px; font-weight: 600;">Project Name *</label>
+        <input type="text" id="project-name" required placeholder="e.g. Kitchen Renovation" 
+               style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 16px;">
+      </div>
+      
+      <div style="margin-bottom: 20px;">
+        <label for="delivery-address" style="display: block; margin-bottom: 5px; font-weight: 600;">Delivery Address</label>
+        <textarea id="delivery-address" rows="3" placeholder="Full delivery address (optional)" 
+                  style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 16px; resize: vertical;"></textarea>
+      </div>
+      
+      <button type="submit" class="btn" style="width: 100%; padding: 12px; font-size: 16px;">
+        Create Estimate
+      </button>
+    </form>
+  </div>
+</div>
+
 <footer class="footer">
   <p>&copy; 2025 Skylon Timber & Glazing House. All rights reserved.</p>
   <div class="footer-links">
