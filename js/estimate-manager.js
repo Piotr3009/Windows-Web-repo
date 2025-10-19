@@ -119,6 +119,16 @@ class EstimateManager {
     // Dodaj okno do wyceny
     async addWindowToEstimate(windowConfig, price) {
         try {
+            // SPRAWDŹ CZY ZALOGOWANY
+            const user = await getCurrentUser();
+            
+            if (!user) {
+                // NIEZALOGOWANY - zapisz do localStorage
+                this.saveToLocalStorage(windowConfig, price);
+                return;
+            }
+            
+            // ZALOGOWANY - kontynuuj z bazą danych
             if (!this.currentEstimate) {
                 // Nie ma aktualnej wyceny - pokaż modal tworzenia
                 this.showCreateEstimateModal();
@@ -292,9 +302,34 @@ class EstimateManager {
         // Przycisk "View My Estimates"
         const viewBtn = document.getElementById('view-my-estimates');
         if (viewBtn) {
-            viewBtn.addEventListener('click', () => {
-                window.location.href = 'customer-dashboard.html';
+            viewBtn.addEventListener('click', async () => {
+                const user = await getCurrentUser();
+                
+                if (user) {
+                    // ZALOGOWANY - idź do dashboardu
+                    window.location.href = 'customer-dashboard.html';
+                } else {
+                    // NIEZALOGOWANY - sprawdź localStorage
+                    const savedEstimates = JSON.parse(localStorage.getItem('windowEstimates') || '[]');
+                    
+                    if (savedEstimates.length > 0) {
+                        // Ma zapisane okna - zaproponuj logowanie
+                        if (confirm(`You have ${savedEstimates.length} window(s) saved locally.\n\nLogin to sync your estimates and access full features?`)) {
+                            localStorage.setItem('redirect_after_login', 'customer-dashboard.html');
+                            window.location.href = 'login.html';
+                        }
+                    } else {
+                        // Nie ma nic - zaproponuj logowanie
+                        if (confirm('Login to create and manage your estimates?')) {
+                            localStorage.setItem('redirect_after_login', 'customer-dashboard.html');
+                            window.location.href = 'login.html';
+                        }
+                    }
+                }
             });
+            
+            // Zaktualizuj licznik przy inicjalizacji
+            this.updateLocalStorageCounter();
         }
 
         // Formularz tworzenia wyceny
@@ -449,6 +484,9 @@ class EstimateManager {
             case 'error':
                 toast.style.background = '#ef4444';
                 break;
+            case 'warning':
+                toast.style.background = '#f59e0b';
+                break;
             default:
                 toast.style.background = '#3b82f6';
         }
@@ -473,6 +511,51 @@ class EstimateManager {
             toast.style.animation = 'slideOutRight 0.3s ease-out';
             setTimeout(() => toast.remove(), 300);
         }, 3000);
+    }
+
+    // Zapisz do localStorage (dla niezalogowanych użytkowników)
+    saveToLocalStorage(windowConfig, price) {
+        try {
+            // Pobierz istniejące wyceny z localStorage
+            const savedEstimates = JSON.parse(localStorage.getItem('windowEstimates') || '[]');
+            
+            // Wygeneruj numer okna (W1, W2, W3...)
+            const windowNumber = `W${savedEstimates.length + 1}`;
+            
+            // Dodaj nowe okno
+            const newWindow = {
+                id: Date.now(),
+                windowNumber: windowNumber,
+                config: windowConfig,
+                price: price,
+                timestamp: new Date().toISOString()
+            };
+            
+            savedEstimates.push(newWindow);
+            
+            // Zapisz z powrotem do localStorage
+            localStorage.setItem('windowEstimates', JSON.stringify(savedEstimates));
+            
+            console.log('Window saved to localStorage:', windowNumber);
+            this.showToast(`✅ ${windowNumber} saved locally. Login to sync your estimates.`, 'warning');
+            
+            // Zaktualizuj licznik w przycisku "View My Estimates"
+            this.updateLocalStorageCounter();
+            
+        } catch (error) {
+            console.error('Error saving to localStorage:', error);
+            this.showToast('❌ Error saving window', 'error');
+        }
+    }
+
+    // Zaktualizuj licznik okien w localStorage
+    updateLocalStorageCounter() {
+        const savedEstimates = JSON.parse(localStorage.getItem('windowEstimates') || '[]');
+        const viewBtn = document.getElementById('view-my-estimates');
+        
+        if (viewBtn && savedEstimates.length > 0) {
+            viewBtn.textContent = `View My Estimates (${savedEstimates.length})`;
+        }
     }
 }
 
