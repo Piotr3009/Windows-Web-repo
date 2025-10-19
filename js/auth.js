@@ -230,22 +230,34 @@ class AuthSystem {
             // Track registration
             await this.trackEvent('user_registration', { user_id: authData.user.id });
 
-            this.showMessage('register', 'Account created! Please check your email to verify.', false);
+            // Sprawdź czy email wymaga potwierdzenia
+            const needsEmailConfirmation = authData.user && !authData.user.email_confirmed_at;
 
-            // Transfer any saved estimates from localStorage to database
-            setTimeout(() => {
-                this.transferLocalEstimates(authData.user.id);
-                this.closeModal();
+            if (needsEmailConfirmation) {
+                // EMAIL NIE POTWIERDZONY - pokaż komunikat i NIE przekierowuj
+                this.showMessage('register', '✅ Account created! Please check your email to confirm your account before logging in.', false);
                 
-                // Sprawdź czy jest redirect zapisany
-                const redirectUrl = localStorage.getItem('redirect_after_login');
-                if (redirectUrl) {
-                    localStorage.removeItem('redirect_after_login');
-                    window.location.href = redirectUrl;
-                } else {
-                    window.location.href = 'customer-dashboard.html';
-                }
-            }, 2000);
+                setTimeout(() => {
+                    this.closeModal();
+                    // NIE przekierowuj - użytkownik musi potwierdzić email
+                }, 3000);
+            } else {
+                // EMAIL POTWIERDZONY - normalny flow (instant confirmation)
+                this.showMessage('register', 'Account created successfully!', false);
+                
+                setTimeout(() => {
+                    this.transferLocalEstimates(authData.user.id);
+                    this.closeModal();
+                    
+                    const redirectUrl = localStorage.getItem('redirect_after_login');
+                    if (redirectUrl) {
+                        localStorage.removeItem('redirect_after_login');
+                        window.location.href = redirectUrl;
+                    } else {
+                        window.location.href = 'customer-dashboard.html';
+                    }
+                }, 2000);
+            }
 
         } catch (error) {
             this.showMessage('register', error.message, true);
