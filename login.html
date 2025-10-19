@@ -165,6 +165,7 @@
             color: var(--secondary-color);
         }
     </style>
+    <link rel="stylesheet" href="css/auth.css">
 </head>
 <body>
     <div class="auth-container">
@@ -174,30 +175,28 @@
         </div>
 
         <div class="auth-tabs">
-            <button class="auth-tab active" onclick="switchTab('login')">Login</button>
-            <button class="auth-tab" onclick="switchTab('register')">Register</button>
+            <button class="auth-tab active" onclick="window.authSystem.switchTab('login')">Login</button>
+            <button class="auth-tab" onclick="window.authSystem.switchTab('register')">Register</button>
         </div>
 
-        <!-- Login Form -->
         <div id="login-form" class="auth-form active">
             <h2>Welcome Back</h2>
             <p style="margin-bottom: 20px; color: #666;">Login to view your estimates and orders</p>
             <input type="email" id="login-email" placeholder="Email" required>
             <input type="password" id="login-password" placeholder="Password" required>
-            <button class="auth-btn" onclick="login()">Login</button>
+            <button class="auth-btn" onclick="window.authSystem.login()">Login</button>
             <div id="login-message" class="auth-message" style="display: none;"></div>
         </div>
 
-        <!-- Register Form -->
         <div id="register-form" class="auth-form">
             <h2>Create Account</h2>
             <p style="margin-bottom: 20px; color: #666;">Register to save your estimates</p>
-            <input type="text" id="register-name" placeholder="Full Name" required>
+            <input type="text" id="register-name" placeholder="Name / Company Name" required>
             <input type="email" id="register-email" placeholder="Email" required>
             <input type="tel" id="register-phone" placeholder="Phone Number" required>
             <input type="password" id="register-password" placeholder="Password (min 6 characters)" required>
             <input type="password" id="register-confirm" placeholder="Confirm Password" required>
-            <button class="auth-btn" onclick="register()">Create Account</button>
+            <button class="auth-btn" onclick="window.authSystem.register()">Create Account</button>
             <div id="register-message" class="auth-message" style="display: none;"></div>
         </div>
 
@@ -206,137 +205,30 @@
         </div>
     </div>
 
-    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-config.js"></script>
+    <script src="js/auth.js"></script>
 
     <script>
-        function switchTab(tab) {
-            // Hide all forms
-            document.querySelectorAll('.auth-form').forEach(form => {
-                form.classList.remove('active');
-            });
-            document.querySelectorAll('.auth-tab').forEach(btn => {
-                btn.classList.remove('active');
-            });
+      document.addEventListener('DOMContentLoaded', () => {
+        const loginPasswordInput = document.getElementById('login-password');
+        const registerConfirmInput = document.getElementById('register-confirm');
 
-            // Show selected form
-            document.getElementById(tab + '-form').classList.add('active');
-            event.target.classList.add('active');
+        if (loginPasswordInput && window.authSystem) {
+          loginPasswordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') window.authSystem.login();
+          });
+        }
+        if (registerConfirmInput && window.authSystem) {
+          registerConfirmInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') window.authSystem.register();
+          });
         }
 
-        async function login() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            const messageEl = document.getElementById('login-message');
-
-            if (!email || !password) {
-                showMessage(messageEl, 'Please fill in all fields', 'error');
-                return;
-            }
-
-            try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
-
-                if (error) throw error;
-
-                showMessage(messageEl, 'Login successful! Redirecting...', 'success');
-                
-                // Check if user is admin
-                const { data: customer } = await supabaseClient
-                    .from('customers')
-                    .select('role')
-                    .eq('user_id', data.user.id)
-                    .single();
-
-                setTimeout(() => {
-                    if (customer && customer.role === 'admin') {
-                        window.location.href = 'admin-dashboard.html';
-                    } else {
-                        window.location.href = 'customer-dashboard.html';
-                    }
-                }, 1000);
-
-            } catch (error) {
-                console.error('Login error:', error);
-                showMessage(messageEl, error.message || 'Login failed', 'error');
-            }
+        if(window.authSystem) {
+             window.authSystem.switchTab('login');
         }
-
-        async function register() {
-            const name = document.getElementById('register-name').value;
-            const email = document.getElementById('register-email').value;
-            const phone = document.getElementById('register-phone').value;
-            const password = document.getElementById('register-password').value;
-            const confirm = document.getElementById('register-confirm').value;
-            const messageEl = document.getElementById('register-message');
-
-            // Validation
-            if (!name || !email || !phone || !password || !confirm) {
-                showMessage(messageEl, 'Please fill in all fields', 'error');
-                return;
-            }
-
-            if (password.length < 6) {
-                showMessage(messageEl, 'Password must be at least 6 characters', 'error');
-                return;
-            }
-
-            if (password !== confirm) {
-                showMessage(messageEl, 'Passwords do not match', 'error');
-                return;
-            }
-
-            try {
-                // Create auth user
-                const { data: authData, error: authError } = await supabaseClient.auth.signUp({
-                    email: email,
-                    password: password
-                });
-
-                if (authError) throw authError;
-
-                // Create customer record
-                const { error: customerError } = await supabaseClient
-                    .from('customers')
-                    .insert([{
-                        user_id: authData.user.id,
-                        full_name: name,
-                        email: email,
-                        phone: phone
-                    }]);
-
-                if (customerError) throw customerError;
-
-                showMessage(messageEl, 'Registration successful! Redirecting...', 'success');
-
-                setTimeout(() => {
-                    window.location.href = 'customer-dashboard.html';
-                }, 1500);
-
-            } catch (error) {
-                console.error('Registration error:', error);
-                showMessage(messageEl, error.message || 'Registration failed', 'error');
-            }
-        }
-
-        function showMessage(element, message, type) {
-            element.textContent = message;
-            element.className = 'auth-message ' + type;
-            element.style.display = 'block';
-        }
-
-        // Enter key support
-        document.getElementById('login-password').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') login();
-        });
-
-        document.getElementById('register-confirm').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') register();
-        });
+      });
     </script>
 </body>
 </html>
