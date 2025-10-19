@@ -192,8 +192,9 @@
             <h2>Create Account</h2>
             <p style="margin-bottom: 20px; color: #666;">Register to save your estimates</p>
             <input type="text" id="register-name" placeholder="Name / Company Name" required>
+            <input type="text" id="register-company" placeholder="Company Name (optional)">
             <input type="email" id="register-email" placeholder="Email" required>
-            <input type="tel" id="register-phone" placeholder="Phone Number" required>
+            <input type="tel" id="register-phone" placeholder="Phone Number (optional)">
             <input type="password" id="register-password" placeholder="Password (min 6 characters)" required>
             <input type="password" id="register-confirm" placeholder="Confirm Password" required>
             <button class="auth-btn" onclick="register()">Create Account</button>
@@ -263,13 +264,14 @@
 
         async function register() {
             const name = document.getElementById('register-name').value;
+            const company = document.getElementById('register-company').value;
             const email = document.getElementById('register-email').value;
             const phone = document.getElementById('register-phone').value;
             const password = document.getElementById('register-password').value;
             const confirm = document.getElementById('register-confirm').value;
             const messageEl = document.getElementById('register-message');
 
-            if (!name || !email || !phone || !password || !confirm) {
+            if (!name || !email || !password || !confirm) {
                 showMessage(messageEl, 'Please fill in all fields', 'error');
                 return;
             }
@@ -297,6 +299,7 @@
                     .insert([{
                         user_id: authData.user.id,
                         full_name: name,
+                        company_name: company || null,
                         email: email,
                         phone: phone
                     }]);
