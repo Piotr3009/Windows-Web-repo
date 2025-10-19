@@ -183,8 +183,8 @@ class EstimateManager {
                     // NOWE: Custom exterior color
                     custom_exterior_color: windowConfig.customExteriorColor,
                     
-                    upper_bars: windowConfig.upperBars ? JSON.stringify(windowConfig.upperBars) : null,
-                    lower_bars: windowConfig.lowerBars ? JSON.stringify(windowConfig.lowerBars) : null,
+                    upper_bars: windowConfig.upperBars || null,
+                    lower_bars: windowConfig.lowerBars || null,
                     horns: windowConfig.horns,
                     
                     // ZMIENIONE: ironmongery jako JSONB (nie VARCHAR)
@@ -388,18 +388,9 @@ class EstimateManager {
                 colorExterior: window.currentConfig.colorExterior,
                 customExteriorColor: window.currentConfig.customExteriorColor,
                 
-                // Bary - KOMPLETNE dane z bars manager
-                upperBars: window.barsUnifiedManager ? {
-                    pattern: window.barsUnifiedManager.getState().upper.pattern,
-                    bars: window.barsUnifiedManager.getState().upper.bars,
-                    details: window.barsUnifiedManager.getBarDetails('upper')
-                } : null,
-                
-                lowerBars: window.barsUnifiedManager ? {
-                    pattern: window.barsUnifiedManager.getState().lower.pattern,
-                    bars: window.barsUnifiedManager.getState().lower.bars,
-                    details: window.barsUnifiedManager.getBarDetails('lower')
-                } : null,
+                // Bary - Pobierz z window.currentConfig (najprostsze i najnowsze źródło)
+                upperBars: window.currentConfig.upperBars || null,
+                lowerBars: window.currentConfig.lowerBars || null,
                 
                 // Detale
                 horns: window.currentConfig.horns,
