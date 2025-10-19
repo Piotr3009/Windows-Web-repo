@@ -41,7 +41,7 @@ class CustomerDashboard {
             // Convert each estimate to order format
             const orders = savedEstimates.map(estimate => ({
                 customer_id: this.currentUser.id,
-                status: 'estimate',
+                status: 'saved', // Zmienione z 'estimate' na 'saved'
                 total_price: estimate.price || estimate.total_price || 0,
                 window_spec: estimate,
                 created_at: estimate.timestamp || new Date().toISOString()
@@ -152,9 +152,9 @@ class CustomerDashboard {
 
     // Update statistics
     updateStats() {
-        const estimates = this.orders.filter(o => o.status === 'estimate').length;
+        const estimates = this.orders.filter(o => o.status === 'saved').length;
         const activeOrders = this.orders.filter(o => 
-            ['confirmed', 'production', 'transport'].includes(o.status)
+            ['pending', 'confirmed', 'in_production'].includes(o.status)
         ).length;
         const completed = this.orders.filter(o => o.status === 'completed').length;
 
@@ -234,7 +234,7 @@ class CustomerDashboard {
                     <button class="btn-secondary" onclick="dashboard.viewOrderDetails('${order.id}')">
                         View Details
                     </button>
-                    ${order.status === 'estimate' ? `
+                    ${order.status === 'saved' ? `
                         <button class="btn" onclick="dashboard.confirmOrder('${order.id}')">
                             Confirm Order
                         </button>
@@ -247,11 +247,11 @@ class CustomerDashboard {
     // Render order progress timeline
     renderOrderProgress(order) {
         const timeline = [
-            { status: 'estimate', label: 'Estimate', icon: '📋' },
+            { status: 'saved', label: 'Saved Estimate', icon: '📋' },
+            { status: 'pending', label: 'Pending', icon: '⏳' },
             { status: 'confirmed', label: 'Confirmed', icon: '✓' },
-            { status: 'production', label: 'Production', icon: '🔨' },
-            { status: 'transport', label: 'Transport', icon: '🚚' },
-            { status: 'completed', label: 'Delivered', icon: '✅' }
+            { status: 'in_production', label: 'Production', icon: '🔨' },
+            { status: 'completed', label: 'Completed', icon: '✅' }
         ];
 
         const currentIndex = timeline.findIndex(t => t.status === order.status);
@@ -271,14 +271,14 @@ class CustomerDashboard {
     // Get status configuration
     getStatusConfig(status) {
         const configs = {
-            estimate: { label: 'Estimate', color: '#2196F3' },
-            confirmed: { label: 'Confirmed', color: '#4CAF50' },
-            production: { label: 'In Production', color: '#FF9800' },
-            transport: { label: 'In Transit', color: '#9C27B0' },
-            completed: { label: 'Completed', color: '#4CAF50' },
-            cancelled: { label: 'Cancelled', color: '#f44336' }
+            saved: { label: 'Saved Estimate', color: '#6c757d' },
+            pending: { label: 'Pending Approval', color: '#ffc107' },
+            confirmed: { label: 'Confirmed', color: '#17a2b8' },
+            in_production: { label: 'In Production', color: '#007bff' },
+            completed: { label: 'Completed', color: '#28a745' },
+            cancelled: { label: 'Cancelled', color: '#dc3545' }
         };
-        return configs[status] || configs.estimate;
+        return configs[status] || configs.saved;
     }
 
     // Format price
