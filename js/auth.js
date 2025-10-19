@@ -153,9 +153,19 @@ class AuthSystem {
             // Track login
             await this.trackEvent('user_login', { user_id: data.user.id });
 
+            // Transfer localStorage estimates
+            await this.transferLocalEstimates(data.user.id);
+
             setTimeout(() => {
                 this.closeModal();
-                window.location.href = 'customer-dashboard.html';
+                // Sprawdź czy jest redirect zapisany
+                const redirectUrl = localStorage.getItem('redirect_after_login');
+                if (redirectUrl) {
+                    localStorage.removeItem('redirect_after_login');
+                    window.location.href = redirectUrl;
+                } else {
+                    window.location.href = 'customer-dashboard.html';
+                }
             }, 1000);
 
         } catch (error) {
@@ -226,7 +236,15 @@ class AuthSystem {
             setTimeout(() => {
                 this.transferLocalEstimates(authData.user.id);
                 this.closeModal();
-                window.location.href = 'customer-dashboard.html';
+                
+                // Sprawdź czy jest redirect zapisany
+                const redirectUrl = localStorage.getItem('redirect_after_login');
+                if (redirectUrl) {
+                    localStorage.removeItem('redirect_after_login');
+                    window.location.href = redirectUrl;
+                } else {
+                    window.location.href = 'customer-dashboard.html';
+                }
             }, 2000);
 
         } catch (error) {
