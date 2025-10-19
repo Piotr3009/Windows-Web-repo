@@ -258,8 +258,8 @@ class EstimateManager {
     async handleCreateEstimateForm(event) {
         event.preventDefault();
 
-        const projectName = document.getElementById('estimate-project-name').value.trim();
-        const deliveryAddress = document.getElementById('estimate-delivery-address').value.trim();
+        const projectName = document.getElementById('project-name').value.trim();
+        const deliveryAddress = document.getElementById('delivery-address').value.trim();
 
         if (!projectName) {
             this.showToast('Project name is required', 'error');
