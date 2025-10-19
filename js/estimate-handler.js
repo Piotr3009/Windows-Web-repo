@@ -69,7 +69,6 @@ class EstimateHandler {
             } else {
                 // NIEZALOGOWANY - przekieruj do logowania
                 console.log('User not logged in, redirecting to login');
-                // Po zalogowaniu automatycznie przeniesie do dashboardu
                 localStorage.setItem('redirect_after_login', 'customer-dashboard.html');
                 window.location.href = 'login.html';
             }
