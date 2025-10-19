@@ -151,17 +151,38 @@ class EstimateManager {
                     width: windowConfig.width,
                     height: windowConfig.height,
                     measurement_type: windowConfig.measurementType,
+                    
+                    // NOWE: Oryginalne wymiary (przed brick-to-brick adjustment)
+                    original_width: windowConfig.originalWidth,
+                    original_height: windowConfig.originalHeight,
+                    
                     frame_type: windowConfig.frameType,
                     glass_type: windowConfig.glassType,
+                    
+                    // NOWE: Glass specification
+                    glass_spec: windowConfig.glassSpec,
+                    glass_finish: windowConfig.glassFinish,
+                    frosted_location: windowConfig.frostedLocation,
+                    
                     opening_type: windowConfig.openingType,
                     color_type: windowConfig.colorType,
                     color_single: windowConfig.colorSingle,
                     color_interior: windowConfig.colorInterior,
                     color_exterior: windowConfig.colorExterior,
+                    
+                    // NOWE: Custom exterior color
+                    custom_exterior_color: windowConfig.customExteriorColor,
+                    
                     upper_bars: windowConfig.upperBars ? JSON.stringify(windowConfig.upperBars) : null,
                     lower_bars: windowConfig.lowerBars ? JSON.stringify(windowConfig.lowerBars) : null,
                     horns: windowConfig.horns,
-                    ironmongery: windowConfig.ironmongery,
+                    
+                    // ZMIENIONE: ironmongery jako JSONB (nie VARCHAR)
+                    ironmongery: windowConfig.ironmongery ? JSON.stringify(windowConfig.ironmongery) : null,
+                    
+                    // NOWE: Ironmongery finish
+                    ironmongery_finish: windowConfig.ironmongeryFinish,
+                    
                     pas24: windowConfig.pas24 || false,
                     quantity: windowConfig.quantity || 1,
                     unit_price: price.unitPrice,
