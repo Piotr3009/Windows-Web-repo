@@ -34,11 +34,9 @@ class FormHandler {
       dualColorSelector: 'dual-color-selector',
       customExteriorColor: 'custom-exterior-color',
       
-      // Buttons
-      addToEstimateBtn: 'add-to-estimate',
-      saveConfigBtn: 'save-configuration',
-      saveVariantBtn: 'save-as-variant',
-      viewEstimateBtn: 'view-estimate'
+      // Buttons - usunięte, obsługiwane przez estimate-handler.js
+      // addToEstimateBtn: 'add-to-estimate',
+      // viewMyEstimatesBtn: 'view-my-estimates'
     };
     
     // Get all single elements
@@ -109,21 +107,21 @@ class FormHandler {
       this.triggerCallback('quantityChange', value);
     });
     
-    // Action buttons
-    const buttons = {
-      addToEstimateBtn: 'addToEstimate',
-      saveConfigBtn: 'saveConfiguration',
-      saveVariantBtn: 'saveVariant'
-    };
+    // Action buttons - usunięte, obsługiwane przez estimate-handler.js
+    // const buttons = {
+    //   addToEstimateBtn: 'addToEstimate',
+    //   saveConfigBtn: 'saveConfiguration',
+    //   saveVariantBtn: 'saveVariant'
+    // };
+    // 
+    // Object.entries(buttons).forEach(([key, event]) => {
+    //   UIHelpers.onClick(el[key], () => this.triggerCallback(event));
+    // });
     
-    Object.entries(buttons).forEach(([key, event]) => {
-      UIHelpers.onClick(el[key], () => this.triggerCallback(event));
-    });
-    
-    // View estimate button
-    UIHelpers.onClick(el.viewEstimateBtn, () => {
-      window.location.href = 'estimate-page.html';
-    });
+    // View estimate button - usunięte, obsługiwane przez estimate-handler.js
+    // UIHelpers.onClick(el.viewEstimateBtn, () => {
+    //   window.location.href = 'estimate-page.html';
+    // });
   }
 
   handleRadioChange(name, value) {
