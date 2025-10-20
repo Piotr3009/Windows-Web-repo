@@ -304,98 +304,98 @@ class CustomerDashboard {
     }
 
     // View order details
-    async viewOrderDetails(orderId) {
+    // View estimate details
+    async viewOrderDetails(estimateId) {
         try {
             const { data, error } = await supabaseClient
-                .from('orders')
+                .from('estimates')
                 .select(`
                     *,
-                    order_items (*),
-                    order_timeline (*)
+                    estimate_items (*)
                 `)
-                .eq('id', orderId)
+                .eq('id', estimateId)
                 .single();
 
             if (error) throw error;
 
             this.showOrderModal(data);
         } catch (error) {
-            console.error('Error loading order details:', error);
-            this.showError('Failed to load order details');
+            console.error('Error loading estimate details:', error);
+            this.showError('Failed to load estimate details');
         }
     }
 
     // Show order detail modal
-    showOrderModal(order) {
+    showOrderModal(estimate) {
         const modal = document.getElementById('order-modal');
         const content = document.getElementById('order-detail-content');
 
-        const itemsHTML = order.order_items.map(item => `
+        const itemsHTML = estimate.estimate_items?.map(item => `
             <div class="order-item-detail">
-                <h4>${item.window_type || 'Custom Window'}</h4>
+                <h4>Window ${item.window_number}</h4>
                 <div class="item-specs">
                     <p><strong>Dimensions:</strong> ${item.width}mm × ${item.height}mm</p>
-                    <p><strong>Glazing:</strong> ${item.glazing_type || 'Standard'}</p>
-                    <p><strong>Colour:</strong> ${item.colour || 'White'}</p>
-                    ${item.hardware ? `<p><strong>Hardware:</strong> ${item.hardware}</p>` : ''}
-                    <p class="item-price"><strong>Price:</strong> £${this.formatPrice(item.price)}</p>
+                    <p><strong>Frame:</strong> ${item.frame_type}</p>
+                    <p><strong>Glass:</strong> ${item.glass_type}</p>
+                    ${item.opening_type ? `<p><strong>Opening:</strong> ${item.opening_type}</p>` : ''}
+                    ${item.color_type === 'single' ? 
+                        `<p><strong>Color:</strong> ${item.color_single}</p>` : 
+                        `<p><strong>Interior:</strong> ${item.color_interior}<br><strong>Exterior:</strong> ${item.color_exterior}</p>`
+                    }
+                    ${item.upper_bars || item.lower_bars ? 
+                        `<p><strong>Bars:</strong> Upper: ${item.upper_bars || 'None'}, Lower: ${item.lower_bars || 'None'}</p>` : ''
+                    }
+                    ${item.horns ? `<p><strong>Horns:</strong> ${item.horns}</p>` : ''}
+                    ${item.pas24 ? `<p><strong>PAS24:</strong> Yes ✓</p>` : ''}
+                    <p><strong>Quantity:</strong> ${item.quantity}</p>
+                    <p class="item-price"><strong>Price:</strong> £${this.formatPrice(item.total_price)}</p>
                 </div>
             </div>
-        `).join('');
-
-        const timelineHTML = order.order_timeline?.length > 0 ? `
-            <div class="detail-timeline">
-                <h3>Order History</h3>
-                ${order.order_timeline.map(event => `
-                    <div class="timeline-event">
-                        <span class="event-date">${new Date(event.created_at).toLocaleString('en-GB')}</span>
-                        <span class="event-text">${event.status_change}</span>
-                        ${event.notes ? `<p class="event-notes">${event.notes}</p>` : ''}
-                    </div>
-                `).join('')}
-            </div>
-        ` : '';
+        `).join('') || '<p>No windows in this estimate</p>';
 
         content.innerHTML = `
-            <h2>Order #${order.order_number || order.id.substring(0, 8).toUpperCase()}</h2>
+            <h2>Estimate ${estimate.estimate_number || estimate.id.substring(0, 8).toUpperCase()}</h2>
             <div class="detail-status">
-                <span class="status-badge status-${order.status}">${this.getStatusConfig(order.status).label}</span>
+                <span class="status-badge status-${estimate.status}">${this.getStatusConfig(estimate.status).label}</span>
             </div>
             
+            ${estimate.project_name ? `
             <div class="detail-section">
-                <h3>Order Items</h3>
+                <h3>Project Information</h3>
+                <p><strong>Project:</strong> ${estimate.project_name}</p>
+                ${estimate.delivery_address ? `<p><strong>Address:</strong> ${estimate.delivery_address}</p>` : ''}
+                ${estimate.notes ? `<p><strong>Notes:</strong> ${estimate.notes}</p>` : ''}
+            </div>
+            ` : ''}
+            
+            <div class="detail-section">
+                <h3>Windows (${estimate.estimate_items?.length || 0})</h3>
                 ${itemsHTML}
             </div>
 
             <div class="detail-section">
-                <h3>Order Summary</h3>
-                <div class="summary-row">
-                    <span>Subtotal:</span>
-                    <span>£${this.formatPrice(order.total_price)}</span>
+                <h3>Estimate Summary</h3>
+                <div class="summary-row total">
+                    <span><strong>Total Price:</strong></span>
+                    <span><strong>£${this.formatPrice(estimate.total_price)}</strong></span>
                 </div>
-                ${order.deposit_amount ? `
+                ${estimate.valid_until ? `
                 <div class="summary-row">
-                    <span>Deposit Required:</span>
-                    <span class="${order.deposit_paid ? 'paid' : 'unpaid'}">
-                        £${this.formatPrice(order.deposit_amount)}
-                        ${order.deposit_paid ? '✓' : '⚠'}
-                    </span>
+                    <span>Valid Until:</span>
+                    <span>${new Date(estimate.valid_until).toLocaleDateString('en-GB')}</span>
                 </div>
                 ` : ''}
-                <div class="summary-row total">
-                    <span><strong>Total:</strong></span>
-                    <span><strong>£${this.formatPrice(order.total_price)}</strong></span>
-                </div>
             </div>
 
-            ${timelineHTML}
-
             <div class="modal-actions">
-                ${!order.deposit_paid && order.deposit_amount ? `
-                    <button class="btn" onclick="dashboard.payDeposit('${order.id}')">
-                        Pay Deposit
+                ${estimate.status === 'draft' ? `
+                    <button class="btn" onclick="dashboard.submitEstimate('${estimate.id}')">
+                        Submit for Quote
                     </button>
                 ` : ''}
+                <button class="btn btn-secondary" id="download-estimate-pdf">
+                    Download PDF
+                </button>
                 <button class="btn-secondary" onclick="dashboard.closeModal()">
                     Close
                 </button>
@@ -403,11 +403,64 @@ class CustomerDashboard {
         `;
 
         modal.style.display = 'block';
+        
+        // Attach PDF download listener
+        const pdfBtn = document.getElementById('download-estimate-pdf');
+        if (pdfBtn) {
+            pdfBtn.addEventListener('click', () => this.downloadEstimatePDF(estimate));
+        }
     }
 
     // Close modal
     closeModal() {
         document.getElementById('order-modal').style.display = 'none';
+    }
+
+    // Submit estimate for quote (change status from draft to sent)
+    async submitEstimate(estimateId) {
+        if (!confirm('Submit this estimate for a quote? Our team will review it and send you a formal quotation.')) {
+            return;
+        }
+
+        try {
+            const { error } = await supabaseClient
+                .from('estimates')
+                .update({ 
+                    status: 'sent',
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', estimateId);
+
+            if (error) throw error;
+
+            alert('Estimate submitted successfully! We will send you a quote shortly.');
+            this.closeModal();
+            await this.loadEstimates();
+        } catch (error) {
+            console.error('Error submitting estimate:', error);
+            this.showError('Failed to submit estimate');
+        }
+    }
+
+    // Download estimate as PDF
+    async downloadEstimatePDF(estimate) {
+        try {
+            // TODO: Implement PDF generation
+            // For now, show alert
+            alert('PDF download will be implemented soon.\n\nEstimate: ' + estimate.estimate_number + '\nProject: ' + estimate.project_name + '\nTotal: £' + this.formatPrice(estimate.total_price));
+            
+            // Placeholder for future implementation:
+            // const pdf = await this.generateEstimatePDF(estimate);
+            // const blob = new Blob([pdf], { type: 'application/pdf' });
+            // const url = window.URL.createObjectURL(blob);
+            // const a = document.createElement('a');
+            // a.href = url;
+            // a.download = `Estimate_${estimate.estimate_number}.pdf`;
+            // a.click();
+        } catch (error) {
+            console.error('Error downloading PDF:', error);
+            this.showError('Failed to download PDF');
+        }
     }
 
     // Place order (change status from saved to pending)
