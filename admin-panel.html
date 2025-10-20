@@ -158,6 +158,18 @@
     <h2>Add Ironmongery Product</h2>
     <form id="add-product-form">
       <div class="form-group">
+        <label>Color:</label>
+        <select id="product-color" required>
+          <option value="">-- Select Color --</option>
+          <option value="chrome">Chrome</option>
+          <option value="satin">Satin</option>
+          <option value="brass">Brass (Gold)</option>
+          <option value="antique-brass">Antique Brass</option>
+          <option value="black">Black</option>
+          <option value="white">White</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label>Category:</label>
         <select id="product-category" required>
           <option value="">-- Select Category --</option>
@@ -172,45 +184,12 @@
         <input type="text" id="product-name" required placeholder="e.g. Sash Lock PAS24">
       </div>
       <div class="form-group">
-        <label>Color:</label>
-        <select id="product-color" required>
-          <option value="">-- Select Color --</option>
-          <option value="chrome">Chrome</option>
-          <option value="satin">Satin</option>
-          <option value="brass">Brass (Gold)</option>
-          <option value="antique-brass">Antique Brass</option>
-          <option value="black">Black</option>
-          <option value="white">White</option>
-        </select>
-      </div>
-      <div class="form-group">
         <label>Price NET (£):</label>
         <input type="number" id="product-price-net" step="0.01" min="0" required placeholder="25.00">
       </div>
       <div class="form-group">
         <label>Price VAT (£):</label>
         <input type="number" id="product-price-vat" step="0.01" min="0" required placeholder="30.00">
-      </div>
-      <div class="form-group">
-        <label>Description:</label>
-        <textarea id="product-description" rows="3" placeholder="Product description"></textarea>
-      </div>
-      <div class="form-group">
-        <label>Upload Image:</label>
-        <input type="file" id="product-image" accept="image/*">
-      </div>
-      <div class="form-group-checkbox">
-        <label><input type="checkbox" id="product-pas24"> PAS24 Certified</label>
-        <label><input type="checkbox" id="product-recommended"> Recommended</label>
-        <label><input type="checkbox" id="product-mandatory"> Mandatory</label>
-      </div>
-      <div class="form-group" id="stopper-type-group" style="display: none;">
-        <label>Stopper Type:</label>
-        <select id="product-stopper-type">
-          <option value="">-- Select Type --</option>
-          <option value="stopper">Window Stopper</option>
-          <option value="weekes">Weekes Stop</option>
-        </select>
       </div>
       <button type="submit" class="btn-save">Add Product</button>
     </form>
