@@ -117,7 +117,7 @@ class EstimateManager {
     }
 
     // Dodaj okno do wyceny
-    async addWindowToEstimate(windowConfig, price) {
+    async addWindowToEstimate(windowConfig, price, estimateId = null) {
         try {
             // SPRAWDŹ CZY ZALOGOWANY
             const user = await getCurrentUser();
@@ -128,10 +128,12 @@ class EstimateManager {
                 return;
             }
             
-            // ZALOGOWANY - kontynuuj z bazą danych
-            if (!this.currentEstimate) {
-                // Nie ma aktualnej wyceny - pokaż modal tworzenia
-                this.showCreateEstimateModal();
+            // ZALOGOWANY - użyj przekazanego estimateId lub currentEstimate
+            const targetEstimateId = estimateId || this.currentEstimate?.id;
+            
+            if (!targetEstimateId) {
+                // Nie ma estimate - to nie powinno się zdarzyć
+                alert('Please select or create an estimate first');
                 return;
             }
 
@@ -139,7 +141,7 @@ class EstimateManager {
             const { data: items, error: countError } = await supabaseClient
                 .from('estimate_items')
                 .select('window_number')
-                .eq('estimate_id', this.currentEstimate.id)
+                .eq('estimate_id', targetEstimateId)
                 .order('window_number', { ascending: false })
                 .limit(1);
 
@@ -156,7 +158,7 @@ class EstimateManager {
             const { data: item, error: itemError } = await supabaseClient
                 .from('estimate_items')
                 .insert([{
-                    estimate_id: this.currentEstimate.id,
+                    estimate_id: targetEstimateId,
                     window_number: windowNumber,
                     width: windowConfig.width,
                     height: windowConfig.height,
@@ -205,10 +207,22 @@ class EstimateManager {
             if (itemError) throw itemError;
 
             console.log('Window added:', windowNumber);
-            this.showToast(`✅ ${windowNumber} added to ${this.currentEstimate.estimate_number}`, 'success');
+            
+            // Pobierz nazwę estimate dla wiadomości
+            const { data: estimate } = await supabaseClient
+                .from('estimates')
+                .select('estimate_number, project_name')
+                .eq('id', targetEstimateId)
+                .single();
+            
+            if (estimate) {
+                this.showToast(`✅ ${windowNumber} added to ${estimate.estimate_number} (${estimate.project_name})`, 'success');
+            }
 
-            // Odśwież estimate (total_price zmieni się przez trigger)
-            await this.refreshCurrentEstimate();
+            // Odśwież estimate selector żeby pokazać zaktualizowaną liczbę okien
+            if (window.estimateSelectorManager) {
+                await window.estimateSelectorManager.loadEstimates();
+            }
 
             return item;
         } catch (error) {
@@ -287,7 +301,18 @@ class EstimateManager {
                 const windowConfig = this.getCurrentWindowConfig();
                 const price = this.getCurrentPrice();
 
-                await this.addWindowToEstimate(windowConfig, price);
+                // Pobierz wybrany estimate z dropdowna
+                if (window.estimateSelectorManager) {
+                    const estimateId = await window.estimateSelectorManager.getOrCreateEstimate();
+                    if (!estimateId) {
+                        console.log('No estimate selected or creation cancelled');
+                        return;
+                    }
+                    await this.addWindowToEstimate(windowConfig, price, estimateId);
+                } else {
+                    // Fallback - użyj starej logiki
+                    await this.addWindowToEstimate(windowConfig, price);
+                }
             });
         }
 
