@@ -333,36 +333,71 @@ class CustomerDashboard {
         const modal = document.getElementById('order-modal');
         const content = document.getElementById('order-detail-content');
 
-        const itemsHTML = estimate.estimate_items?.map(item => `
+        // Color to RAL mapping
+        const colorRAL = {
+            'Pure White': 'RAL 9016',
+            'Jet Black': 'RAL 9005',
+            'Anthracite Grey': 'RAL 7016',
+            'Olive Green': 'RAL 6003',
+            'Off-White': 'RAL 9010',
+            'Cream': 'RAL 9001',
+            'Burgundy Red': 'RAL 3005',
+            'Royal Blue': 'RAL 5002'
+        };
+
+        const itemsHTML = estimate.estimate_items?.map(item => {
+            // Parse ironmongery if it's a JSON string
+            let ironmongeryDisplay = '';
+            if (item.ironmongery) {
+                try {
+                    const ironData = typeof item.ironmongery === 'string' ? JSON.parse(item.ironmongery) : item.ironmongery;
+                    if (ironData && ironData.products) {
+                        const productsList = Object.values(ironData.products).map(p => 
+                            `${p.quantity}x ${p.product.name}`
+                        ).join(', ');
+                        ironmongeryDisplay = productsList;
+                    }
+                } catch(e) {
+                    ironmongeryDisplay = typeof item.ironmongery === 'string' ? item.ironmongery : JSON.stringify(item.ironmongery);
+                }
+            }
+
+            // Get measurement type display text
+            const measurementDisplay = item.measurement_type === 'brick-to-brick' ? 'Brick-to-Brick' : 
+                                      item.measurement_type === 'box-to-box' ? 'Box-to-Box' : 
+                                      item.measurement_type === 'sight-size' ? 'Sight Size' : 
+                                      'Framed Dimension';
+
+            return `
             <div class="order-item-detail">
                 <h4>Window ${item.window_number}</h4>
                 <div class="item-specs">
-                    <p><strong>Dimensions:</strong> ${item.width}mm × ${item.height}mm (${item.measurement_type || 'brick-to-brick'})</p>
-                    ${item.original_width && item.original_height ? 
+                    <p><strong>${measurementDisplay}:</strong> ${item.width}mm × ${item.height}mm</p>
+                    ${item.original_width && item.original_height && (item.original_width !== item.width || item.original_height !== item.height) ? 
                         `<p><strong>Original Dimensions:</strong> ${item.original_width}mm × ${item.original_height}mm</p>` : ''
                     }
-                    <p><strong>Frame:</strong> ${item.frame_type}</p>
-                    <p><strong>Glass:</strong> ${item.glass_type}</p>
+                    <p><strong>Frame:</strong> ${item.frame_type} (165mm deep)</p>
+                    <p><strong>Glass:</strong> ${item.glass_type}${item.glass_type === 'double' ? ' (standard 4x16x4mm, U-value 1.4)' : ''}</p>
                     ${item.glass_spec ? `<p><strong>Glass Spec:</strong> ${item.glass_spec}</p>` : ''}
-                    ${item.glass_finish ? `<p><strong>Glass Finish:</strong> ${item.glass_finish}</p>` : ''}
+                    ${item.glass_finish && item.glass_finish !== 'clear' ? `<p><strong>Glass Finish:</strong> ${item.glass_finish}</p>` : ''}
                     ${item.frosted_location ? `<p><strong>Frosted Location:</strong> ${item.frosted_location}</p>` : ''}
                     ${item.opening_type ? `<p><strong>Opening:</strong> ${item.opening_type}</p>` : ''}
                     ${item.color_type === 'single' ? 
-                        `<p><strong>Color:</strong> ${item.color_single}</p>` : 
-                        `<p><strong>Interior:</strong> ${item.color_interior}<br><strong>Exterior:</strong> ${item.color_exterior}${item.custom_exterior_color ? ' (' + item.custom_exterior_color + ')' : ''}</p>`
+                        `<p><strong>Color:</strong> ${item.color_single}${colorRAL[item.color_single] ? ' (' + colorRAL[item.color_single] + ')' : ''}</p>` : 
+                        `<p><strong>Interior:</strong> ${item.color_interior}${colorRAL[item.color_interior] ? ' (' + colorRAL[item.color_interior] + ')' : ''}<br><strong>Exterior:</strong> ${item.color_exterior}${colorRAL[item.color_exterior] ? ' (' + colorRAL[item.color_exterior] + ')' : ''}${item.custom_exterior_color ? ' [Custom: ' + item.custom_exterior_color + ']' : ''}</p>`
                     }
                     ${item.upper_bars || item.lower_bars ? 
-                        `<p><strong>Bars:</strong> Upper: ${item.upper_bars ? JSON.stringify(item.upper_bars) : 'None'}, Lower: ${item.lower_bars ? JSON.stringify(item.lower_bars) : 'None'}</p>` : ''
+                        `<p><strong>Georgian Bars:</strong> Upper: ${item.upper_bars || 'None'}, Lower: ${item.lower_bars || 'None'}</p>` : ''
                     }
                     ${item.horns ? `<p><strong>Horns:</strong> ${item.horns}</p>` : ''}
-                    ${item.ironmongery ? `<p><strong>Ironmongery:</strong> ${typeof item.ironmongery === 'string' ? item.ironmongery : JSON.stringify(item.ironmongery)}</p>` : ''}
+                    ${ironmongeryDisplay ? `<p><strong>Ironmongery:</strong> ${ironmongeryDisplay}</p>` : ''}
                     ${item.ironmongery_finish ? `<p><strong>Ironmongery Finish:</strong> ${item.ironmongery_finish}</p>` : ''}
                     ${item.pas24 ? `<p><strong>PAS24:</strong> Yes ✓</p>` : ''}
                     <p><strong>Quantity:</strong> ${item.quantity}</p>
                     <p class="item-price"><strong>Price:</strong> £${this.formatPrice(item.total_price)}</p>
                 </div>
             </div>
-        `).join('') || '<p>No windows in this estimate</p>';
+        `}).join('') || '<p>No windows in this estimate</p>';
 
         content.innerHTML = `
             <h2>Estimate ${estimate.estimate_number || estimate.id.substring(0, 8).toUpperCase()}</h2>
