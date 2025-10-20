@@ -137,22 +137,29 @@ class EstimateManager {
                 return;
             }
 
-            // Pobierz liczbę okien w tej wycenie
+            // Pobierz wszystkie window_numbers w tej wycenie
             const { data: items, error: countError } = await supabaseClient
                 .from('estimate_items')
                 .select('window_number')
-                .eq('estimate_id', targetEstimateId)
-                .order('window_number', { ascending: false })
-                .limit(1);
+                .eq('estimate_id', targetEstimateId);
 
             if (countError) throw countError;
 
             // Wygeneruj numer okna (W1, W2, W3...)
             let windowNumber = 'W1';
             if (items && items.length > 0) {
-                const lastNumber = parseInt(items[0].window_number.substring(1));
-                windowNumber = `W${lastNumber + 1}`;
+                // Wyciągnij numery i znajdź maksymalny
+                const numbers = items
+                    .map(item => parseInt(item.window_number.substring(1)))
+                    .filter(n => !isNaN(n));
+                
+                if (numbers.length > 0) {
+                    const maxNumber = Math.max(...numbers);
+                    windowNumber = `W${maxNumber + 1}`;
+                }
             }
+
+            console.log('Generated window number:', windowNumber);
 
             // Zapisz okno
             const { data: item, error: itemError } = await supabaseClient
@@ -456,35 +463,18 @@ class EstimateManager {
 
     // Aktualizuj UI
     updateUI() {
-        // Pokaż aktualną wycenę w nagłówku
+        // Pokaż aktualną wycenę w nagłówku (jeśli istnieje element)
         const estimateInfo = document.getElementById('current-estimate-info');
-        if (estimateInfo) {
-            if (this.currentEstimate) {
-                estimateInfo.innerHTML = `
-                    <strong>Current Estimate:</strong> ${this.currentEstimate.estimate_number} 
-                    - ${this.currentEstimate.project_name}
-                    <span style="color: #666; margin-left: 10px;">Total: £${this.currentEstimate.total_price || 0}</span>
-                `;
-                estimateInfo.style.display = 'block';
-            } else {
-                estimateInfo.innerHTML = `
-                    <span style="color: #999;">No active estimate. Click "Create New Estimate" to start.</span>
-                `;
-                estimateInfo.style.display = 'block';
-            }
+        if (estimateInfo && this.currentEstimate) {
+            estimateInfo.innerHTML = `
+                <strong>Current Estimate:</strong> ${this.currentEstimate.estimate_number} 
+                - ${this.currentEstimate.project_name}
+                <span style="color: #666; margin-left: 10px;">Total: £${this.currentEstimate.total_price || 0}</span>
+            `;
+            estimateInfo.style.display = 'block';
         }
-
-        // Zmień tekst przycisku "Add to Estimate"
-        const addBtn = document.getElementById('add-to-estimate');
-        if (addBtn) {
-            if (this.currentEstimate) {
-                addBtn.textContent = `Add to ${this.currentEstimate.estimate_number}`;
-                addBtn.disabled = false;
-            } else {
-                addBtn.textContent = 'Create Estimate First';
-                addBtn.disabled = false; // Po kliknięciu pokaże modal
-            }
-        }
+        
+        // NIE zmieniamy button text - zarządza nim estimate-selector.js
     }
 
     // Toast notifications
