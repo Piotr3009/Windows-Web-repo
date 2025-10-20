@@ -254,6 +254,9 @@ class CustomerDashboard {
                             Place Order
                         </button>
                     ` : ''}
+                    <button class="btn-danger" onclick="dashboard.deleteEstimate('${order.id}')">
+                        Delete
+                    </button>
                 </div>
             </div>
         `;
@@ -414,6 +417,37 @@ class CustomerDashboard {
     // Close modal
     closeModal() {
         document.getElementById('order-modal').style.display = 'none';
+    }
+
+    // Delete estimate
+    async deleteEstimate(estimateId) {
+        if (!confirm('Are you sure you want to delete this estimate? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            // First delete estimate_items (because of foreign key)
+            const { error: itemsError } = await supabaseClient
+                .from('estimate_items')
+                .delete()
+                .eq('estimate_id', estimateId);
+
+            if (itemsError) throw itemsError;
+
+            // Then delete the estimate
+            const { error: estimateError } = await supabaseClient
+                .from('estimates')
+                .delete()
+                .eq('id', estimateId);
+
+            if (estimateError) throw estimateError;
+
+            this.showSuccessMessage('Estimate deleted successfully');
+            await this.loadEstimates();
+        } catch (error) {
+            console.error('Error deleting estimate:', error);
+            this.showError('Failed to delete estimate');
+        }
     }
 
     // Submit estimate for quote (change status from draft to sent)
