@@ -82,14 +82,14 @@ h1, h2, h3, h4, h5, h6 {
 .header {
   background-color: var(--primary-color);
   text-align: center;
-  padding: 40px 20px;
+  padding: 30px 20px;
   color: var(--secondary-color);
 }
 
 .header h1 {
   font-family: 'Playfair Display', serif;
-  font-size: 2.5rem;
-  margin-bottom: 10px;
+  font-size: 2rem;
+  margin-bottom: 8px;
   color: var(--secondary-color);
 }
 
@@ -185,30 +185,35 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'Playfair Display', serif;
   color: var(--primary-color);
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
   font-size: 1.5rem;
   border-bottom: 2px solid var(--secondary-color);
-  padding-bottom: 10px;
+  padding-bottom: 7px;
 }
 
 .spec-section {
-  margin-bottom: 15px;
-  padding: 10px;
+  margin-bottom: 10px;
+  padding: 7px 10px;
   background-color: var(--light-gray);
   border-radius: var(--radius);
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.spec-section:last-child {
+  border-bottom: none;
 }
 
 .spec-section h4 {
   color: var(--primary-color);
   font-size: 1.1rem;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
   font-weight: 600;
 }
 
 .spec-item {
   display: flex;
   justify-content: space-between;
-  padding: 5px 0;
+  padding: 3px 0;
   font-size: 0.95rem;
 }
 
@@ -324,7 +329,8 @@ h1, h2, h3, h4, h5, h6 {
 .config-section h3 {
   font-family: 'Playfair Display', serif;
   color: var(--primary-color);
-  margin-bottom: 15px;
+  margin-bottom: 12px;
+  font-size: 1.4rem;
 }
 
 /* Form Elements */
@@ -346,6 +352,7 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
   font-family: 'Raleway', sans-serif;
+  font-size: 0.9rem;
   background-color: var(--white);
   transition: border-color 0.3s;
 }
@@ -468,7 +475,7 @@ h1, h2, h3, h4, h5, h6 {
   background-color: var(--primary-color);
   color: var(--white);
   border: none;
-  padding: 12px 25px;
+  padding: 11px 25px;
   border-radius: var(--radius);
   cursor: pointer;
   font-family: 'Raleway', sans-serif;
@@ -476,7 +483,7 @@ h1, h2, h3, h4, h5, h6 {
   text-transform: uppercase;
   letter-spacing: 1px;
   transition: var(--transition);
-  margin-top: 20px;
+  margin-top: 15px;
   width: 100%;
   position: relative;
   overflow: hidden;
@@ -497,9 +504,9 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn-apply {
   background-color: var(--primary-color);
-  margin-top: 15px;
+  margin-top: 12px;
   font-size: 0.9rem;
-  padding: 10px 20px;
+  padding: 9px 20px;
 }
 
 .btn-apply:hover {

@@ -376,7 +376,7 @@ class CustomerDashboard {
                     ${item.original_width && item.original_height && (item.original_width !== item.width || item.original_height !== item.height) ? 
                         `<p><strong>Original Dimensions:</strong> ${item.original_width}mm × ${item.original_height}mm</p>` : ''
                     }
-                    <p><strong>Frame:</strong> ${item.frame_type} (165mm deep)</p>
+                    <p><strong>Frame:</strong> ${item.frame_type} (164mm deep)</p>
                     <p><strong>Glass:</strong> ${item.glass_type}${item.glass_type === 'double' ? ' (standard 4x16x4mm, U-value 1.4)' : ''}</p>
                     ${item.glass_spec ? `<p><strong>Glass Spec:</strong> ${item.glass_spec}</p>` : ''}
                     ${item.glass_finish && item.glass_finish !== 'clear' ? `<p><strong>Glass Finish:</strong> ${item.glass_finish}</p>` : ''}
