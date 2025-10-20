@@ -12,23 +12,24 @@
 .admin-header {
   background: var(--admin-primary);
   color: white;
-  padding: 40px 20px;
+  padding: 25px 20px;
   text-align: center;
 }
 
 .admin-header h1 {
-  margin: 0 0 10px 0;
-  font-size: 2rem;
+  margin: 0 0 5px 0;
+  font-size: 1.6rem;
 }
 
 .admin-header p {
   margin: 0;
   opacity: 0.9;
+  font-size: 0.9rem;
 }
 
 .admin-container {
   max-width: 1400px;
-  margin: 40px auto;
+  margin: 20px auto;
   padding: 0 20px;
 }
 
@@ -37,14 +38,14 @@
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  margin-bottom: 30px;
+  margin-bottom: 15px;
   overflow: hidden;
 }
 
 .section-header {
   background: var(--admin-bg);
   border-bottom: 2px solid var(--admin-border);
-  padding: 20px;
+  padding: 12px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -52,34 +53,51 @@
 
 .section-header h2 {
   margin: 0;
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   color: var(--admin-primary);
 }
 
 .section-content {
-  padding: 30px;
+  padding: 20px;
+}
+
+/* Form Groups - 2 column grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.form-grid .form-group {
+  margin-bottom: 0;
 }
 
 /* Form Groups */
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
   font-weight: 600;
   color: var(--admin-primary);
+  font-size: 0.9rem;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
   width: 100%;
-  padding: 10px;
+  padding: 8px;
   border: 1px solid var(--admin-border);
+  font-size: 0.9rem;
   border-radius: 4px;
   font-size: 1rem;
+}
+
+.form-group input[type="number"] {
+  max-width: 150px;
 }
 
 .form-group-inline {

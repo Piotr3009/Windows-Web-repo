@@ -12,15 +12,14 @@
 </head>
 <body>
 
-<nav class="navigation">
-  <div class="nav-container">
-    <a href="index.html" class="logo">Skylon T&G</a>
-    <ul class="nav-links">
-      <li><a href="index.html">Home</a></li>
-      <li><a href="build-your-own-windows.html">Configurator</a></li>
-      <li><a href="admin-panel.html" class="active">Admin Panel</a></li>
-    </ul>
-  </div>
+<nav class="menu-bar" aria-label="Main Navigation">
+  <a href="index.html"><button>Home</button></a>
+  <a href="build-your-own-windows.html"><button class="button-with-subtitle">
+    Build Your Own <strong>Windows</strong><br /><small>Create New Estimate</small>
+  </button></a>
+  <a href="customer-dashboard.html"><button>My Dashboard</button></a>
+  <a href="admin-panel.html"><button class="active">Admin Panel</button></a>
+  <a href="#" id="logout-btn"><button>Logout</button></a>
 </nav>
 
 <header class="admin-header">
@@ -50,13 +49,15 @@
       <h2>Section 5: Glass Type</h2>
     </div>
     <div class="section-content">
-      <div class="form-group">
-        <label for="triple-price">Triple glazing price per m² (£):</label>
-        <input type="number" id="triple-price" step="0.01" min="0" placeholder="50.00">
-      </div>
-      <div class="form-group">
-        <label for="passive-price">Passive glass price per m² (£):</label>
-        <input type="number" id="passive-price" step="0.01" min="0" placeholder="100.00">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="triple-price">Triple glazing price per m² (£):</label>
+          <input type="number" id="triple-price" step="0.01" min="0" placeholder="50.00">
+        </div>
+        <div class="form-group">
+          <label for="passive-price">Passive glass price per m² (£):</label>
+          <input type="number" id="passive-price" step="0.01" min="0" placeholder="100.00">
+        </div>
       </div>
       <button class="btn-save" onclick="AdminController.saveGlassPrices()">Save</button>
     </div>
@@ -234,7 +235,22 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
 <script src="js/admin-controller.js"></script>
+<script>
+// Logout handler
+document.addEventListener('DOMContentLoaded', () => {
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await supabaseClient.auth.signOut();
+      window.location.href = 'index.html';
+    });
+  }
+});
+</script>
 
 </body>
 </html>
