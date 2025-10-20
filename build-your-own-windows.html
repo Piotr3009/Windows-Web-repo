@@ -43,20 +43,23 @@
 
 .estimate-selector-container {
     display: flex;
+    flex-direction: column;
     gap: 10px;
-    align-items: center;
 }
 
 .estimate-dropdown {
-    flex: 1;
+    width: 100%;
     padding: 12px 15px;
-    font-size: 16px;
+    font-size: 0.85rem;
     border: 2px solid var(--primary-color);
     border-radius: 5px;
     background: white;
     font-family: 'Raleway', sans-serif;
     cursor: pointer;
     transition: all 0.3s;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .estimate-dropdown:hover {
@@ -82,8 +85,9 @@
 }
 
 .btn-small {
-    padding: 10px 15px;
-    font-size: 18px;
+    padding: 9px 15px;
+    font-size: 16px;
+    width: 100%;
 }
 
 /* New Estimate Modal Styles */
