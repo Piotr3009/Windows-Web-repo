@@ -163,7 +163,6 @@ const AdminController = {
     const name = document.getElementById('product-name').value;
     const color = document.getElementById('product-color').value;
     const priceNet = parseFloat(document.getElementById('product-price-net').value);
-    const priceVat = parseFloat(document.getElementById('product-price-vat').value);
     const description = document.getElementById('product-description').value;
     const isPAS24 = document.getElementById('product-pas24').checked;
     const recommended = document.getElementById('product-recommended').checked;
@@ -171,7 +170,7 @@ const AdminController = {
     const imageFile = document.getElementById('product-image').files[0];
 
     // Validation
-    if (!category || !name || !color || !priceNet || !priceVat) {
+    if (!category || !name || !color || !priceNet) {
       alert('Please fill all required fields');
       return;
     }
@@ -196,7 +195,7 @@ const AdminController = {
         category,
         name,
         color,
-        prices: { net: priceNet, vat: priceVat },
+        prices: { net: priceNet, vat: 0 },
         description,
         isPAS24,
         recommended,
@@ -216,7 +215,7 @@ const AdminController = {
           category,
           name,
           color,
-          prices: { net: priceNet, vat: priceVat },
+          prices: { net: priceNet, vat: 0 },
           description,
           isPAS24,
           recommended,
@@ -232,7 +231,7 @@ const AdminController = {
         category,
         name,
         color,
-        prices: { net: priceNet, vat: priceVat },
+        prices: { net: priceNet, vat: 0 },
         description,
         isPAS24,
         recommended,
@@ -281,7 +280,7 @@ const AdminController = {
     const products = JSON.parse(localStorage.getItem(this.STORAGE_KEYS.IRONMONGERY_PRODUCTS) || '[]');
 
     if (products.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No products added yet</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No products added yet</td></tr>';
       return;
     }
 
@@ -292,7 +291,6 @@ const AdminController = {
         <td>${product.name}</td>
         <td>${this.getColorName(product.color)}</td>
         <td>£${product.prices.net.toFixed(2)}</td>
-        <td>£${product.prices.vat.toFixed(2)}</td>
         <td>
           <button class="btn-edit" onclick="AdminController.editProduct('${product.id}')">Edit</button>
           <button class="btn-delete" onclick="AdminController.deleteProduct('${product.id}')">Delete</button>
@@ -337,7 +335,6 @@ const AdminController = {
     document.getElementById('product-name').value = product.name;
     document.getElementById('product-color').value = product.color;
     document.getElementById('product-price-net').value = product.prices.net;
-    document.getElementById('product-price-vat').value = product.prices.vat;
     document.getElementById('product-description').value = product.description || '';
     document.getElementById('product-pas24').checked = product.isPAS24 || false;
     document.getElementById('product-recommended').checked = product.recommended || false;

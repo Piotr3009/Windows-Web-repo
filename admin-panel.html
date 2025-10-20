@@ -110,7 +110,6 @@
               <th>Name</th>
               <th>Color</th>
               <th>Price (NET)</th>
-              <th>Price (VAT)</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -184,12 +183,42 @@
         <input type="text" id="product-name" required placeholder="e.g. Sash Lock PAS24">
       </div>
       <div class="form-group">
+        <label>Description:</label>
+        <textarea id="product-description" placeholder="Optional description"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Product Image:</label>
+        <input type="file" id="product-image" accept="image/*">
+      </div>
+      <div class="form-group">
         <label>Price NET (£):</label>
         <input type="number" id="product-price-net" step="0.01" min="0" required placeholder="25.00">
       </div>
+      <div class="form-group" id="stopper-type-group" style="display: none;">
+        <label>Stopper Type:</label>
+        <select id="product-stopper-type">
+          <option value="">-- Select Type --</option>
+          <option value="magnetic">Magnetic</option>
+          <option value="traditional">Traditional</option>
+        </select>
+      </div>
       <div class="form-group">
-        <label>Price VAT (£):</label>
-        <input type="number" id="product-price-vat" step="0.01" min="0" required placeholder="30.00">
+        <label>
+          <input type="checkbox" id="product-pas24">
+          PAS24 Certified
+        </label>
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="product-recommended">
+          Recommended
+        </label>
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="product-mandatory">
+          Mandatory
+        </label>
       </div>
       <button type="submit" class="btn-save">Add Product</button>
     </form>
