@@ -21,7 +21,7 @@ body {
   background-color: var(--white);
   color: var(--text-color);
   line-height: 1.0;
-  padding-top: 140px;
+  padding-top: 170px;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -121,16 +121,16 @@ a:hover {
 /* Menu Bar - FIXED */
 .menu-bar {
   position: fixed;
-  top: 110px;
+  top: 95px;
   left: 0;
   right: 0;
   z-index: 999;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 9px;
+  gap: 15px;
   background-color: var(--white);
-  padding: 12px 6px;
+  padding: 20px 10px;
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -143,14 +143,14 @@ a:hover {
   background-color: transparent;
   border: 2px solid var(--primary-color);
   color: var(--primary-color);
-  padding: 6px 10px;
+  padding: 10px 16px;
   border-radius: 5px;
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
   width: 100%;
-  line-height: 1.1;
+  line-height: 1.3;
 }
 
 .menu-bar button:hover {
@@ -169,13 +169,13 @@ a:hover {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 5px 7px;
+  padding: 8px 12px;
   text-align: center;
-  line-height: 1.0;
+  line-height: 1.3;
 }
 
 .button-with-subtitle small {
-  font-size: 0.64rem;
+  font-size: 0.8rem;
   opacity: 0.8;
 }
 
@@ -312,13 +312,13 @@ a:hover {
 /* Responsive */
 @media (max-width: 768px) {
   body {
-    padding-top: 170px;
+    padding-top: 200px;
   }
 
   .menu-bar {
     flex-direction: column;
     align-items: center;
-    top: 120px;
+    top: 100px;
   }
 
   .menu-bar a {
