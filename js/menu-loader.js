@@ -31,14 +31,16 @@ class MenuLoader {
     async configureMenu() {
         // Sprawdź czy użytkownik jest zalogowany i czy jest adminem
         const user = await this.getCurrentUser();
-        const adminLink = document.getElementById('admin-link');
+        const adminPanelLink = document.getElementById('admin-panel-link');
+        const adminDashboardLink = document.getElementById('admin-dashboard-link');
         
-        if (user && adminLink) {
+        if (user) {
             // Sprawdź rolę użytkownika
             const isAdmin = await this.checkIfAdmin(user.id);
             
             if (isAdmin) {
-                adminLink.style.display = 'inline-block';
+                if (adminPanelLink) adminPanelLink.style.display = 'inline-block';
+                if (adminDashboardLink) adminDashboardLink.style.display = 'inline-block';
             }
         }
 
