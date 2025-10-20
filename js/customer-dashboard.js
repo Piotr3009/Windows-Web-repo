@@ -23,7 +23,7 @@ class CustomerDashboard {
         await this.importLocalStorageEstimates();
         
         await this.loadCustomerData();
-        await this.loadOrders();
+        await this.loadEstimates();  // ← Zmienione z loadOrders
         this.attachEventListeners();
     }
 
@@ -38,10 +38,19 @@ class CustomerDashboard {
 
             console.log(`Found ${savedEstimates.length} estimates in localStorage, importing...`);
 
+            // Najpierw pobierz customer_id
+            const { data: customer, error: customerError } = await supabaseClient
+                .from('customers')
+                .select('id')
+                .eq('user_id', this.currentUser.id)
+                .single();
+
+            if (customerError) throw customerError;
+
             // Convert each estimate to order format
             const orders = savedEstimates.map(estimate => ({
-                customer_id: this.currentUser.id,
-                status: 'saved', // Zmienione z 'estimate' na 'saved'
+                customer_id: customer.id,  // ← Używa customer.id!
+                status: 'saved',
                 total_price: estimate.price || estimate.total_price || 0,
                 window_spec: estimate,
                 created_at: estimate.timestamp || new Date().toISOString()
@@ -105,6 +114,7 @@ class CustomerDashboard {
             if (error) throw error;
 
             this.customerData = data;
+            console.log('Customer data loaded:', data);  // Debug
             this.updateCustomerInfo();
         } catch (error) {
             console.error('Error loading customer data:', error);
@@ -127,40 +137,45 @@ class CustomerDashboard {
             memberSince.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
     }
 
-    // Load orders from database
-    async loadOrders() {
+    // Load estimates from database
+    async loadEstimates() {
         try {
+            // Sprawdź czy mamy customer data
+            if (!this.customerData || !this.customerData.id) {
+                console.error('Customer data not loaded yet');
+                return;
+            }
+
             const { data, error } = await supabaseClient
-                .from('orders')
+                .from('estimates')
                 .select(`
                     *,
-                    order_items (*)
+                    estimate_items (*)
                 `)
-                .eq('customer_id', this.currentUser.id)
+                .eq('customer_id', this.customerData.id)
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
 
-            this.orders = data || [];
+            console.log('Estimates loaded:', data);  // Debug
+            this.orders = data || [];  // Używamy tej samej zmiennej dla kompatybilności z resztą kodu
             this.updateStats();
             this.renderOrders();
         } catch (error) {
-            console.error('Error loading orders:', error);
-            this.showError('Failed to load orders');
+            console.error('Error loading estimates:', error);
+            this.showError('Failed to load estimates');
         }
     }
 
     // Update statistics
     updateStats() {
-        const estimates = this.orders.filter(o => o.status === 'saved').length;
-        const activeOrders = this.orders.filter(o => 
-            ['pending', 'confirmed', 'in_production'].includes(o.status)
-        ).length;
-        const completed = this.orders.filter(o => o.status === 'completed').length;
+        const drafts = this.orders.filter(o => o.status === 'draft').length;
+        const sent = this.orders.filter(o => o.status === 'sent').length;
+        const approved = this.orders.filter(o => o.status === 'approved').length;
 
-        document.getElementById('stat-estimates').textContent = estimates;
-        document.getElementById('stat-orders').textContent = activeOrders;
-        document.getElementById('stat-completed').textContent = completed;
+        document.getElementById('stat-estimates').textContent = drafts + sent;  // Draft + Sent = Total Estimates
+        document.getElementById('stat-orders').textContent = approved;  // Approved = Ready for Production
+        document.getElementById('stat-completed').textContent = this.orders.filter(o => o.status === 'ordered').length;  // Ordered
     }
 
     // Render orders list
@@ -194,13 +209,13 @@ class CustomerDashboard {
     renderOrderCard(order) {
         const statusConfig = this.getStatusConfig(order.status);
         const createdDate = new Date(order.created_at).toLocaleDateString('en-GB');
-        const itemCount = order.order_items?.length || 0;
+        const itemCount = order.estimate_items?.length || 0;
 
         return `
             <div class="order-card" data-order-id="${order.id}">
                 <div class="order-header">
                     <div>
-                        <h3>Order #${order.order_number || order.id.substring(0, 8).toUpperCase()}</h3>
+                        <h3>Estimate #${order.estimate_number || order.id.substring(0, 8).toUpperCase()}</h3>
                         <p class="order-date">Created: ${createdDate}</p>
                     </div>
                     <span class="status-badge status-${order.status}">${statusConfig.label}</span>
@@ -209,7 +224,7 @@ class CustomerDashboard {
                 <div class="order-body">
                     <div class="order-info">
                         <div class="info-row">
-                            <span class="info-label">Items:</span>
+                            <span class="info-label">Windows:</span>
                             <span class="info-value">${itemCount} window${itemCount !== 1 ? 's' : ''}</span>
                         </div>
                         <div class="info-row">
@@ -271,14 +286,13 @@ class CustomerDashboard {
     // Get status configuration
     getStatusConfig(status) {
         const configs = {
-            saved: { label: 'Saved Estimate', color: '#6c757d' },
-            pending: { label: 'Pending Approval', color: '#ffc107' },
-            confirmed: { label: 'Confirmed', color: '#17a2b8' },
-            in_production: { label: 'In Production', color: '#007bff' },
-            completed: { label: 'Completed', color: '#28a745' },
+            draft: { label: 'Draft', color: '#6c757d' },
+            sent: { label: 'Sent to Customer', color: '#17a2b8' },
+            approved: { label: 'Approved', color: '#28a745' },
+            ordered: { label: 'In Production', color: '#007bff' },
             cancelled: { label: 'Cancelled', color: '#dc3545' }
         };
-        return configs[status] || configs.saved;
+        return configs[status] || configs.draft;
     }
 
     // Format price
