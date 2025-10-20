@@ -11,23 +11,38 @@ class AdminPanel {
     }
 
     async init() {
-        // Check if user is admin
-        const user = await getCurrentUser();
-        if (!user) {
-            window.location.href = 'index.html';
-            return;
-        }
+        try {
+            console.log('Admin Panel initializing...');
+            
+            // Check if user is admin
+            const user = await getCurrentUser();
+            console.log('Current user:', user);
+            
+            if (!user) {
+                console.log('No user logged in, redirecting to index');
+                window.location.href = 'index.html';
+                return;
+            }
 
-        const isAdminUser = await isAdmin();
-        if (!isAdminUser) {
-            alert('Access denied. Admin privileges required.');
-            window.location.href = 'index.html';
-            return;
-        }
+            const isAdminUser = await isAdmin();
+            console.log('Is admin:', isAdminUser);
+            
+            if (!isAdminUser) {
+                alert('Access denied. Admin privileges required.');
+                window.location.href = 'index.html';
+                return;
+            }
 
-        this.currentUser = user;
-        await this.loadDashboardData();
-        this.attachEventListeners();
+            this.currentUser = user;
+            console.log('Loading dashboard data...');
+            await this.loadDashboardData();
+            console.log('Dashboard data loaded, attaching listeners...');
+            this.attachEventListeners();
+            console.log('Admin Panel initialized successfully');
+        } catch (error) {
+            console.error('Error initializing admin panel:', error);
+            alert('Error loading admin panel: ' + error.message);
+        }
     }
 
     // Attach event listeners
@@ -122,40 +137,59 @@ class AdminPanel {
     // Load statistics
     async loadStats() {
         try {
+            console.log('Loading stats...');
+            
             // Total customers
-            const { count: customersCount } = await supabaseClient
+            const { count: customersCount, error: customersError } = await supabaseClient
                 .from('customers')
                 .select('*', { count: 'exact', head: true });
             
+            if (customersError) {
+                console.error('Error loading customers count:', customersError);
+            }
             document.getElementById('total-customers').textContent = customersCount || 0;
+            console.log('Customers count:', customersCount);
 
             // Total estimates
-            const { count: estimatesCount } = await supabaseClient
+            const { count: estimatesCount, error: estimatesError } = await supabaseClient
                 .from('orders')
                 .select('*', { count: 'exact', head: true })
                 .eq('status', 'saved');
             
+            if (estimatesError) {
+                console.error('Error loading estimates count:', estimatesError);
+            }
             document.getElementById('total-estimates').textContent = estimatesCount || 0;
+            console.log('Estimates count:', estimatesCount);
 
             // Active orders
-            const { count: activeCount } = await supabaseClient
+            const { count: activeCount, error: activeError } = await supabaseClient
                 .from('orders')
                 .select('*', { count: 'exact', head: true })
                 .in('status', ['pending', 'confirmed', 'in_production']);
             
+            if (activeError) {
+                console.error('Error loading active orders count:', activeError);
+            }
             document.getElementById('active-orders').textContent = activeCount || 0;
+            console.log('Active orders count:', activeCount);
 
             // Total revenue
-            const { data: revenueData } = await supabaseClient
+            const { data: revenueData, error: revenueError } = await supabaseClient
                 .from('orders')
                 .select('total_price')
                 .in('status', ['confirmed', 'production', 'transport', 'completed']);
             
+            if (revenueError) {
+                console.error('Error loading revenue:', revenueError);
+            }
             const totalRevenue = revenueData?.reduce((sum, order) => sum + (order.total_price || 0), 0) || 0;
             document.getElementById('total-revenue').textContent = `£${this.formatPrice(totalRevenue)}`;
+            console.log('Total revenue:', totalRevenue);
 
         } catch (error) {
             console.error('Error loading stats:', error);
+            alert('Error loading dashboard statistics. Check console for details.');
         }
     }
 
