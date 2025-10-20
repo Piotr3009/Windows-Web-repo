@@ -85,17 +85,22 @@ class EstimateSelectorManager {
 
     updateEstimateInfo() {
         const info = document.getElementById('estimate-info');
-        if (!info) return;
+        const addBtn = document.getElementById('add-to-estimate');
+        
+        if (!info || !addBtn) return;
 
         if (this.selectedEstimateId === 'new') {
-            info.textContent = 'Click "Add to Estimate" to create a new estimate';
+            info.textContent = 'A new estimate will be created when you add the window';
             info.style.color = '#666';
+            info.style.fontWeight = 'normal';
+            addBtn.textContent = 'Create New Estimate & Add Window';
         } else {
             const estimate = this.estimates.find(e => e.id === this.selectedEstimateId);
             if (estimate) {
-                info.textContent = `Adding to: ${estimate.project_name}`;
+                info.textContent = `Window will be added to: ${estimate.project_name}`;
                 info.style.color = 'var(--primary-color)';
                 info.style.fontWeight = '600';
+                addBtn.textContent = `Add Window to "${estimate.project_name}"`;
             }
         }
     }
@@ -264,11 +269,10 @@ class EstimateSelectorManager {
 }
 
 // Initialize when DOM is ready
-let estimateSelectorManager;
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        estimateSelectorManager = new EstimateSelectorManager();
+        window.estimateSelectorManager = new EstimateSelectorManager();
     });
 } else {
-    estimateSelectorManager = new EstimateSelectorManager();
+    window.estimateSelectorManager = new EstimateSelectorManager();
 }
