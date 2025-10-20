@@ -708,6 +708,26 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--primary-color);
 }
 
+.modal-close {
+  color: #555;
+  float: right;
+  font-size: 42px;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  right: 20px;
+  top: 15px;
+  transition: all 0.3s;
+}
+
+.modal-close:hover {
+  color: var(--primary-color);
+  transform: scale(1.1);
+}
+
 /* Window Item */
 .window-item {
   margin-bottom: 20px;
