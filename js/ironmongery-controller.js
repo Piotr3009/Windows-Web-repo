@@ -168,9 +168,26 @@ const IronmongeryController = {
     img.className = 'product-image';
     img.src = product.image || 'img/placeholder.png';
     img.alt = product.name;
+    img.style.cursor = 'pointer';
+    img.title = 'Click to view larger image';
     img.onerror = function() {
       this.src = 'img/placeholder.png';
     };
+    
+    // Click handler dla powiększenia zdjęcia
+    img.addEventListener('click', () => {
+      const modal = document.getElementById('ironmongery-image-modal');
+      const modalTitle = document.getElementById('ironmongery-modal-title');
+      const modalImage = document.getElementById('ironmongery-modal-image');
+      const modalDesc = document.getElementById('ironmongery-modal-description');
+      
+      modalTitle.textContent = product.name;
+      modalImage.src = product.image || 'img/placeholder.png';
+      modalImage.alt = product.name;
+      modalDesc.textContent = product.description;
+      
+      modal.style.display = 'block';
+    });
 
     // Info section
     const infoDiv = document.createElement('div');

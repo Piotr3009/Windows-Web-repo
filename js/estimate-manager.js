@@ -148,21 +148,33 @@ class EstimateManager {
 
             if (countError) throw countError;
 
-            // Wygeneruj numer okna (W1, W2, W3...)
-            let windowNumber = 'W1';
-            if (items && items.length > 0) {
-                // Wyciągnij numery i znajdź maksymalny
-                const numbers = items
-                    .map(item => parseInt(item.window_number.substring(1)))
-                    .filter(n => !isNaN(n));
-                
-                if (numbers.length > 0) {
-                    const maxNumber = Math.max(...numbers);
-                    windowNumber = `W${maxNumber + 1}`;
+            // Sprawdź czy użytkownik podał custom nazwę
+            const customNameInput = document.getElementById('window-custom-name');
+            let windowNumber = customNameInput ? customNameInput.value.trim() : '';
+
+            // Jeśli nie ma custom nazwy, wygeneruj automatyczną (W1, W2, W3...)
+            if (!windowNumber) {
+                windowNumber = 'W1';
+                if (items && items.length > 0) {
+                    // Wyciągnij numery tylko z okien o formacie W[number]
+                    const numbers = items
+                        .filter(item => /^W\d+$/.test(item.window_number))
+                        .map(item => parseInt(item.window_number.substring(1)))
+                        .filter(n => !isNaN(n));
+                    
+                    if (numbers.length > 0) {
+                        const maxNumber = Math.max(...numbers);
+                        windowNumber = `W${maxNumber + 1}`;
+                    }
                 }
             }
 
-            console.log('Generated window number:', windowNumber);
+            console.log('Window number:', windowNumber);
+
+            // Wyczyść pole custom name po użyciu
+            if (customNameInput) {
+                customNameInput.value = '';
+            }
 
             // Zapisz okno
             const { data: item, error: itemError } = await supabaseClient

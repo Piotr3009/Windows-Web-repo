@@ -1013,9 +1013,17 @@
             <option value="new">+ Create New Estimate</option>
             <!-- Dynamically loaded estimates -->
           </select>
-          <button class="btn btn-secondary btn-small" id="refresh-estimates" title="Refresh estimates list">🔄</button>
         </div>
         <p class="estimate-info" id="estimate-info">Click the button below to proceed</p>
+        
+        <div class="input-group" style="margin-top: 15px;">
+          <label for="window-custom-name">Window Name/Reference (optional):</label>
+          <input type="text" id="window-custom-name" placeholder="e.g. GL01.02, Right - Main Bedroom, or leave blank for W1, W2..." 
+                 style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
+          <small style="color: #666; font-size: 0.85rem; display: block; margin-top: 5px;">
+            Leave blank to use automatic numbering (W1, W2, W3...). Or enter your own reference from architectural plans.
+          </small>
+        </div>
       </div>
       
       <button class="btn" id="add-to-estimate">Create New Estimate & Add Window</button>
@@ -1269,6 +1277,18 @@
 </footer>
 
 <!-- SCRIPTS - POPRAWIONA KOLEJNOŚĆ -->
+<!-- Ironmongery Image Modal -->
+<div id="ironmongery-image-modal" class="modal" style="display: none;">
+  <div class="modal-content" style="max-width: 800px;">
+    <span class="modal-close" onclick="document.getElementById('ironmongery-image-modal').style.display='none'">&times;</span>
+    <div id="ironmongery-modal-content">
+      <h2 id="ironmongery-modal-title" style="margin-bottom: 20px;"></h2>
+      <img id="ironmongery-modal-image" src="" alt="" style="width: 100%; max-width: 600px; margin: 0 auto; display: block; border-radius: 8px;">
+      <p id="ironmongery-modal-description" style="margin-top: 20px; color: #555; line-height: 1.6;"></p>
+    </div>
+  </div>
+</div>
+
 <!-- 1. HELPERS MUSI BYĆ PIERWSZY! -->
 <script src="js/helpers.js"></script>
 <!-- 2. Pricing config -->
