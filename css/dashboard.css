@@ -11,6 +11,7 @@
     background: var(--white);
     padding: 15px;
     border-radius: 5px;
+    line-height: 1.0;
 }
 
 .info-grid {
@@ -23,17 +24,22 @@
 .info-item {
     display: flex;
     justify-content: space-between;
-    padding: 8px 0;
+    padding: 4px 0;
     border-bottom: 1px solid var(--border-color);
+    line-height: 1.0;
 }
 
 .info-label {
     font-weight: 600;
     color: var(--primary-color);
+    font-size: 0.8rem;
+    line-height: 1.0;
 }
 
 .info-value {
     color: var(--text-color);
+    font-size: 0.8rem;
+    line-height: 1.0;
 }
 
 .stats-grid {
@@ -44,11 +50,12 @@
 
 .stat-card {
     background: var(--white);
-    padding: 15px;
+    padding: 12px;
     border-radius: 5px;
     text-align: center;
     border: 2px solid var(--border-color);
     transition: all 0.3s;
+    line-height: 1.0;
 }
 
 .stat-card:hover {
@@ -59,19 +66,22 @@
 
 .stat-icon {
     font-size: 2rem;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
+    line-height: 1.0;
 }
 
 .stat-value {
     font-size: 1.6rem;
     font-weight: 700;
     color: var(--primary-color);
-    margin: 8px 0;
+    margin: 4px 0;
+    line-height: 1.0;
 }
 
 .stat-label {
     font-size: 0.85rem;
     color: var(--text-color);
+    line-height: 1.0;
 }
 
 /* Section Header */
@@ -130,8 +140,9 @@
     background: var(--white);
     border: 2px solid var(--border-color);
     border-radius: 5px;
-    padding: 18px;
+    padding: 12px;
     transition: all 0.3s;
+    line-height: 1.0;
 }
 
 .order-card:hover {
@@ -143,21 +154,24 @@
     display: flex;
     justify-content: space-between;
     align-items: start;
-    margin-bottom: 15px;
-    padding-bottom: 12px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
     border-bottom: 2px solid var(--border-color);
+    line-height: 1.0;
 }
 
 .order-header h3 {
     margin: 0;
     color: var(--primary-color);
     font-size: 1.15rem;
+    line-height: 1.1;
 }
 
 .order-date {
     color: var(--text-color);
     font-size: 0.85rem;
-    margin: 5px 0 0 0;
+    margin: 3px 0 0 0;
+    line-height: 1.0;
 }
 
 /* Status Badges */
@@ -202,26 +216,33 @@
 
 /* Order Body */
 .order-body {
-    margin: 15px 0;
+    margin: 10px 0;
+    line-height: 1.0;
 }
 
 .order-info {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
+    line-height: 1.0;
 }
 
 .info-row {
     display: flex;
     justify-content: space-between;
-    padding: 6px 0;
+    padding: 3px 0;
+    line-height: 1.0;
 }
 
 .info-row .info-label {
     color: var(--text-color);
+    font-size: 0.8rem;
+    line-height: 1.0;
 }
 
 .info-row .info-value {
     font-weight: 600;
     color: var(--primary-color);
+    font-size: 0.8rem;
+    line-height: 1.0;
 }
 
 .info-row .price {

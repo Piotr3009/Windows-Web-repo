@@ -254,6 +254,11 @@ class CustomerDashboard {
                             Place Order
                         </button>
                     ` : ''}
+                    ${order.status === 'sent' || order.status === 'approved' ? `
+                        <button class="btn" onclick="dashboard.addLineDetailsForDeposit('${order.id}')">
+                            Add line & details to send invoice for deposit
+                        </button>
+                    ` : ''}
                     <button class="btn-danger" onclick="dashboard.deleteEstimate('${order.id}')">
                         Delete
                     </button>
@@ -290,7 +295,7 @@ class CustomerDashboard {
     getStatusConfig(status) {
         const configs = {
             draft: { label: 'Draft', color: '#6c757d' },
-            sent: { label: 'Sent to Customer', color: '#17a2b8' },
+            sent: { label: 'Sent to supplier - waiting for confirmation', color: '#17a2b8' },
             approved: { label: 'Approved', color: '#28a745' },
             ordered: { label: 'In Production', color: '#007bff' },
             cancelled: { label: 'Cancelled', color: '#dc3545' }
@@ -569,6 +574,18 @@ class CustomerDashboard {
             console.error('Error placing order:', error);
             this.showError('Failed to place order');
         }
+    }
+
+    // Add line details for deposit invoice
+    async addLineDetailsForDeposit(orderId) {
+        // TODO: Implement modal or form to add line items and details
+        // For now, placeholder alert
+        alert('Add line items and details for deposit invoice. Feature coming soon - contact admin for manual processing.');
+        // This would open a modal where customer can add:
+        // - Additional line items
+        // - Special requirements
+        // - Delivery details
+        // Then admin creates invoice for deposit
     }
 
     // Pay deposit (placeholder - would integrate with payment gateway)
