@@ -12,7 +12,7 @@ class EstimateManager {
         const user = await getCurrentUser();
         if (user) {
             await this.loadCustomer(user.id);
-            await this.loadOrCreateDraftEstimate();
+            // NIE ładujemy automatycznie draft - użytkownik wybiera z dropdowna!
         }
 
         // Inicjalizuj przyciski
@@ -37,7 +37,9 @@ class EstimateManager {
         }
     }
 
-    // Załaduj lub utwórz draft estimate
+    // STARA FUNKCJA - nie używana z nowym systemem dropdowna
+    // Zostawiona dla kompatybilności wstecznej
+    /*
     async loadOrCreateDraftEstimate() {
         try {
             // Sprawdź czy jest już draft
@@ -66,6 +68,7 @@ class EstimateManager {
             console.error('Error loading draft estimate:', error);
         }
     }
+    */
 
     // Utwórz nową wycenę
     async createNewEstimate(projectName, deliveryAddress) {
