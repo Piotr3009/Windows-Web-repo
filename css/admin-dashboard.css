@@ -19,7 +19,7 @@ body {
 
 /* Sidebar */
 .admin-sidebar {
-    width: 260px;
+    width: 220px;
     background: var(--primary-color, #0F3124);
     color: var(--white, #fff);
     display: flex;
@@ -32,7 +32,7 @@ body {
 }
 
 .admin-logo {
-    padding: 30px 20px;
+    padding: 20px 15px;
     border-bottom: 2px solid var(--secondary-color, #d4af37);
     text-align: center;
 }
@@ -40,32 +40,32 @@ body {
 .admin-logo h1 {
     font-family: 'Playfair Display', serif;
     color: var(--secondary-color, #d4af37);
-    font-size: 2rem;
-    margin-bottom: 5px;
+    font-size: 1.5rem;
+    margin-bottom: 3px;
 }
 
 .admin-logo p {
     color: var(--secondary-color, #d4af37);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     opacity: 0.9;
 }
 
 .admin-nav {
     flex: 1;
-    padding: 20px 0;
+    padding: 15px 0;
 }
 
 .nav-btn {
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 15px;
-    padding: 15px 25px;
+    gap: 12px;
+    padding: 12px 20px;
     background: none;
     border: none;
     color: var(--white, #fff);
     font-family: 'Raleway', sans-serif;
-    font-size: 1rem;
+    font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.3s;
     border-left: 4px solid transparent;
@@ -123,14 +123,14 @@ body {
 /* Main Content */
 .admin-main {
     flex: 1;
-    margin-left: 260px;
+    margin-left: 220px;
     padding: 0;
     min-height: 100vh;
 }
 
 .admin-header {
     background: var(--white, #fff);
-    padding: 25px 40px;
+    padding: 15px 25px;
     border-bottom: 2px solid var(--secondary-color, #d4af37);
     display: flex;
     justify-content: space-between;
@@ -144,27 +144,28 @@ body {
 .header-left h2 {
     font-family: 'Playfair Display', serif;
     color: var(--primary-color, #0F3124);
-    font-size: 1.8rem;
+    font-size: 1.4rem;
 }
 
 .header-right {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
 }
 
 .admin-user {
-    padding: 8px 20px;
+    padding: 6px 15px;
     background: var(--primary-color, #0F3124);
     color: var(--white, #fff);
     border-radius: 20px;
     font-weight: 600;
+    font-size: 0.9rem;
 }
 
 /* Views */
 .admin-view {
     display: none;
-    padding: 40px;
+    padding: 25px;
     animation: fadeIn 0.3s ease;
 }
 
@@ -180,32 +181,32 @@ body {
 /* Stats Overview */
 .stats-overview {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 25px;
-    margin-bottom: 40px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
 }
 
 .stat-box {
     background: var(--white, #fff);
-    padding: 25px;
-    border-radius: 10px;
+    padding: 15px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
     border: 2px solid #ddd;
     transition: all 0.3s;
 }
 
 .stat-box:hover {
     border-color: var(--secondary-color, #d4af37);
-    transform: translateY(-5px);
+    transform: translateY(-3px);
     box-shadow: 0 5px 20px rgba(0,0,0,0.1);
 }
 
 .stat-icon {
-    font-size: 3rem;
-    width: 70px;
-    height: 70px;
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -218,14 +219,14 @@ body {
 }
 
 .stat-value {
-    font-size: 2.2rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: var(--primary-color, #0F3124);
-    margin-bottom: 5px;
+    margin-bottom: 3px;
 }
 
 .stat-label {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     color: #666;
 }
 
@@ -238,7 +239,7 @@ body {
 
 .dashboard-card {
     background: var(--white, #fff);
-    padding: 30px;
+    padding: 20px;
     border-radius: 10px;
     border: 2px solid #ddd;
 }
@@ -311,7 +312,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     gap: 20px;
     flex-wrap: wrap;
 }
@@ -405,7 +406,7 @@ body {
 .admin-table td.error,
 .admin-table td.no-data {
     text-align: center;
-    padding: 40px;
+    padding: 25px;
     color: #999;
     font-style: italic;
 }
@@ -518,7 +519,7 @@ body {
 
 .analytics-card {
     background: var(--white, #fff);
-    padding: 30px;
+    padding: 20px;
     border-radius: 10px;
     border: 2px solid #ddd;
 }
@@ -590,8 +591,8 @@ body {
 /* Config Section */
 .config-section {
     background: var(--white, #fff);
-    padding: 30px;
-    margin-bottom: 30px;
+    padding: 20px;
+    margin-bottom: 20px;
     border-radius: 10px;
     border: 2px solid #ddd;
 }
@@ -636,7 +637,7 @@ body {
     display: flex;
     gap: 15px;
     justify-content: center;
-    padding: 30px;
+    padding: 20px;
 }
 
 /* Modal */
@@ -655,7 +656,7 @@ body {
 .modal-content {
     background-color: var(--white, #fff);
     margin: 3% auto;
-    padding: 40px;
+    padding: 25px;
     border: 3px solid var(--secondary-color, #d4af37);
     width: 90%;
     max-width: 700px;
