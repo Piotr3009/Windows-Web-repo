@@ -21,7 +21,7 @@ body {
   background-color: var(--white);
   color: var(--text-color);
   line-height: 1.0;
-  padding-top: 155px;
+  padding-top: 190px;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -121,7 +121,7 @@ a:hover {
 /* Menu Bar - FIXED */
 .menu-bar {
   position: fixed;
-  top: 75px;
+  top: 100px;
   left: 0;
   right: 0;
   z-index: 999;
