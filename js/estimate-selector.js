@@ -209,26 +209,39 @@ class EstimateSelectorManager {
     }
 
     async generateEstimateNumber() {
-        // Get latest estimate number
+        if (!this.customerData || !this.customerData.customer_code) {
+            console.error('Customer data not loaded');
+            return 'ERROR/01/2025';
+        }
+
+        const customerCode = this.customerData.customer_code;
+        const year = new Date().getFullYear();
+
+        // Get latest estimate for this customer in current year
         const { data, error } = await supabaseClient
             .from('estimates')
             .select('estimate_number')
+            .eq('customer_id', this.customerData.id)
+            .ilike('estimate_number', `${customerCode}/%/${year}`)
             .order('created_at', { ascending: false })
             .limit(1);
 
-        if (error || !data || data.length === 0) {
-            return 'E001';
+        if (error) {
+            console.error('Error getting estimate number:', error);
         }
 
-        // Extract number and increment
-        const lastNumber = data[0].estimate_number;
-        const match = lastNumber.match(/E(\d+)/);
-        if (match) {
-            const nextNum = parseInt(match[1]) + 1;
-            return `E${String(nextNum).padStart(3, '0')}`;
+        let sequence = 1;
+        
+        if (data && data.length > 0) {
+            // Extract sequence from format: SKL00125/03/2025
+            const match = data[0].estimate_number.match(/\/(\d+)\//);
+            if (match) {
+                sequence = parseInt(match[1]) + 1;
+            }
         }
 
-        return 'E001';
+        // Format: SKL00125/01/2025
+        return `${customerCode}/${String(sequence).padStart(2, '0')}/${year}`;
     }
 
     formatPrice(price) {
