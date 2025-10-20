@@ -337,18 +337,26 @@ class CustomerDashboard {
             <div class="order-item-detail">
                 <h4>Window ${item.window_number}</h4>
                 <div class="item-specs">
-                    <p><strong>Dimensions:</strong> ${item.width}mm × ${item.height}mm</p>
+                    <p><strong>Dimensions:</strong> ${item.width}mm × ${item.height}mm (${item.measurement_type || 'brick-to-brick'})</p>
+                    ${item.original_width && item.original_height ? 
+                        `<p><strong>Original Dimensions:</strong> ${item.original_width}mm × ${item.original_height}mm</p>` : ''
+                    }
                     <p><strong>Frame:</strong> ${item.frame_type}</p>
                     <p><strong>Glass:</strong> ${item.glass_type}</p>
+                    ${item.glass_spec ? `<p><strong>Glass Spec:</strong> ${item.glass_spec}</p>` : ''}
+                    ${item.glass_finish ? `<p><strong>Glass Finish:</strong> ${item.glass_finish}</p>` : ''}
+                    ${item.frosted_location ? `<p><strong>Frosted Location:</strong> ${item.frosted_location}</p>` : ''}
                     ${item.opening_type ? `<p><strong>Opening:</strong> ${item.opening_type}</p>` : ''}
                     ${item.color_type === 'single' ? 
                         `<p><strong>Color:</strong> ${item.color_single}</p>` : 
-                        `<p><strong>Interior:</strong> ${item.color_interior}<br><strong>Exterior:</strong> ${item.color_exterior}</p>`
+                        `<p><strong>Interior:</strong> ${item.color_interior}<br><strong>Exterior:</strong> ${item.color_exterior}${item.custom_exterior_color ? ' (' + item.custom_exterior_color + ')' : ''}</p>`
                     }
                     ${item.upper_bars || item.lower_bars ? 
-                        `<p><strong>Bars:</strong> Upper: ${item.upper_bars || 'None'}, Lower: ${item.lower_bars || 'None'}</p>` : ''
+                        `<p><strong>Bars:</strong> Upper: ${item.upper_bars ? JSON.stringify(item.upper_bars) : 'None'}, Lower: ${item.lower_bars ? JSON.stringify(item.lower_bars) : 'None'}</p>` : ''
                     }
                     ${item.horns ? `<p><strong>Horns:</strong> ${item.horns}</p>` : ''}
+                    ${item.ironmongery ? `<p><strong>Ironmongery:</strong> ${typeof item.ironmongery === 'string' ? item.ironmongery : JSON.stringify(item.ironmongery)}</p>` : ''}
+                    ${item.ironmongery_finish ? `<p><strong>Ironmongery Finish:</strong> ${item.ironmongery_finish}</p>` : ''}
                     ${item.pas24 ? `<p><strong>PAS24:</strong> Yes ✓</p>` : ''}
                     <p><strong>Quantity:</strong> ${item.quantity}</p>
                     <p class="item-price"><strong>Price:</strong> £${this.formatPrice(item.total_price)}</p>
