@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Admin Panel - Skylon Timber & Glazing House" />
-    <title>Admin Panel | Skylon Management</title>
+    <title>Admin Dashboard | Skylon Management</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -28,256 +27,368 @@
                     <span class="nav-icon">📊</span>
                     <span class="nav-text">Dashboard</span>
                 </button>
+                <button class="nav-btn" data-view="new-quotes">
+                    <span class="nav-icon">🆕</span>
+                    <span class="nav-text">New Quote Requests</span>
+                    <span class="nav-badge" id="new-quotes-badge">0</span>
+                </button>
+                <button class="nav-btn" data-view="need-action">
+                    <span class="nav-icon">⚠️</span>
+                    <span class="nav-text">Need Action</span>
+                    <span class="nav-badge urgent" id="need-action-badge">0</span>
+                </button>
+                <button class="nav-btn" data-view="all-quotes">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-text">All Quotes</span>
+                </button>
+                <button class="nav-btn" data-view="active-orders">
+                    <span class="nav-icon">📦</span>
+                    <span class="nav-text">Active Orders</span>
+                </button>
                 <button class="nav-btn" data-view="customers">
                     <span class="nav-icon">👥</span>
                     <span class="nav-text">Customers</span>
                 </button>
-                <button class="nav-btn" data-view="orders">
-                    <span class="nav-icon">📦</span>
-                    <span class="nav-text">Orders</span>
+                <button class="nav-btn" data-view="invoices">
+                    <span class="nav-icon">💰</span>
+                    <span class="nav-text">Invoices & Payments</span>
                 </button>
                 <button class="nav-btn" data-view="analytics">
                     <span class="nav-icon">📈</span>
                     <span class="nav-text">Analytics</span>
                 </button>
                 <button class="nav-btn" data-view="pricing">
-                    <span class="nav-icon">💰</span>
+                    <span class="nav-icon">⚙️</span>
                     <span class="nav-text">Pricing Config</span>
                 </button>
             </nav>
 
             <div class="admin-footer">
                 <button id="admin-logout" class="logout-btn">
-                    <span class="nav-icon">🚪</span>
-                    <span class="nav-text">Logout</span>
+                    <span>🚪</span> Logout
                 </button>
             </div>
         </aside>
 
         <!-- Main Content -->
         <main class="admin-main">
-            <!-- Header -->
-            <header class="admin-header">
-                <div class="header-left">
-                    <h2 id="view-title">Dashboard</h2>
-                </div>
-                <div class="header-right">
-                    <div class="admin-user">
-                        <span id="admin-name">Admin</span>
-                    </div>
-                </div>
-            </header>
-
             <!-- Dashboard View -->
             <div id="dashboard-view" class="admin-view active">
-                <div class="stats-overview">
-                    <div class="stat-box">
+                <h1 class="view-title">Dashboard - Daily Overview</h1>
+                
+                <!-- Priority Actions Alert -->
+                <div class="priority-alert">
+                    <h2>🔔 PRIORITY ACTIONS</h2>
+                    <div id="priority-actions-list">
+                        <!-- Loaded by JS -->
+                    </div>
+                </div>
+
+                <!-- Today's Statistics -->
+                <div class="stats-grid">
+                    <div class="stat-card">
                         <div class="stat-icon">👥</div>
                         <div class="stat-info">
-                            <div class="stat-value" id="total-customers">0</div>
-                            <div class="stat-label">Total Customers</div>
+                            <div class="stat-value" id="new-customers-today">0</div>
+                            <div class="stat-label">New Customers TODAY</div>
                         </div>
                     </div>
-                    <div class="stat-box">
-                        <div class="stat-icon">📋</div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🆕</div>
                         <div class="stat-info">
-                            <div class="stat-value" id="total-estimates">0</div>
-                            <div class="stat-label">Total Estimates</div>
+                            <div class="stat-value" id="new-quote-requests">0</div>
+                            <div class="stat-label">New Quote Requests</div>
                         </div>
                     </div>
-                    <div class="stat-box">
-                        <div class="stat-icon">📦</div>
+                    <div class="stat-card urgent">
+                        <div class="stat-icon">⚠️</div>
                         <div class="stat-info">
-                            <div class="stat-value" id="active-orders">0</div>
-                            <div class="stat-label">Active Orders</div>
+                            <div class="stat-value" id="need-invoice-count">0</div>
+                            <div class="stat-label">Need Invoice (URGENT)</div>
                         </div>
                     </div>
-                    <div class="stat-box">
-                        <div class="stat-icon">💰</div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🏭</div>
                         <div class="stat-info">
-                            <div class="stat-value" id="total-revenue">£0</div>
-                            <div class="stat-label">Total Revenue</div>
+                            <div class="stat-value" id="in-production-count">0</div>
+                            <div class="stat-label">In Production</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="dashboard-grid">
-                    <div class="dashboard-card">
-                        <h3>Recent Orders</h3>
-                        <div id="recent-orders-list">Loading...</div>
-                    </div>
-                    <div class="dashboard-card">
-                        <h3>Quick Actions</h3>
-                        <div class="quick-actions-list">
-                            <button class="action-btn" onclick="adminPanel.switchView('orders')">View All Orders</button>
-                            <button class="action-btn" onclick="adminPanel.switchView('customers')">Manage Customers</button>
-                            <button class="action-btn" onclick="adminPanel.switchView('analytics')">View Analytics</button>
+                <!-- Orders Pipeline -->
+                <div class="pipeline-section">
+                    <h2>Orders Pipeline</h2>
+                    <div class="pipeline-stages">
+                        <div class="pipeline-stage" data-status="quote_requested" onclick="adminDashboard.filterByStatus('quote_requested')">
+                            <div class="stage-icon">🆕</div>
+                            <div class="stage-count" id="stage-quote-requested">0</div>
+                            <div class="stage-label">New Quote Requests</div>
                         </div>
+                        <div class="pipeline-stage" data-status="quote_sent" onclick="adminDashboard.filterByStatus('quote_sent')">
+                            <div class="stage-icon">📤</div>
+                            <div class="stage-count" id="stage-quote-sent">0</div>
+                            <div class="stage-label">Quote Sent</div>
+                        </div>
+                        <div class="pipeline-stage urgent" data-status="customer_confirmed" onclick="adminDashboard.filterByStatus('customer_confirmed')">
+                            <div class="stage-icon">⚠️</div>
+                            <div class="stage-count" id="stage-customer-confirmed">0</div>
+                            <div class="stage-label">Need Invoice</div>
+                        </div>
+                        <div class="pipeline-stage" data-status="deposit_invoice_sent" onclick="adminDashboard.filterByStatus('deposit_invoice_sent')">
+                            <div class="stage-icon">💳</div>
+                            <div class="stage-count" id="stage-deposit-invoice-sent">0</div>
+                            <div class="stage-label">Await Deposit</div>
+                        </div>
+                        <div class="pipeline-stage" data-status="in_production" onclick="adminDashboard.filterByStatus('in_production')">
+                            <div class="stage-icon">🏭</div>
+                            <div class="stage-count" id="stage-in-production">0</div>
+                            <div class="stage-label">In Production</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="recent-activity">
+                    <h2>Recent Activity</h2>
+                    <div id="recent-activity-list">
+                        <!-- Loaded by JS -->
                     </div>
                 </div>
             </div>
 
-            <!-- Customers View -->
-            <div id="customers-view" class="admin-view">
-                <div class="view-header">
-                    <div class="search-bar">
-                        <input type="text" id="customer-search" placeholder="Search customers by name or email...">
+            <!-- New Quote Requests View -->
+            <div id="new-quotes-view" class="admin-view">
+                <h1 class="view-title">🆕 New Quote Requests</h1>
+                <div class="view-content">
+                    <div id="new-quotes-list">
+                        <!-- Loaded by JS -->
                     </div>
-                    <button class="btn" onclick="adminPanel.exportCustomers()">Export CSV</button>
-                </div>
-                <div class="table-container">
-                    <table class="admin-table" id="customers-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Registered</th>
-                                <th>Orders</th>
-                                <th>Estimates</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="customers-tbody">
-                            <tr><td colspan="7" class="loading">Loading customers...</td></tr>
-                        </tbody>
-                    </table>
                 </div>
             </div>
 
-            <!-- Orders View -->
-            <div id="orders-view" class="admin-view">
-                <div class="view-header">
+            <!-- Need Action View -->
+            <div id="need-action-view" class="admin-view">
+                <h1 class="view-title">⚠️ Actions Required</h1>
+                <div class="view-content">
+                    <div id="need-action-list">
+                        <!-- Loaded by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- All Quotes View -->
+            <div id="all-quotes-view" class="admin-view">
+                <h1 class="view-title">📋 All Quotes & Estimates</h1>
+                
+                <!-- Filters -->
+                <div class="filters-bar">
                     <div class="filter-group">
-                        <button class="filter-btn active" data-status="all">All</button>
-                        <button class="filter-btn" data-status="saved">Saved Estimates</button>
-                        <button class="filter-btn" data-status="pending">Pending</button>
-                        <button class="filter-btn" data-status="confirmed">Confirmed</button>
-                        <button class="filter-btn" data-status="in_production">In Production</button>
-                        <button class="filter-btn" data-status="completed">Completed</button>
+                        <label>Status:</label>
+                        <select id="quotes-status-filter">
+                            <option value="all">All Statuses</option>
+                            <option value="quote_requested">Quote Requested</option>
+                            <option value="quote_sent">Quote Sent</option>
+                            <option value="customer_confirmed">Customer Confirmed</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
                     </div>
-                    <button class="btn" onclick="adminPanel.exportOrders()">Export CSV</button>
+                    <div class="filter-group">
+                        <label>Period:</label>
+                        <select id="quotes-period-filter">
+                            <option value="all">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="year">This Year</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Search:</label>
+                        <input type="text" id="quotes-search" placeholder="Customer name or email...">
+                    </div>
                 </div>
-                <div class="table-container">
-                    <table class="admin-table" id="orders-table">
-                        <thead>
-                            <tr>
-                                <th>Order #</th>
-                                <th>Customer</th>
-                                <th>Date</th>
-                                <th>Items</th>
-                                <th>Total</th>
-                                <th>Deposit</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="orders-tbody">
-                            <tr><td colspan="8" class="loading">Loading orders...</td></tr>
-                        </tbody>
-                    </table>
+
+                <!-- Summary Stats -->
+                <div class="summary-stats">
+                    <div class="summary-card">
+                        <div class="summary-label">Total Quotes</div>
+                        <div class="summary-value" id="total-quotes-count">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Total Value</div>
+                        <div class="summary-value" id="total-quotes-value">£0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Average Value</div>
+                        <div class="summary-value" id="avg-quotes-value">£0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Conversion Rate</div>
+                        <div class="summary-value" id="quotes-conversion-rate">0%</div>
+                    </div>
+                </div>
+
+                <div class="view-content">
+                    <div id="all-quotes-list">
+                        <!-- Loaded by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Orders View -->
+            <div id="active-orders-view" class="admin-view">
+                <h1 class="view-title">📦 Active Orders</h1>
+                
+                <!-- Filters -->
+                <div class="filters-bar">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="deposit_invoice_sent">Awaiting Deposit</button>
+                    <button class="filter-btn" data-filter="deposit_paid">Deposit Paid</button>
+                    <button class="filter-btn" data-filter="in_production">In Production</button>
+                    <button class="filter-btn" data-filter="ready_delivery">Ready for Delivery</button>
+                    <button class="filter-btn" data-filter="completed">Completed</button>
+                </div>
+
+                <div class="view-content">
+                    <div id="active-orders-list">
+                        <!-- Loaded by JS -->
+                    </div>
                 </div>
             </div>
 
             <!-- Analytics View -->
             <div id="analytics-view" class="admin-view">
+                <h1 class="view-title">📈 Analytics & Reports</h1>
+                
+                <!-- Period Selector -->
+                <div class="analytics-controls">
+                    <div class="period-selector">
+                        <button class="period-btn active" data-period="week">This Week</button>
+                        <button class="period-btn" data-period="month">This Month</button>
+                        <button class="period-btn" data-period="year">This Year</button>
+                        <button class="period-btn" data-period="custom">Custom Range</button>
+                    </div>
+                    <div class="date-range" style="display: none;">
+                        <input type="date" id="analytics-from">
+                        <span>to</span>
+                        <input type="date" id="analytics-to">
+                        <button class="btn">Apply</button>
+                    </div>
+                </div>
+
+                <!-- Key Metrics -->
                 <div class="analytics-grid">
                     <div class="analytics-card">
-                        <h3>Conversion Funnel</h3>
-                        <div class="funnel-stats">
-                            <div class="funnel-step">
-                                <span class="funnel-label">Visitors</span>
-                                <span class="funnel-value" id="analytics-visitors">0</span>
-                            </div>
-                            <div class="funnel-arrow">▼</div>
-                            <div class="funnel-step">
-                                <span class="funnel-label">Registrations</span>
-                                <span class="funnel-value" id="analytics-registrations">0</span>
-                                <span class="funnel-percent" id="reg-percent">0%</span>
-                            </div>
-                            <div class="funnel-arrow">▼</div>
-                            <div class="funnel-step">
-                                <span class="funnel-label">Estimates Created</span>
-                                <span class="funnel-value" id="analytics-estimates">0</span>
-                                <span class="funnel-percent" id="est-percent">0%</span>
-                            </div>
-                            <div class="funnel-arrow">▼</div>
-                            <div class="funnel-step">
-                                <span class="funnel-label">Orders Placed</span>
-                                <span class="funnel-value" id="analytics-orders">0</span>
-                                <span class="funnel-percent" id="ord-percent">0%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="analytics-card">
                         <h3>Revenue Overview</h3>
-                        <div class="revenue-stats">
-                            <div class="revenue-item">
-                                <span>Total Revenue:</span>
-                                <strong id="revenue-total">£0</strong>
-                            </div>
-                            <div class="revenue-item">
-                                <span>Average Order Value:</span>
-                                <strong id="revenue-avg">£0</strong>
-                            </div>
-                            <div class="revenue-item">
-                                <span>This Month:</span>
-                                <strong id="revenue-month">£0</strong>
-                            </div>
+                        <div class="metric-large" id="total-revenue">£0</div>
+                        <div class="metric-sub">
+                            <span>Quotes: <strong id="quotes-revenue">£0</strong></span>
+                            <span>Orders: <strong id="orders-revenue">£0</strong></span>
                         </div>
                     </div>
-
                     <div class="analytics-card">
-                        <h3>Popular Products</h3>
-                        <div id="popular-products">Loading...</div>
+                        <h3>Conversion Rate</h3>
+                        <div class="metric-large" id="conversion-rate">0%</div>
+                        <div class="metric-sub">
+                            <span>Quotes to Orders</span>
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Average Order Value</h3>
+                        <div class="metric-large" id="avg-order-value">£0</div>
+                        <div class="metric-sub">
+                            <span>Per completed order</span>
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>New Customers</h3>
+                        <div class="metric-large" id="new-customers-period">0</div>
+                        <div class="metric-sub">
+                            <span>In selected period</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-section">
+                    <div class="chart-card">
+                        <h3>Quotes vs Orders Timeline</h3>
+                        <div id="timeline-chart" class="chart-placeholder">
+                            Chart will be rendered here
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Order Status Breakdown</h3>
+                        <div id="status-chart" class="chart-placeholder">
+                            Chart will be rendered here
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Stats Table -->
+                <div class="analytics-table">
+                    <h3>Detailed Statistics</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>This Week</th>
+                                <th>This Month</th>
+                                <th>This Year</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analytics-table-body">
+                            <!-- Loaded by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Customers View -->
+            <div id="customers-view" class="admin-view">
+                <h1 class="view-title">👥 Customers</h1>
+                <div class="view-content">
+                    <div id="customers-list">
+                        <!-- Loaded by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoices View -->
+            <div id="invoices-view" class="admin-view">
+                <h1 class="view-title">💰 Invoices & Payments</h1>
+                <div class="view-content">
+                    <div id="invoices-list">
+                        <!-- Loaded by JS -->
                     </div>
                 </div>
             </div>
 
             <!-- Pricing Config View -->
             <div id="pricing-view" class="admin-view">
-                <div class="config-section">
-                    <h3>Base Pricing</h3>
-                    <div class="config-grid">
-                        <div class="config-item">
-                            <label>Base Price (£):</label>
-                            <input type="number" id="config-base-price" value="300">
-                        </div>
-                        <div class="config-item">
-                            <label>Price per m² (£):</label>
-                            <input type="number" id="config-sqm-price" value="150">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="config-section">
-                    <h3>Multipliers</h3>
-                    <div id="multipliers-config">
-                        <!-- Will be populated dynamically -->
-                    </div>
-                </div>
-
-                <div class="config-actions">
-                    <button class="btn" onclick="adminPanel.savePricingConfig()">Save Changes</button>
-                    <button class="btn-secondary" onclick="adminPanel.resetPricingConfig()">Reset to Default</button>
+                <h1 class="view-title">⚙️ Pricing Configuration</h1>
+                <div class="view-content">
+                    <button class="btn" onclick="window.location.href='admin-panel.html'">
+                        Open Pricing Config Panel
+                    </button>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Order Edit Modal -->
-    <div id="order-edit-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="modal-close" onclick="adminPanel.closeOrderModal()">&times;</span>
-            <div id="order-edit-content">
-                <!-- Content loaded dynamically -->
+    <!-- Quote Detail Modal -->
+    <div id="quote-modal" class="modal">
+        <div class="modal-content large">
+            <span class="modal-close" onclick="adminDashboard.closeModal()">&times;</span>
+            <div id="quote-detail-content">
+                <!-- Loaded by JS -->
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
     <script src="js/supabase-config.js"></script>
-    <script src="js/admin-panel-controller.js"></script>
+    <script src="js/admin-dashboard-new.js"></script>
 </body>
 </html>

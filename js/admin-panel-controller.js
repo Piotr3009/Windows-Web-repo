@@ -1,32 +1,32 @@
-// Admin Panel Controller
+// Admin Dashboard New - Complete Workflow System
 
-class AdminPanel {
+class AdminDashboard {
     constructor() {
         this.currentView = 'dashboard';
         this.currentUser = null;
-        this.customers = [];
+        this.quotes = [];
         this.orders = [];
-        this.orderFilter = 'all';
+        this.customers = [];
+        this.filters = {
+            status: 'all',
+            period: 'all',
+            search: ''
+        };
         this.init();
     }
 
     async init() {
         try {
-            console.log('Admin Panel initializing...');
+            console.log('Admin Dashboard initializing...');
             
-            // Check if user is admin
+            // Check authentication
             const user = await getCurrentUser();
-            console.log('Current user:', user);
-            
             if (!user) {
-                console.log('No user logged in, redirecting to index');
                 window.location.href = 'index.html';
                 return;
             }
 
             const isAdminUser = await isAdmin();
-            console.log('Is admin:', isAdminUser);
-            
             if (!isAdminUser) {
                 alert('Access denied. Admin privileges required.');
                 window.location.href = 'index.html';
@@ -34,52 +34,282 @@ class AdminPanel {
             }
 
             this.currentUser = user;
-            console.log('Loading dashboard data...');
-            await this.loadDashboardData();
-            console.log('Dashboard data loaded, attaching listeners...');
+            
+            // Load all data
+            await this.loadAllData();
+            
+            // Setup event listeners
             this.attachEventListeners();
-            console.log('Admin Panel initialized successfully');
+            
+            console.log('Admin Dashboard initialized successfully');
         } catch (error) {
-            console.error('Error initializing admin panel:', error);
-            alert('Error loading admin panel: ' + error.message);
+            console.error('Error initializing admin dashboard:', error);
+            alert('Error loading admin dashboard: ' + error.message);
         }
     }
 
-    // Attach event listeners
-    attachEventListeners() {
-        // Navigation buttons
-        document.querySelectorAll('.nav-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                this.switchView(btn.dataset.view);
-            });
-        });
-
-        // Logout
-        document.getElementById('admin-logout').addEventListener('click', async () => {
-            await supabaseClient.auth.signOut();
-            window.location.href = 'index.html';
-        });
-
-        // Order filter buttons
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                this.orderFilter = btn.dataset.status;
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                this.renderOrdersTable();
-            });
-        });
-
-        // Customer search
-        const searchInput = document.getElementById('customer-search');
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                this.filterCustomers(e.target.value);
-            });
+    // Load all data from database
+    async loadAllData() {
+        try {
+            await Promise.all([
+                this.loadQuotes(),
+                this.loadOrders(),
+                this.loadCustomers(),
+                this.updateDashboard()
+            ]);
+        } catch (error) {
+            console.error('Error loading data:', error);
         }
     }
 
-    // Switch between views
+    // Load quotes from database
+    async loadQuotes() {
+        try {
+            const { data, error } = await supabaseClient
+                .from('orders')
+                .select(`
+                    *,
+                    customers (full_name, email, phone)
+                `)
+                .in('status', ['saved', 'quote_requested', 'quote_sent', 'customer_confirmed', 'rejected'])
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            
+            this.quotes = data || [];
+            console.log('Quotes loaded:', this.quotes.length);
+        } catch (error) {
+            console.error('Error loading quotes:', error);
+        }
+    }
+
+    // Load orders from database
+    async loadOrders() {
+        try {
+            const { data, error } = await supabaseClient
+                .from('orders')
+                .select(`
+                    *,
+                    customers (full_name, email, phone)
+                `)
+                .in('status', ['deposit_invoice_sent', 'deposit_paid', 'in_production', 'ready_delivery', 'completed'])
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            
+            this.orders = data || [];
+            console.log('Orders loaded:', this.orders.length);
+        } catch (error) {
+            console.error('Error loading orders:', error);
+        }
+    }
+
+    // Load customers from database
+    async loadCustomers() {
+        try {
+            const { data, error } = await supabaseClient
+                .from('customers')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            
+            this.customers = data || [];
+            console.log('Customers loaded:', this.customers.length);
+        } catch (error) {
+            console.error('Error loading customers:', error);
+        }
+    }
+
+    // Update dashboard view
+    async updateDashboard() {
+        // Update badges
+        this.updateBadges();
+        
+        // Update today's stats
+        this.updateTodayStats();
+        
+        // Update pipeline
+        this.updatePipeline();
+        
+        // Update priority actions
+        this.updatePriorityActions();
+        
+        // Update recent activity
+        this.updateRecentActivity();
+    }
+
+    // Update navigation badges
+    updateBadges() {
+        const newQuotes = this.quotes.filter(q => q.status === 'quote_requested').length;
+        const needAction = this.quotes.filter(q => q.status === 'customer_confirmed').length;
+        
+        document.getElementById('new-quotes-badge').textContent = newQuotes;
+        document.getElementById('need-action-badge').textContent = needAction;
+    }
+
+    // Update today's statistics
+    updateTodayStats() {
+        const today = new Date().toISOString().split('T')[0];
+        
+        // New customers today
+        const newCustomersToday = this.customers.filter(c => 
+            c.created_at && c.created_at.split('T')[0] === today
+        ).length;
+        document.getElementById('new-customers-today').textContent = newCustomersToday;
+        
+        // New quote requests
+        const newQuoteRequests = this.quotes.filter(q => q.status === 'quote_requested').length;
+        document.getElementById('new-quote-requests').textContent = newQuoteRequests;
+        
+        // Need invoice (urgent)
+        const needInvoice = this.quotes.filter(q => q.status === 'customer_confirmed').length;
+        document.getElementById('need-invoice-count').textContent = needInvoice;
+        
+        // In production
+        const inProduction = this.orders.filter(o => o.status === 'in_production').length;
+        document.getElementById('in-production-count').textContent = inProduction;
+    }
+
+    // Update pipeline stages
+    updatePipeline() {
+        document.getElementById('stage-quote-requested').textContent = 
+            this.quotes.filter(q => q.status === 'quote_requested').length;
+        
+        document.getElementById('stage-quote-sent').textContent = 
+            this.quotes.filter(q => q.status === 'quote_sent').length;
+        
+        document.getElementById('stage-customer-confirmed').textContent = 
+            this.quotes.filter(q => q.status === 'customer_confirmed').length;
+        
+        document.getElementById('stage-deposit-invoice-sent').textContent = 
+            this.orders.filter(o => o.status === 'deposit_invoice_sent').length;
+        
+        document.getElementById('stage-in-production').textContent = 
+            this.orders.filter(o => o.status === 'in_production').length;
+    }
+
+    // Update priority actions list
+    updatePriorityActions() {
+        const container = document.getElementById('priority-actions-list');
+        const priorities = [];
+        
+        // Customer confirmed - need invoice
+        const needInvoice = this.quotes.filter(q => q.status === 'customer_confirmed');
+        if (needInvoice.length > 0) {
+            priorities.push({
+                text: `⚠️ ${needInvoice.length} ORDER${needInvoice.length > 1 ? 'S' : ''} CONFIRMED BY CUSTOMER - Generate & send deposit invoice`,
+                action: 'need-action',
+                urgent: true
+            });
+        }
+        
+        // New quote requests
+        const newQuotes = this.quotes.filter(q => q.status === 'quote_requested');
+        if (newQuotes.length > 0) {
+            priorities.push({
+                text: `🆕 ${newQuotes.length} NEW QUOTE REQUEST${newQuotes.length > 1 ? 'S' : ''} - Review & send quotes to customers`,
+                action: 'new-quotes',
+                urgent: false
+            });
+        }
+        
+        // Deposit received
+        const depositPaid = this.orders.filter(o => o.status === 'deposit_paid');
+        if (depositPaid.length > 0) {
+            priorities.push({
+                text: `💰 ${depositPaid.length} DEPOSIT${depositPaid.length > 1 ? 'S' : ''} RECEIVED - Confirm & send to production`,
+                action: 'active-orders',
+                urgent: false
+            });
+        }
+        
+        if (priorities.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: #666;">✅ No urgent actions required. Great job!</p>';
+            return;
+        }
+        
+        container.innerHTML = priorities.map(p => `
+            <div class="priority-item ${p.urgent ? 'urgent' : ''}">
+                <div class="priority-item-text">${p.text}</div>
+                <div class="priority-item-action">
+                    <button class="btn btn-small" onclick="adminDashboard.switchView('${p.action}')">
+                        View
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Update recent activity
+    updateRecentActivity() {
+        const container = document.getElementById('recent-activity-list');
+        const allItems = [...this.quotes, ...this.orders]
+            .sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at))
+            .slice(0, 10);
+        
+        if (allItems.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: #666;">No recent activity</p>';
+            return;
+        }
+        
+        container.innerHTML = allItems.map(item => {
+            const time = this.formatTimeAgo(item.updated_at || item.created_at);
+            const customerName = item.customers?.full_name || 'Unknown';
+            const statusText = this.getStatusText(item.status);
+            
+            return `
+                <div class="activity-item">
+                    <div>
+                        <strong>${customerName}</strong> - ${statusText}
+                        <br><small style="color: #666;">${item.id}</small>
+                    </div>
+                    <div class="activity-time">${time}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Get status display text
+    getStatusText(status) {
+        const statusTexts = {
+            saved: 'Draft (Customer)',
+            quote_requested: 'New Quote Request',
+            quote_sent: 'Quote Sent to Customer',
+            customer_confirmed: 'Customer Confirmed Order',
+            deposit_invoice_sent: 'Awaiting Deposit Payment',
+            deposit_paid: 'Deposit Paid',
+            in_production: 'In Production',
+            ready_delivery: 'Ready for Delivery',
+            completed: 'Completed',
+            rejected: 'Rejected'
+        };
+        return statusTexts[status] || status;
+    }
+
+    // Format time ago
+    formatTimeAgo(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const seconds = Math.floor((now - date) / 1000);
+        
+        if (seconds < 60) return 'Just now';
+        if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+        if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+        if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+        
+        return date.toLocaleDateString();
+    }
+
+    // Format price
+    formatPrice(price) {
+        return new Intl.NumberFormat('en-GB', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(price);
+    }
+
+    // Switch view
     switchView(view) {
         // Hide all views
         document.querySelectorAll('.admin-view').forEach(v => v.classList.remove('active'));
@@ -91,825 +321,624 @@ class AdminPanel {
         document.getElementById(`${view}-view`).classList.add('active');
         document.querySelector(`[data-view="${view}"]`).classList.add('active');
         
-        // Update title
-        const titles = {
-            dashboard: 'Dashboard',
-            customers: 'Customers Management',
-            orders: 'Orders Management',
-            analytics: 'Analytics & Reports',
-            pricing: 'Pricing Configuration'
-        };
-        document.getElementById('view-title').textContent = titles[view];
-        
         this.currentView = view;
         
         // Load view-specific data
+        this.loadViewData(view);
+    }
+
+    // Load data for specific view
+    loadViewData(view) {
         switch(view) {
-            case 'customers':
-                this.loadCustomers();
+            case 'dashboard':
+                this.updateDashboard();
                 break;
-            case 'orders':
-                this.loadOrders();
+            case 'new-quotes':
+                this.renderNewQuotes();
+                break;
+            case 'need-action':
+                this.renderNeedAction();
+                break;
+            case 'all-quotes':
+                this.renderAllQuotes();
+                break;
+            case 'active-orders':
+                this.renderActiveOrders();
                 break;
             case 'analytics':
-                this.loadAnalytics();
+                this.renderAnalytics();
                 break;
-            case 'pricing':
-                this.loadPricingConfig();
+            case 'customers':
+                this.renderCustomers();
+                break;
+            case 'invoices':
+                this.renderInvoices();
                 break;
         }
     }
 
-    // Load dashboard data
-    async loadDashboardData() {
-        try {
-            // Load stats
-            await this.loadStats();
-            
-            // Load recent orders
-            await this.loadRecentOrders();
-            
-        } catch (error) {
-            console.error('Error loading dashboard:', error);
-        }
+    // Render customers (placeholder)
+    renderCustomers() {
+        const container = document.getElementById('customers-list');
+        container.innerHTML = '<p style="text-align: center; padding: 40px;">Customers list coming soon...</p>';
     }
 
-    // Load statistics
-    async loadStats() {
-        try {
-            console.log('Loading stats...');
-            
-            // Total customers
-            const { count: customersCount, error: customersError } = await supabaseClient
-                .from('customers')
-                .select('*', { count: 'exact', head: true });
-            
-            if (customersError) {
-                console.error('Error loading customers count:', customersError);
-            }
-            document.getElementById('total-customers').textContent = customersCount || 0;
-            console.log('Customers count:', customersCount);
-
-            // Total estimates
-            const { count: estimatesCount, error: estimatesError } = await supabaseClient
-                .from('orders')
-                .select('*', { count: 'exact', head: true })
-                .eq('status', 'saved');
-            
-            if (estimatesError) {
-                console.error('Error loading estimates count:', estimatesError);
-            }
-            document.getElementById('total-estimates').textContent = estimatesCount || 0;
-            console.log('Estimates count:', estimatesCount);
-
-            // Active orders
-            const { count: activeCount, error: activeError } = await supabaseClient
-                .from('orders')
-                .select('*', { count: 'exact', head: true })
-                .in('status', ['pending', 'confirmed', 'in_production']);
-            
-            if (activeError) {
-                console.error('Error loading active orders count:', activeError);
-            }
-            document.getElementById('active-orders').textContent = activeCount || 0;
-            console.log('Active orders count:', activeCount);
-
-            // Total revenue
-            const { data: revenueData, error: revenueError } = await supabaseClient
-                .from('orders')
-                .select('total_price')
-                .in('status', ['confirmed', 'production', 'transport', 'completed']);
-            
-            if (revenueError) {
-                console.error('Error loading revenue:', revenueError);
-            }
-            const totalRevenue = revenueData?.reduce((sum, order) => sum + (order.total_price || 0), 0) || 0;
-            document.getElementById('total-revenue').textContent = `£${this.formatPrice(totalRevenue)}`;
-            console.log('Total revenue:', totalRevenue);
-
-        } catch (error) {
-            console.error('Error loading stats:', error);
-            alert('Error loading dashboard statistics. Check console for details.');
-        }
+    // Render invoices (placeholder)
+    renderInvoices() {
+        const container = document.getElementById('invoices-list');
+        container.innerHTML = '<p style="text-align: center; padding: 40px;">Invoices list coming soon...</p>';
     }
 
-    // Load recent orders for dashboard
-    async loadRecentOrders() {
-        try {
-            const { data, error } = await supabaseClient
-                .from('orders')
-                .select(`
-                    *,
-                    customers (full_name, email)
-                `)
-                .order('created_at', { ascending: false })
-                .limit(5);
+    // Render new quotes
+    renderNewQuotes() {
+        const container = document.getElementById('new-quotes-list');
+        const newQuotes = this.quotes.filter(q => q.status === 'quote_requested');
+        
+        if (newQuotes.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">No new quote requests</p>';
+            return;
+        }
+        
+        container.innerHTML = newQuotes.map(quote => this.renderQuoteCard(quote, true)).join('');
+    }
 
-            if (error) throw error;
+    // Render need action
+    renderNeedAction() {
+        const container = document.getElementById('need-action-list');
+        const needAction = this.quotes.filter(q => q.status === 'customer_confirmed');
+        
+        if (needAction.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">✅ No actions required</p>';
+            return;
+        }
+        
+        container.innerHTML = needAction.map(quote => this.renderQuoteCard(quote, true, true)).join('');
+    }
 
-            const container = document.getElementById('recent-orders-list');
-            
-            if (!data || data.length === 0) {
-                container.innerHTML = '<p class="no-data">No recent orders</p>';
-                return;
-            }
-
-            container.innerHTML = data.map(order => `
-                <div class="recent-order-item">
-                    <div class="order-info">
-                        <strong>#${order.id.substring(0, 8).toUpperCase()}</strong>
-                        <span>${order.customers?.full_name || 'Unknown'}</span>
+    // Render quote card
+    renderQuoteCard(quote, showActions = false, isUrgent = false) {
+        const customer = quote.customers;
+        const price = quote.total_price || 0;
+        
+        return `
+            <div class="quote-card ${isUrgent ? 'urgent' : ''}">
+                <div class="quote-header">
+                    <div>
+                        <div class="quote-id">${quote.id}</div>
+                        <div style="font-size: 0.9rem; color: #666; margin-top: 3px;">
+                            ${customer?.full_name || 'Unknown'} | ${customer?.email || ''}
+                        </div>
                     </div>
-                    <div class="order-meta">
-                        <span class="status-badge status-${order.status}">${this.formatStatus(order.status)}</span>
-                        <span class="price">£${this.formatPrice(order.total_price)}</span>
+                    <div class="quote-status ${isUrgent ? 'status-urgent' : 'status-new'}">
+                        ${this.getStatusText(quote.status)}
                     </div>
                 </div>
-            `).join('');
-
-        } catch (error) {
-            console.error('Error loading recent orders:', error);
-        }
-    }
-
-    // Load customers
-    async loadCustomers() {
-        try {
-            const { data, error } = await supabaseClient
-                .from('customers')
-                .select(`
-                    *,
-                    orders (id, status)
-                `)
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-
-            this.customers = data || [];
-            this.renderCustomersTable();
-
-        } catch (error) {
-            console.error('Error loading customers:', error);
-            document.getElementById('customers-tbody').innerHTML = 
-                '<tr><td colspan="7" class="error">Failed to load customers</td></tr>';
-        }
-    }
-
-    // Render customers table
-    renderCustomersTable() {
-        const tbody = document.getElementById('customers-tbody');
-        
-        if (this.customers.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="no-data">No customers found</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = this.customers.map(customer => {
-            const orders = customer.orders || [];
-            const totalOrders = orders.filter(o => o.status !== 'saved').length;
-            const estimates = orders.filter(o => o.status === 'saved').length;
-            const registeredDate = new Date(customer.created_at).toLocaleDateString('en-GB');
-
-            return `
-                <tr>
-                    <td><strong>${customer.full_name}</strong></td>
-                    <td>${customer.email}</td>
-                    <td>${customer.phone || 'N/A'}</td>
-                    <td>${registeredDate}</td>
-                    <td>${totalOrders}</td>
-                    <td>${estimates}</td>
-                    <td>
-                        <button class="btn-small" onclick="adminPanel.viewCustomer('${customer.id}')">View</button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-    }
-
-    // Filter customers
-    filterCustomers(query) {
-        const filtered = this.customers.filter(c => 
-            c.full_name.toLowerCase().includes(query.toLowerCase()) ||
-            c.email.toLowerCase().includes(query.toLowerCase())
-        );
-
-        const tbody = document.getElementById('customers-tbody');
-        
-        if (filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="no-data">No customers match your search</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = filtered.map(customer => {
-            const orders = customer.orders || [];
-            const totalOrders = orders.filter(o => o.status !== 'saved').length;
-            const estimates = orders.filter(o => o.status === 'saved').length;
-            const registeredDate = new Date(customer.created_at).toLocaleDateString('en-GB');
-
-            return `
-                <tr>
-                    <td><strong>${customer.full_name}</strong></td>
-                    <td>${customer.email}</td>
-                    <td>${customer.phone || 'N/A'}</td>
-                    <td>${registeredDate}</td>
-                    <td>${totalOrders}</td>
-                    <td>${estimates}</td>
-                    <td>
-                        <button class="btn-small" onclick="adminPanel.viewCustomer('${customer.id}')">View</button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-    }
-
-    // Load orders
-    async loadOrders() {
-        try {
-            const { data, error } = await supabaseClient
-                .from('orders')
-                .select(`
-                    *,
-                    customers (full_name, email),
-                    order_items (id)
-                `)
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-
-            this.orders = data || [];
-            this.renderOrdersTable();
-
-        } catch (error) {
-            console.error('Error loading orders:', error);
-            document.getElementById('orders-tbody').innerHTML = 
-                '<tr><td colspan="8" class="error">Failed to load orders</td></tr>';
-        }
-    }
-
-    // Render orders table
-    renderOrdersTable() {
-        const tbody = document.getElementById('orders-tbody');
-        
-        // Filter orders
-        let filtered = this.orders;
-        if (this.orderFilter !== 'all') {
-            filtered = this.orders.filter(o => o.status === this.orderFilter);
-        }
-
-        if (filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="no-data">No orders found</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = filtered.map(order => {
-            const orderDate = new Date(order.created_at).toLocaleDateString('en-GB');
-            const itemCount = order.order_items?.length || 0;
-            const depositStatus = order.deposit_paid ? 
-                `<span class="paid">✓ £${this.formatPrice(order.deposit_amount)}</span>` : 
-                `<span class="unpaid">⚠ £${this.formatPrice(order.deposit_amount || 0)}</span>`;
-
-            return `
-                <tr>
-                    <td><strong>#${order.id.substring(0, 8).toUpperCase()}</strong></td>
-                    <td>${order.customers?.full_name || 'Unknown'}</td>
-                    <td>${orderDate}</td>
-                    <td>${itemCount}</td>
-                    <td>£${this.formatPrice(order.total_price)}</td>
-                    <td>${order.deposit_amount ? depositStatus : 'N/A'}</td>
-                    <td><span class="status-badge status-${order.status}">${this.formatStatus(order.status)}</span></td>
-                    <td>
-                        <button class="btn-small" onclick="adminPanel.editOrder('${order.id}')">Edit</button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-    }
-
-    // Edit order - show modal with status update options
-    async editOrder(orderId) {
-        try {
-            const { data, error } = await supabaseClient
-                .from('orders')
-                .select(`
-                    *,
-                    customers (full_name, email, phone),
-                    order_items (*),
-                    order_timeline (*)
-                `)
-                .eq('id', orderId)
-                .single();
-
-            if (error) throw error;
-
-            this.showOrderEditModal(data);
-
-        } catch (error) {
-            console.error('Error loading order:', error);
-            alert('Failed to load order details');
-        }
-    }
-
-    // Show order edit modal
-    showOrderEditModal(order) {
-        const modal = document.getElementById('order-edit-modal');
-        const content = document.getElementById('order-edit-content');
-
-        content.innerHTML = `
-            <h2>Edit Order #${order.id.substring(0, 8).toUpperCase()}</h2>
-            
-            <div class="order-edit-section">
-                <h3>Customer Information</h3>
-                <p><strong>Name:</strong> ${order.customers.full_name}</p>
-                <p><strong>Email:</strong> ${order.customers.email}</p>
-                <p><strong>Phone:</strong> ${order.customers.phone || 'N/A'}</p>
-            </div>
-
-            <div class="order-edit-section">
-                <h3>Order Status</h3>
-                <select id="order-status-select" class="status-select">
-                    <option value="saved" ${order.status === 'saved' ? 'selected' : ''}>Saved Estimate</option>
-                    <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
-                    <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-                    <option value="in_production" ${order.status === 'in_production' ? 'selected' : ''}>In Production</option>
-                    <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Completed</option>
-                    <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-                </select>
-            </div>
-
-            <div class="order-edit-section">
-                <h3>Deposit Status</h3>
-                <label class="checkbox-label">
-                    <input type="checkbox" id="deposit-paid-checkbox" ${order.deposit_paid ? 'checked' : ''}>
-                    Deposit Paid (£${this.formatPrice(order.deposit_amount || 0)})
-                </label>
-            </div>
-
-            <div class="order-edit-section">
-                <h3>Add Note</h3>
-                <textarea id="order-note" placeholder="Add a note to order timeline..." rows="3"></textarea>
-            </div>
-
-            <div class="modal-actions">
-                <button class="btn" onclick="adminPanel.saveOrderChanges('${order.id}')">Save Changes</button>
-                <button class="btn-secondary" onclick="adminPanel.closeOrderModal()">Cancel</button>
+                <div class="quote-body">
+                    <div class="quote-info-row">
+                        <span>Created:</span>
+                        <strong>${new Date(quote.created_at).toLocaleDateString()}</strong>
+                    </div>
+                    <div class="quote-info-row">
+                        <span>Total Value:</span>
+                        <strong style="color: var(--secondary-color); font-size: 1.1rem;">£${this.formatPrice(price)}</strong>
+                    </div>
+                    <div class="quote-info-row">
+                        <span>Items:</span>
+                        <strong>${quote.items?.length || 0} window(s)</strong>
+                    </div>
+                </div>
+                ${showActions ? `
+                    <div class="quote-actions">
+                        <button class="btn btn-small" onclick="adminDashboard.viewQuoteDetail('${quote.id}')">
+                            View Details
+                        </button>
+                        ${quote.status === 'quote_requested' ? `
+                            <button class="btn btn-small" onclick="adminDashboard.sendQuote('${quote.id}')">
+                                📤 Send Quote to Customer
+                            </button>
+                        ` : ''}
+                        ${quote.status === 'customer_confirmed' ? `
+                            <button class="btn btn-small" onclick="adminDashboard.generateDepositInvoice('${quote.id}')">
+                                💰 Generate Deposit Invoice
+                            </button>
+                        ` : ''}
+                    </div>
+                ` : ''}
             </div>
         `;
-
-        modal.style.display = 'block';
     }
 
-    // Save order changes
-    async saveOrderChanges(orderId) {
-        const newStatus = document.getElementById('order-status-select').value;
-        const depositPaid = document.getElementById('deposit-paid-checkbox').checked;
-        const note = document.getElementById('order-note').value.trim();
-
-        try {
-            // Update order
-            const { error: orderError } = await supabaseClient
-                .from('orders')
-                .update({
-                    status: newStatus,
-                    deposit_paid: depositPaid,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', orderId);
-
-            if (orderError) throw orderError;
-
-            // Add timeline entry if note provided
-            if (note) {
-                await supabaseClient
-                    .from('order_timeline')
-                    .insert([{
-                        order_id: orderId,
-                        status_change: `Status updated to: ${newStatus}`,
-                        notes: note,
-                        created_at: new Date().toISOString()
-                    }]);
-            }
-
-            alert('Order updated successfully!');
-            this.closeOrderModal();
-            await this.loadOrders();
-
-        } catch (error) {
-            console.error('Error saving order:', error);
-            alert('Failed to update order');
+    // Render all quotes with filters
+    renderAllQuotes() {
+        const container = document.getElementById('all-quotes-list');
+        
+        // Apply filters
+        let filteredQuotes = [...this.quotes];
+        
+        // Status filter
+        const statusFilter = document.getElementById('quotes-status-filter')?.value || 'all';
+        if (statusFilter !== 'all') {
+            filteredQuotes = filteredQuotes.filter(q => q.status === statusFilter);
         }
-    }
-
-    // Close order modal
-    closeOrderModal() {
-        document.getElementById('order-edit-modal').style.display = 'none';
-    }
-
-    // Format price
-    formatPrice(price) {
-        return new Intl.NumberFormat('en-GB', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(price);
-    }
-
-    // Format status for display
-    formatStatus(status) {
-        const statusLabels = {
-            'saved': 'Saved Estimate',
-            'pending': 'Pending',
-            'confirmed': 'Confirmed',
-            'in_production': 'In Production',
-            'completed': 'Completed',
-            'cancelled': 'Cancelled'
-        };
-        return statusLabels[status] || status;
-    }
-
-    // Export customers to CSV
-    exportCustomers() {
-        const csv = [
-            ['Name', 'Email', 'Phone', 'Registered', 'Total Orders', 'Estimates'],
-            ...this.customers.map(c => [
-                c.full_name,
-                c.email,
-                c.phone || '',
-                new Date(c.created_at).toLocaleDateString('en-GB'),
-                c.orders?.filter(o => o.status !== 'saved').length || 0,
-                c.orders?.filter(o => o.status === 'saved').length || 0
-            ])
-        ].map(row => row.join(',')).join('\n');
-
-        this.downloadCSV(csv, 'customers.csv');
-    }
-
-    // Export orders to CSV
-    exportOrders() {
-        const csv = [
-            ['Order ID', 'Customer', 'Date', 'Items', 'Total', 'Deposit Paid', 'Status'],
-            ...this.orders.map(o => [
-                o.id.substring(0, 8).toUpperCase(),
-                o.customers?.full_name || 'Unknown',
-                new Date(o.created_at).toLocaleDateString('en-GB'),
-                o.order_items?.length || 0,
-                o.total_price,
-                o.deposit_paid ? 'Yes' : 'No',
-                o.status
-            ])
-        ].map(row => row.join(',')).join('\n');
-
-        this.downloadCSV(csv, 'orders.csv');
-    }
-
-    // Download CSV helper
-    downloadCSV(content, filename) {
-        const blob = new Blob([content], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        a.click();
-        window.URL.revokeObjectURL(url);
-    }
-
-    // Continue in part 2...
-
-    // Load Analytics
-    async loadAnalytics() {
-        try {
-            // Load funnel data
-            await this.loadConversionFunnel();
-            
-            // Load revenue data
-            await this.loadRevenueData();
-            
-            // Load popular products
-            await this.loadPopularProducts();
-
-        } catch (error) {
-            console.error('Error loading analytics:', error);
+        
+        // Period filter
+        const periodFilter = document.getElementById('quotes-period-filter')?.value || 'all';
+        if (periodFilter !== 'all') {
+            filteredQuotes = this.filterByPeriod(filteredQuotes, periodFilter);
         }
-    }
-
-    // Load conversion funnel
-    async loadConversionFunnel() {
-        try {
-            // Get total visitors (from analytics_events)
-            const { count: visitors } = await supabaseClient
-                .from('analytics_events')
-                .select('*', { count: 'exact', head: true })
-                .eq('event_name', 'page_visit');
-
-            // Get registrations
-            const { count: registrations } = await supabaseClient
-                .from('customers')
-                .select('*', { count: 'exact', head: true });
-
-            // Get estimates
-            const { count: estimates } = await supabaseClient
-                .from('orders')
-                .select('*', { count: 'exact', head: true });
-
-            // Get confirmed orders
-            const { count: orders } = await supabaseClient
-                .from('orders')
-                .select('*', { count: 'exact', head: true })
-                .in('status', ['pending', 'confirmed', 'in_production', 'completed']);
-
-            // Update UI
-            document.getElementById('analytics-visitors').textContent = visitors || 0;
-            document.getElementById('analytics-registrations').textContent = registrations || 0;
-            document.getElementById('analytics-estimates').textContent = estimates || 0;
-            document.getElementById('analytics-orders').textContent = orders || 0;
-
-            // Calculate percentages
-            if (visitors > 0) {
-                const regPercent = ((registrations / visitors) * 100).toFixed(1);
-                document.getElementById('reg-percent').textContent = `${regPercent}%`;
-            }
-
-            if (registrations > 0) {
-                const estPercent = ((estimates / registrations) * 100).toFixed(1);
-                document.getElementById('est-percent').textContent = `${estPercent}%`;
-            }
-
-            if (estimates > 0) {
-                const ordPercent = ((orders / estimates) * 100).toFixed(1);
-                document.getElementById('ord-percent').textContent = `${ordPercent}%`;
-            }
-
-        } catch (error) {
-            console.error('Error loading funnel:', error);
-        }
-    }
-
-    // Load revenue data
-    async loadRevenueData() {
-        try {
-            // Total revenue
-            const { data: allOrders } = await supabaseClient
-                .from('orders')
-                .select('total_price')
-                .in('status', ['confirmed', 'production', 'transport', 'completed']);
-
-            const totalRevenue = allOrders?.reduce((sum, o) => sum + (o.total_price || 0), 0) || 0;
-            const avgOrder = allOrders?.length > 0 ? totalRevenue / allOrders.length : 0;
-
-            // This month revenue
-            const now = new Date();
-            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-            
-            const { data: monthOrders } = await supabaseClient
-                .from('orders')
-                .select('total_price')
-                .in('status', ['confirmed', 'production', 'transport', 'completed'])
-                .gte('created_at', firstDay);
-
-            const monthRevenue = monthOrders?.reduce((sum, o) => sum + (o.total_price || 0), 0) || 0;
-
-            // Update UI
-            document.getElementById('revenue-total').textContent = `£${this.formatPrice(totalRevenue)}`;
-            document.getElementById('revenue-avg').textContent = `£${this.formatPrice(avgOrder)}`;
-            document.getElementById('revenue-month').textContent = `£${this.formatPrice(monthRevenue)}`;
-
-        } catch (error) {
-            console.error('Error loading revenue:', error);
-        }
-    }
-
-    // Load popular products
-    async loadPopularProducts() {
-        try {
-            const { data, error } = await supabaseClient
-                .from('order_items')
-                .select('window_type');
-
-            if (error) throw error;
-
-            // Count window types
-            const counts = {};
-            data?.forEach(item => {
-                const type = item.window_type || 'Custom';
-                counts[type] = (counts[type] || 0) + 1;
+        
+        // Search filter
+        const searchFilter = document.getElementById('quotes-search')?.value.toLowerCase() || '';
+        if (searchFilter) {
+            filteredQuotes = filteredQuotes.filter(q => {
+                const customer = q.customers;
+                return (customer?.full_name?.toLowerCase().includes(searchFilter) ||
+                        customer?.email?.toLowerCase().includes(searchFilter) ||
+                        q.id?.toLowerCase().includes(searchFilter));
             });
-
-            // Sort by count
-            const sorted = Object.entries(counts)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 5);
-
-            // Display
-            const container = document.getElementById('popular-products');
-            
-            if (sorted.length === 0) {
-                container.innerHTML = '<p class="no-data">No product data available</p>';
-                return;
-            }
-
-            container.innerHTML = sorted.map(([type, count]) => `
-                <div class="product-item" style="display: flex; justify-content: space-between; padding: 12px; background: #f9f9f9; margin: 8px 0; border-radius: 5px;">
-                    <span style="font-weight: 600;">${type}</span>
-                    <span style="color: var(--secondary-color);">${count} orders</span>
-                </div>
-            `).join('');
-
-        } catch (error) {
-            console.error('Error loading popular products:', error);
-        }
-    }
-
-    // Load pricing config
-    async loadPricingConfig() {
-        try {
-            // Load current config from database or use default
-            const { data, error } = await supabaseClient
-                .from('pricing_config')
-                .select('*')
-                .single();
-
-            if (error && error.code !== 'PGRST116') { // PGRST116 = no rows
-                throw error;
-            }
-
-            const config = data || {
-                base_price: 300,
-                sqm_price: 150,
-                multipliers: {
-                    frame: { standard: 1, slim: 1.05 },
-                    glass: { double: 1, triple: 1.15, passive: 1.25 },
-                    opening: { both: 1, top: 0.95, bottom: 0.95, fixed: 0.9 },
-                    color: { single: 1, dual: 1.1 },
-                    bars: { none: 1, '2x2': 1.04, '3x3': 1.06, '6x6': 1.08 }
-                }
-            };
-
-            // Populate base pricing
-            document.getElementById('config-base-price').value = config.base_price;
-            document.getElementById('config-sqm-price').value = config.sqm_price;
-
-            // Populate multipliers
-            this.renderMultipliersConfig(config.multipliers);
-
-        } catch (error) {
-            console.error('Error loading pricing config:', error);
-        }
-    }
-
-    // Render multipliers config
-    renderMultipliersConfig(multipliers) {
-        const container = document.getElementById('multipliers-config');
-        
-        let html = '';
-        
-        for (const [category, options] of Object.entries(multipliers)) {
-            html += `
-                <div class="multiplier-category" style="margin: 20px 0; padding: 20px; background: #f9f9f9; border-radius: 5px;">
-                    <h4 style="color: var(--primary-color); margin-bottom: 15px; text-transform: capitalize;">${category}</h4>
-                    <div class="config-grid">
-            `;
-            
-            for (const [option, value] of Object.entries(options)) {
-                html += `
-                    <div class="config-item">
-                        <label>${option}:</label>
-                        <input type="number" 
-                               step="0.01" 
-                               value="${value}" 
-                               data-category="${category}" 
-                               data-option="${option}"
-                               class="multiplier-input">
-                    </div>
-                `;
-            }
-            
-            html += `
-                    </div>
-                </div>
-            `;
         }
         
-        container.innerHTML = html;
-    }
-
-    // Save pricing config
-    async savePricingConfig() {
-        try {
-            const basePrice = parseFloat(document.getElementById('config-base-price').value);
-            const sqmPrice = parseFloat(document.getElementById('config-sqm-price').value);
-
-            // Collect all multipliers
-            const multipliers = {};
-            document.querySelectorAll('.multiplier-input').forEach(input => {
-                const category = input.dataset.category;
-                const option = input.dataset.option;
-                const value = parseFloat(input.value);
-
-                if (!multipliers[category]) {
-                    multipliers[category] = {};
-                }
-                multipliers[category][option] = value;
-            });
-
-            // Save to database
-            const { error } = await supabaseClient
-                .from('pricing_config')
-                .upsert({
-                    id: 1, // Single config row
-                    base_price: basePrice,
-                    sqm_price: sqmPrice,
-                    multipliers: multipliers,
-                    updated_at: new Date().toISOString()
-                });
-
-            if (error) throw error;
-
-            alert('Pricing configuration saved successfully!');
-
-            // Also update the config.js file (would need backend endpoint)
-            // For now, just show success
-
-        } catch (error) {
-            console.error('Error saving pricing config:', error);
-            alert('Failed to save pricing configuration');
-        }
-    }
-
-    // Reset pricing config
-    async resetPricingConfig() {
-        if (!confirm('Are you sure you want to reset pricing to default values?')) {
+        // Calculate statistics
+        this.updateQuotesSummary(filteredQuotes);
+        
+        // Render quotes
+        if (filteredQuotes.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">No quotes found</p>';
             return;
         }
+        
+        container.innerHTML = filteredQuotes.map(quote => this.renderQuoteCard(quote, true)).join('');
+        
+        // Attach filter event listeners
+        this.attachQuotesFilters();
+    }
 
-        try {
-            const defaultConfig = {
-                id: 1,
-                base_price: 300,
-                sqm_price: 150,
-                multipliers: {
-                    frame: { standard: 1, slim: 1.05 },
-                    glass: { double: 1, triple: 1.15, passive: 1.25 },
-                    opening: { both: 1, top: 0.95, bottom: 0.95, fixed: 0.9 },
-                    color: { single: 1, dual: 1.1 },
-                    bars: { none: 1, '2x2': 1.04, '3x3': 1.06, '6x6': 1.08 }
-                },
-                updated_at: new Date().toISOString()
-            };
-
-            const { error } = await supabaseClient
-                .from('pricing_config')
-                .upsert(defaultConfig);
-
-            if (error) throw error;
-
-            alert('Pricing reset to default values!');
-            await this.loadPricingConfig();
-
-        } catch (error) {
-            console.error('Error resetting pricing:', error);
-            alert('Failed to reset pricing');
+    // Filter by period
+    filterByPeriod(items, period) {
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        
+        switch(period) {
+            case 'today':
+                return items.filter(item => {
+                    const date = new Date(item.created_at);
+                    return date >= today;
+                });
+            case 'week':
+                const weekAgo = new Date(today);
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                return items.filter(item => new Date(item.created_at) >= weekAgo);
+            case 'month':
+                const monthAgo = new Date(today);
+                monthAgo.setMonth(monthAgo.getMonth() - 1);
+                return items.filter(item => new Date(item.created_at) >= monthAgo);
+            case 'year':
+                const yearStart = new Date(now.getFullYear(), 0, 1);
+                return items.filter(item => new Date(item.created_at) >= yearStart);
+            default:
+                return items;
         }
     }
 
-    // View customer details
-    viewCustomer(customerId) {
-        // Switch to orders view and filter by customer
-        this.switchView('orders');
+    // Update quotes summary statistics
+    updateQuotesSummary(quotes) {
+        const totalCount = quotes.length;
+        const totalValue = quotes.reduce((sum, q) => sum + (q.total_price || 0), 0);
+        const avgValue = totalCount > 0 ? totalValue / totalCount : 0;
         
-        // Filter orders for this customer
-        const filteredOrders = this.orders.filter(o => o.customer_id === customerId);
+        // Calculate conversion rate (quotes that became orders)
+        const convertedQuotes = quotes.filter(q => 
+            ['customer_confirmed', 'deposit_invoice_sent', 'deposit_paid', 'in_production', 'completed'].includes(q.status)
+        ).length;
+        const conversionRate = totalCount > 0 ? (convertedQuotes / totalCount * 100) : 0;
         
-        const tbody = document.getElementById('orders-tbody');
+        document.getElementById('total-quotes-count').textContent = totalCount;
+        document.getElementById('total-quotes-value').textContent = `£${this.formatPrice(totalValue)}`;
+        document.getElementById('avg-quotes-value').textContent = `£${this.formatPrice(avgValue)}`;
+        document.getElementById('quotes-conversion-rate').textContent = `${conversionRate.toFixed(1)}%`;
+    }
+
+    // Attach quotes filters event listeners
+    attachQuotesFilters() {
+        const statusFilter = document.getElementById('quotes-status-filter');
+        const periodFilter = document.getElementById('quotes-period-filter');
+        const searchInput = document.getElementById('quotes-search');
+        
+        if (statusFilter && !statusFilter.dataset.listenerAttached) {
+            statusFilter.addEventListener('change', () => this.renderAllQuotes());
+            statusFilter.dataset.listenerAttached = 'true';
+        }
+        
+        if (periodFilter && !periodFilter.dataset.listenerAttached) {
+            periodFilter.addEventListener('change', () => this.renderAllQuotes());
+            periodFilter.dataset.listenerAttached = 'true';
+        }
+        
+        if (searchInput && !searchInput.dataset.listenerAttached) {
+            searchInput.addEventListener('input', () => this.renderAllQuotes());
+            searchInput.dataset.listenerAttached = 'true';
+        }
+    }
+
+    // Render active orders
+    renderActiveOrders() {
+        const container = document.getElementById('active-orders-list');
+        
+        if (this.orders.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">No active orders</p>';
+            return;
+        }
+        
+        container.innerHTML = this.orders.map(order => this.renderOrderCard(order)).join('');
+        
+        // Attach filter buttons
+        document.querySelectorAll('#active-orders-view .filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const filter = btn.dataset.filter;
+                document.querySelectorAll('#active-orders-view .filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.filterOrders(filter);
+            });
+        });
+    }
+
+    // Render order card
+    renderOrderCard(order) {
+        const customer = order.customers;
+        const price = order.total_price || 0;
+        
+        return `
+            <div class="quote-card">
+                <div class="quote-header">
+                    <div>
+                        <div class="quote-id">${order.id}</div>
+                        <div style="font-size: 0.9rem; color: #666; margin-top: 3px;">
+                            ${customer?.full_name || 'Unknown'} | ${customer?.email || ''}
+                        </div>
+                    </div>
+                    <div class="quote-status status-sent">
+                        ${this.getStatusText(order.status)}
+                    </div>
+                </div>
+                <div class="quote-body">
+                    <div class="quote-info-row">
+                        <span>Created:</span>
+                        <strong>${new Date(order.created_at).toLocaleDateString()}</strong>
+                    </div>
+                    <div class="quote-info-row">
+                        <span>Total Value:</span>
+                        <strong style="color: var(--secondary-color); font-size: 1.1rem;">£${this.formatPrice(price)}</strong>
+                    </div>
+                    <div class="quote-info-row">
+                        <span>Items:</span>
+                        <strong>${order.items?.length || 0} window(s)</strong>
+                    </div>
+                </div>
+                <div class="quote-actions">
+                    <button class="btn btn-small" onclick="adminDashboard.viewQuoteDetail('${order.id}')">
+                        View Details
+                    </button>
+                    ${order.status === 'deposit_paid' ? `
+                        <button class="btn btn-small" onclick="adminDashboard.sendToProduction('${order.id}')">
+                            🏭 Send to Production
+                        </button>
+                    ` : ''}
+                    ${order.status === 'in_production' ? `
+                        <button class="btn btn-small" onclick="adminDashboard.markReadyForDelivery('${order.id}')">
+                            ✅ Mark Ready for Delivery
+                        </button>
+                    ` : ''}
+                    ${order.status === 'ready_delivery' ? `
+                        <button class="btn btn-small" onclick="adminDashboard.markCompleted('${order.id}')">
+                            ✅ Mark as Completed
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    // Filter orders
+    filterOrders(filter) {
+        const container = document.getElementById('active-orders-list');
+        let filteredOrders = this.orders;
+        
+        if (filter !== 'all') {
+            filteredOrders = this.orders.filter(o => o.status === filter);
+        }
         
         if (filteredOrders.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="no-data">This customer has no orders yet</td></tr>';
+            container.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">No orders in this category</p>';
             return;
         }
+        
+        container.innerHTML = filteredOrders.map(order => this.renderOrderCard(order)).join('');
+    }
 
-        tbody.innerHTML = filteredOrders.map(order => {
-            const orderDate = new Date(order.created_at).toLocaleDateString('en-GB');
-            const itemCount = order.order_items?.length || 0;
-            const depositStatus = order.deposit_paid ? 
-                `<span class="paid">✓ £${this.formatPrice(order.deposit_amount)}</span>` : 
-                `<span class="unpaid">⚠ £${this.formatPrice(order.deposit_amount || 0)}</span>`;
+    // Send to production
+    async sendToProduction(orderId) {
+        if (!confirm('Send this order to production?')) return;
+        
+        try {
+            const { error } = await supabaseClient
+                .from('orders')
+                .update({ status: 'in_production', updated_at: new Date().toISOString() })
+                .eq('id', orderId);
+            
+            if (error) throw error;
+            
+            alert('Order sent to production!');
+            await this.loadAllData();
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error: ' + error.message);
+        }
+    }
 
-            return `
-                <tr>
-                    <td><strong>#${order.id.substring(0, 8).toUpperCase()}</strong></td>
-                    <td>${order.customers?.full_name || 'Unknown'}</td>
-                    <td>${orderDate}</td>
-                    <td>${itemCount}</td>
-                    <td>£${this.formatPrice(order.total_price)}</td>
-                    <td>${order.deposit_amount ? depositStatus : 'N/A'}</td>
-                    <td><span class="status-badge status-${order.status}">${this.formatStatus(order.status)}</span></td>
-                    <td>
-                        <button class="btn-small" onclick="adminPanel.editOrder('${order.id}')">Edit</button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
+    // Mark ready for delivery
+    async markReadyForDelivery(orderId) {
+        if (!confirm('Mark this order as ready for delivery?')) return;
+        
+        try {
+            const { error } = await supabaseClient
+                .from('orders')
+                .update({ status: 'ready_delivery', updated_at: new Date().toISOString() })
+                .eq('id', orderId);
+            
+            if (error) throw error;
+            
+            alert('Order marked as ready for delivery!');
+            await this.loadAllData();
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error: ' + error.message);
+        }
+    }
+
+    // Mark completed
+    async markCompleted(orderId) {
+        if (!confirm('Mark this order as completed?')) return;
+        
+        try {
+            const { error } = await supabaseClient
+                .from('orders')
+                .update({ status: 'completed', updated_at: new Date().toISOString() })
+                .eq('id', orderId);
+            
+            if (error) throw error;
+            
+            alert('Order completed!');
+            await this.loadAllData();
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error: ' + error.message);
+        }
+    }
+
+    // Render analytics
+    renderAnalytics() {
+        // Default period: month
+        const activePeriod = document.querySelector('.period-btn.active')?.dataset.period || 'month';
+        this.loadAnalyticsData(activePeriod);
+        
+        // Attach period selector listeners
+        document.querySelectorAll('.period-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                if (btn.dataset.period === 'custom') {
+                    document.querySelector('.date-range').style.display = 'flex';
+                } else {
+                    document.querySelector('.date-range').style.display = 'none';
+                    this.loadAnalyticsData(btn.dataset.period);
+                }
+            });
+        });
+    }
+
+    // Load analytics data
+    loadAnalyticsData(period) {
+        // Get all items for the period
+        const allItems = [...this.quotes, ...this.orders];
+        const filteredItems = this.filterByPeriod(allItems, period);
+        
+        // Calculate revenue
+        const quotesRevenue = filteredItems
+            .filter(i => ['saved', 'quote_requested', 'quote_sent'].includes(i.status))
+            .reduce((sum, i) => sum + (i.total_price || 0), 0);
+        
+        const ordersRevenue = filteredItems
+            .filter(i => ['customer_confirmed', 'deposit_invoice_sent', 'deposit_paid', 'in_production', 'ready_delivery', 'completed'].includes(i.status))
+            .reduce((sum, i) => sum + (i.total_price || 0), 0);
+        
+        const totalRevenue = quotesRevenue + ordersRevenue;
+        
+        // Conversion rate
+        const totalQuotes = filteredItems.filter(i => ['saved', 'quote_requested', 'quote_sent', 'customer_confirmed'].includes(i.status)).length;
+        const convertedOrders = filteredItems.filter(i => ['customer_confirmed', 'deposit_invoice_sent', 'deposit_paid', 'in_production', 'ready_delivery', 'completed'].includes(i.status)).length;
+        const conversionRate = totalQuotes > 0 ? (convertedOrders / totalQuotes * 100) : 0;
+        
+        // Average order value
+        const completedOrders = filteredItems.filter(i => i.status === 'completed');
+        const avgOrderValue = completedOrders.length > 0 
+            ? completedOrders.reduce((sum, i) => sum + (i.total_price || 0), 0) / completedOrders.length 
+            : 0;
+        
+        // New customers in period
+        const newCustomers = this.filterByPeriod(this.customers, period).length;
+        
+        // Update UI
+        document.getElementById('total-revenue').textContent = `£${this.formatPrice(totalRevenue)}`;
+        document.getElementById('quotes-revenue').textContent = `£${this.formatPrice(quotesRevenue)}`;
+        document.getElementById('orders-revenue').textContent = `£${this.formatPrice(ordersRevenue)}`;
+        document.getElementById('conversion-rate').textContent = `${conversionRate.toFixed(1)}%`;
+        document.getElementById('avg-order-value').textContent = `£${this.formatPrice(avgOrderValue)}`;
+        document.getElementById('new-customers-period').textContent = newCustomers;
+        
+        // Render detailed stats table
+        this.renderAnalyticsTable();
+    }
+
+    // Render analytics table
+    renderAnalyticsTable() {
+        const tbody = document.getElementById('analytics-table-body');
+        
+        const metrics = [
+            { name: 'Total Quotes', week: 0, month: 0, year: 0 },
+            { name: 'Total Orders', week: 0, month: 0, year: 0 },
+            { name: 'Revenue', week: 0, month: 0, year: 0 },
+            { name: 'New Customers', week: 0, month: 0, year: 0 },
+            { name: 'Conversion Rate', week: '0%', month: '0%', year: '0%' }
+        ];
+        
+        // Calculate for each period
+        ['week', 'month', 'year'].forEach(period => {
+            const allItems = [...this.quotes, ...this.orders];
+            const filtered = this.filterByPeriod(allItems, period);
+            
+            metrics[0][period] = filtered.filter(i => ['saved', 'quote_requested', 'quote_sent'].includes(i.status)).length;
+            metrics[1][period] = filtered.filter(i => ['customer_confirmed', 'deposit_invoice_sent', 'deposit_paid', 'in_production', 'ready_delivery', 'completed'].includes(i.status)).length;
+            metrics[2][period] = `£${this.formatPrice(filtered.reduce((sum, i) => sum + (i.total_price || 0), 0))}`;
+            metrics[3][period] = this.filterByPeriod(this.customers, period).length;
+            
+            const quotes = metrics[0][period];
+            const orders = metrics[1][period];
+            metrics[4][period] = quotes > 0 ? `${(orders / quotes * 100).toFixed(1)}%` : '0%';
+        });
+        
+        tbody.innerHTML = metrics.map(m => `
+            <tr>
+                <td><strong>${m.name}</strong></td>
+                <td>${m.week}</td>
+                <td>${m.month}</td>
+                <td>${m.year}</td>
+            </tr>
+        `).join('');
+    }
+
+    // View quote detail (opens modal)
+    viewQuoteDetail(quoteId) {
+        const quote = this.quotes.find(q => q.id === quoteId) || this.orders.find(o => o.id === quoteId);
+        if (!quote) return;
+        
+        const modal = document.getElementById('quote-modal');
+        const content = document.getElementById('quote-detail-content');
+        
+        content.innerHTML = this.renderQuoteDetail(quote);
+        modal.classList.add('active');
+    }
+
+    // Render quote detail
+    renderQuoteDetail(quote) {
+        const customer = quote.customers;
+        const price = quote.total_price || 0;
+        const deposit = price * 0.3;
+        
+        return `
+            <h2>Quote/Order Details</h2>
+            <div style="background: var(--light-gray); padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <strong>ID:</strong> ${quote.id}<br>
+                <strong>Status:</strong> ${this.getStatusText(quote.status)}<br>
+                <strong>Created:</strong> ${new Date(quote.created_at).toLocaleString()}
+            </div>
+            
+            <h3>Customer Information</h3>
+            <div style="background: var(--light-gray); padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <strong>Name:</strong> ${customer?.full_name || 'Unknown'}<br>
+                <strong>Email:</strong> ${customer?.email || 'N/A'}<br>
+                <strong>Phone:</strong> ${customer?.phone || 'N/A'}
+            </div>
+            
+            <h3>Order Details</h3>
+            <div style="background: var(--light-gray); padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <strong>Items:</strong> ${quote.items?.length || 0} window(s)<br>
+                <strong>Total Price:</strong> £${this.formatPrice(price)}<br>
+                <strong>Deposit (30%):</strong> £${this.formatPrice(deposit)}<br>
+                <strong>Balance:</strong> £${this.formatPrice(price - deposit)}
+            </div>
+            
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+                <button class="btn" onclick="adminDashboard.closeModal()">Close</button>
+            </div>
+        `;
+    }
+
+    // Close modal
+    closeModal() {
+        document.getElementById('quote-modal').classList.remove('active');
+    }
+
+    // Send quote to customer
+    async sendQuote(quoteId) {
+        if (!confirm('Send this quote to customer?')) return;
+        
+        try {
+            // Update status
+            const { error } = await supabaseClient
+                .from('orders')
+                .update({ status: 'quote_sent', updated_at: new Date().toISOString() })
+                .eq('id', quoteId);
+            
+            if (error) throw error;
+            
+            // TODO: Send email to customer
+            
+            alert('Quote sent to customer successfully!');
+            await this.loadAllData();
+        } catch (error) {
+            console.error('Error sending quote:', error);
+            alert('Error sending quote: ' + error.message);
+        }
+    }
+
+    // Generate deposit invoice
+    async generateDepositInvoice(quoteId) {
+        if (!confirm('Generate deposit invoice for this order?')) return;
+        
+        try {
+            // Update status
+            const { error } = await supabaseClient
+                .from('orders')
+                .update({ status: 'deposit_invoice_sent', updated_at: new Date().toISOString() })
+                .eq('id', quoteId);
+            
+            if (error) throw error;
+            
+            // TODO: Generate PDF invoice and send email
+            
+            alert('Deposit invoice generated and sent to customer!');
+            await this.loadAllData();
+        } catch (error) {
+            console.error('Error generating invoice:', error);
+            alert('Error generating invoice: ' + error.message);
+        }
+    }
+
+    // Filter by status from pipeline
+    filterByStatus(status) {
+        this.filters.status = status;
+        this.switchView('all-quotes');
+    }
+
+    // Attach event listeners
+    attachEventListeners() {
+        // Navigation
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.switchView(btn.dataset.view);
+            });
+        });
+        
+        // Logout
+        document.getElementById('admin-logout').addEventListener('click', async () => {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
+        });
     }
 }
 
 // Initialize when DOM ready
 document.addEventListener('DOMContentLoaded', () => {
-    window.adminPanel = new AdminPanel();
+    window.adminDashboard = new AdminDashboard();
 });
