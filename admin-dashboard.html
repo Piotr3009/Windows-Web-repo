@@ -14,7 +14,17 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div class="admin-container">
+    <!-- Top Header Bar -->
+    <div style="background: var(--white); border-bottom: 2px solid var(--secondary-color); padding: 10px 30px; position: fixed; top: 0; left: 260px; right: 0; z-index: 999; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <a href="index.html" style="text-decoration: none; color: var(--primary-color); font-weight: 600;">🏠 Home</a>
+            <a href="build-your-own-windows.html" style="text-decoration: none; color: var(--primary-color); font-weight: 600;">🪟 BYOW</a>
+            <a href="admin-panel.html" style="text-decoration: none; color: var(--primary-color); font-weight: 600;">⚙️ Pricing Config</a>
+        </div>
+        <div style="color: var(--primary-color); font-weight: 600;" id="admin-user-name">Admin Panel</div>
+    </div>
+    
+    <div class="admin-container" style="margin-top: 60px;">
         <!-- Sidebar -->
         <aside class="admin-sidebar">
             <div class="admin-logo">
