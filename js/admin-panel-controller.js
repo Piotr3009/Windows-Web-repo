@@ -65,21 +65,33 @@ class AdminDashboard {
     // Load quotes from database
     async loadQuotes() {
         try {
+            // Load from estimates table (customer creates estimates)
             const { data, error } = await supabaseClient
-                .from('orders')
+                .from('estimates')
                 .select(`
                     *,
                     customers (full_name, email, phone)
                 `)
-                .in('status', ['saved', 'quote_requested', 'quote_sent', 'customer_confirmed', 'rejected'])
+                .in('status', ['draft', 'sent', 'quote_sent', 'confirmed', 'rejected'])
                 .order('created_at', { ascending: false });
 
-            if (error) throw error;
+            if (error) {
+                console.error('Error loading quotes:', error);
+                throw error;
+            }
             
             this.quotes = data || [];
-            console.log('Quotes loaded:', this.quotes.length);
+            console.log('Quotes loaded from estimates:', this.quotes.length);
+            
+            // Map statuses to our workflow
+            // 'draft' -> customer hasn't sent yet (admin doesn't see)
+            // 'sent' -> NEW QUOTE REQUEST (customer sent to supplier)
+            // 'quote_sent' -> QUOTE SENT (admin sent quote back to customer)
+            // 'confirmed' -> CUSTOMER CONFIRMED (needs deposit invoice)
+            
         } catch (error) {
             console.error('Error loading quotes:', error);
+            this.quotes = [];
         }
     }
 
@@ -141,8 +153,8 @@ class AdminDashboard {
 
     // Update navigation badges
     updateBadges() {
-        const newQuotes = this.quotes.filter(q => q.status === 'quote_requested').length;
-        const needAction = this.quotes.filter(q => q.status === 'customer_confirmed').length;
+        const newQuotes = this.quotes.filter(q => q.status === 'sent').length;
+        const needAction = this.quotes.filter(q => q.status === 'confirmed').length;
         
         document.getElementById('new-quotes-badge').textContent = newQuotes;
         document.getElementById('need-action-badge').textContent = needAction;
@@ -273,16 +285,19 @@ class AdminDashboard {
     // Get status display text
     getStatusText(status) {
         const statusTexts = {
-            saved: 'Draft (Customer)',
-            quote_requested: 'New Quote Request',
+            // Estimates statuses (from customer)
+            draft: 'Draft (Customer)',
+            sent: 'New Quote Request',
             quote_sent: 'Quote Sent to Customer',
-            customer_confirmed: 'Customer Confirmed Order',
+            confirmed: 'Customer Confirmed Order',
+            rejected: 'Rejected',
+            
+            // Orders statuses (after deposit invoice)
             deposit_invoice_sent: 'Awaiting Deposit Payment',
             deposit_paid: 'Deposit Paid',
             in_production: 'In Production',
             ready_delivery: 'Ready for Delivery',
-            completed: 'Completed',
-            rejected: 'Rejected'
+            completed: 'Completed'
         };
         return statusTexts[status] || status;
     }
