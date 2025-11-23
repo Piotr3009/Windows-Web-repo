@@ -337,6 +337,43 @@
         document.getElementById('register-confirm').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') register();
         });
+
+        // Handle email confirmation token from URL
+        async function handleEmailConfirmation() {
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            const accessToken = hashParams.get('access_token');
+            const type = hashParams.get('type');
+
+            if (accessToken && type === 'signup') {
+                try {
+                    // Set session with the token
+                    const { data, error } = await supabaseClient.auth.setSession({
+                        access_token: accessToken,
+                        refresh_token: hashParams.get('refresh_token')
+                    });
+
+                    if (error) throw error;
+
+                    // Clear URL hash
+                    window.history.replaceState(null, null, window.location.pathname);
+
+                    // Show success message
+                    showMessage(document.getElementById('login-message'), '✅ Email confirmed! Redirecting...', 'success');
+
+                    // Redirect to home
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+
+                } catch (error) {
+                    console.error('Email confirmation error:', error);
+                    showMessage(document.getElementById('login-message'), 'Email confirmation failed. Please try logging in.', 'error');
+                }
+            }
+        }
+
+        // Run on page load
+        handleEmailConfirmation();
     </script>
 </body>
 </html>
