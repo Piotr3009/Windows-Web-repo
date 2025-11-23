@@ -331,7 +331,7 @@ class IronmongeryGallery {
     
     try {
       // Delete from Supabase
-      const { error } = await supabase
+      const { error } = await window.supabaseClient
         .from('ironmongery_products')
         .delete()
         .eq('id', productId);
@@ -466,12 +466,22 @@ class IronmongeryGallery {
   }
 
   async saveProduct(existingId, modal) {
+    // Validation
+    const priceInput = document.getElementById('product-price');
+    const price = parseFloat(priceInput.value);
+    
+    if (isNaN(price) || price <= 0) {
+      alert('Please enter a valid price!');
+      priceInput.focus();
+      return;
+    }
+    
     const formData = {
       category: document.getElementById('product-category').value,
       name: document.getElementById('product-name').value,
       color: document.getElementById('product-color').value || null,
-      price_net: parseFloat(document.getElementById('product-price').value),
-      price_vat: parseFloat(document.getElementById('product-price').value), // To samo - VAT będzie na końcu
+      price_net: price,
+      price_vat: price, // To samo - VAT będzie na końcu
       description: document.getElementById('product-description').value || null
     };
     
@@ -498,7 +508,7 @@ class IronmongeryGallery {
       // Save to Supabase
       if (existingId) {
         // Update
-        const { error } = await supabase
+        const { error } = await window.supabaseClient
           .from('ironmongery_products')
           .update(formData)
           .eq('id', existingId);
@@ -507,7 +517,7 @@ class IronmongeryGallery {
         alert('Product updated successfully!');
       } else {
         // Insert
-        const { error } = await supabase
+        const { error } = await window.supabaseClient
           .from('ironmongery_products')
           .insert([formData]);
         
@@ -520,6 +530,7 @@ class IronmongeryGallery {
       
       // Reload products
       await this.loadProductsFromDatabase();
+      console.log('🔍 Products in current category:', this.currentCategory, IRONMONGERY_DATA.categories[this.currentCategory]?.products);
       this.renderProducts();
       
     } catch (error) {
@@ -530,7 +541,7 @@ class IronmongeryGallery {
 
   async loadProductsFromDatabase() {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await window.supabaseClient
         .from('ironmongery_products')
         .select('*')
         .order('category', { ascending: true })
