@@ -10,6 +10,13 @@ class AuthSystem {
 
     // Initialize auth modal
     initModal() {
+        // Sprawdź czy modal już istnieje
+        const existingModal = document.getElementById('auth-modal');
+        if (existingModal) {
+            this.modal = existingModal;
+            return;
+        }
+
         const modalHTML = `
             <div id="auth-modal" class="auth-modal" style="display: none;">
                 <div class="auth-modal-content">
