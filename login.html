@@ -252,7 +252,7 @@
                     if (customer && customer.role === 'admin') {
                         window.location.href = 'admin-dashboard.html';
                     } else {
-                        window.location.href = 'index.html';
+                        window.location.href = 'customer-dashboard.html';
                     }
                 }, 1000);
 
@@ -314,7 +314,7 @@
                 } else {
                     showMessage(messageEl, 'Registration successful! Redirecting...', 'success');
                     setTimeout(() => {
-                        window.location.href = 'index.html';
+                        window.location.href = 'customer-dashboard.html';
                     }, 1500);
                 }
 
