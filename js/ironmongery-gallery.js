@@ -14,11 +14,17 @@ class IronmongeryGallery {
     this.selectedProducts = new Map(); // category -> product
     this.currentCategory = 'locks';
     this.currentFinish = 'all';
+    this.isAdminMode = false; // Tryb zarządzania dla admina
     
     this.init();
   }
 
-  init() {
+  async init() {
+    // Check if user is admin
+    if (typeof isAdmin === 'function') {
+      this.isAdminMode = await isAdmin();
+    }
+    
     // Close handlers
     this.closeBtn?.addEventListener('click', () => this.close());
     this.overlay?.addEventListener('click', (e) => {
@@ -145,16 +151,34 @@ class IronmongeryGallery {
 
   renderProductCard(product) {
     const isSelected = this.selectedProducts.get(this.currentCategory)?.id === product.id;
+    const price = product.prices?.vat || product.price_vat || product.price || 0;
+    
+    // Admin buttons
+    const adminButtons = this.isAdminMode ? `
+      <div class="admin-actions" style="position: absolute; top: 5px; right: 5px; display: flex; gap: 5px; z-index: 10;">
+        <button onclick="event.stopPropagation(); window.IronmongeryGallery.editProduct('${product.id}')" 
+                class="btn-admin-edit" 
+                style="padding: 5px 10px; background: #ffc107; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+          ✏️
+        </button>
+        <button onclick="event.stopPropagation(); window.IronmongeryGallery.deleteProduct('${product.id}')" 
+                class="btn-admin-delete"
+                style="padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+          🗑️
+        </button>
+      </div>
+    ` : '';
     
     return `
       <div class="product-card ${isSelected ? 'selected' : ''}" 
            data-product-id="${product.id}">
-        <img src="${product.image || 'img/placeholder-ironmongery.jpg'}" 
+        ${adminButtons}
+        <img src="${product.image || product.image_url || 'img/placeholder-ironmongery.jpg'}" 
              alt="${product.name}"
              class="product-card-image"
              onerror="this.src='img/placeholder-ironmongery.jpg'">
         <div class="product-card-name">${product.name}</div>
-        <div class="product-card-price">£${product.price.toFixed(2)}</div>
+        <div class="product-card-price">£${price.toFixed(2)}</div>
         ${product.description ? 
           `<div class="product-card-description">${product.description}</div>` 
           : ''}
@@ -250,7 +274,7 @@ class IronmongeryGallery {
     let total = 0;
 
     this.selectedProducts.forEach((product, category) => {
-      const price = product.prices?.vat || product.price || 0;
+      const price = product.prices?.vat || product.price_vat || product.price || 0;
       total += price;
 
       const categoryName = {
@@ -263,7 +287,7 @@ class IronmongeryGallery {
 
       html += `
         <div style="text-align: center; padding: 8px; background: white; border-radius: 6px; border: 1px solid #e0e0e0;">
-          <img src="${product.image || 'img/placeholder-ironmongery.jpg'}" 
+          <img src="${product.image || product.image_url || 'img/placeholder-ironmongery.jpg'}" 
                alt="${product.name}"
                style="width: 100%; height: 60px; object-fit: cover; border-radius: 4px; margin-bottom: 5px;"
                onerror="this.src='img/placeholder-ironmongery.jpg'">
@@ -276,14 +300,298 @@ class IronmongeryGallery {
     gridContainer.innerHTML = html;
     totalElement.textContent = `£${total.toFixed(2)}`;
   }
+
+  // ==========================================
+  // ADMIN FUNCTIONS
+  // ==========================================
+
+  async addProduct() {
+    // Open modal with form
+    const modal = this.createProductModal();
+    document.body.appendChild(modal);
+  }
+
+  async editProduct(productId) {
+    console.log('Edit product:', productId);
+    const categoryData = IRONMONGERY_DATA.categories[this.currentCategory];
+    const product = categoryData.products.find(p => p.id === productId);
+    
+    if (!product) return;
+    
+    // Open modal with form pre-filled
+    const modal = this.createProductModal(product);
+    document.body.appendChild(modal);
+  }
+
+  async deleteProduct(productId) {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    
+    console.log('Delete product:', productId);
+    
+    try {
+      // Delete from Supabase
+      const { error } = await supabase
+        .from('ironmongery_products')
+        .delete()
+        .eq('id', productId);
+      
+      if (error) throw error;
+      
+      alert('Product deleted successfully!');
+      
+      // Reload products
+      await this.loadProductsFromDatabase();
+      this.renderProducts();
+      
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('Error deleting product: ' + error.message);
+    }
+  }
+
+  createProductModal(existingProduct = null) {
+    const isEdit = !!existingProduct;
+    
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 20000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    `;
+    
+    modal.innerHTML = `
+      <div style="background: white; border-radius: 12px; padding: 30px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto;">
+        <h2 style="margin: 0 0 20px 0;">${isEdit ? 'Edit' : 'Add New'} Product</h2>
+        
+        <form id="productForm" style="display: flex; flex-direction: column; gap: 15px;">
+          
+          <div>
+            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Category *</label>
+            <select id="product-category" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+              <option value="locks" ${existingProduct?.category === 'locks' ? 'selected' : ''}>Sash Locks</option>
+              <option value="fingerLifts" ${existingProduct?.category === 'fingerLifts' ? 'selected' : ''}>Finger Lifts</option>
+              <option value="pullHandles" ${existingProduct?.category === 'pullHandles' ? 'selected' : ''}>Pull Handles</option>
+              <option value="stoppers" ${existingProduct?.category === 'stoppers' ? 'selected' : ''}>Stoppers</option>
+              <option value="horns" ${existingProduct?.category === 'horns' ? 'selected' : ''}>Sash Horns</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Product Name *</label>
+            <input type="text" id="product-name" required 
+                   value="${existingProduct?.name || ''}"
+                   placeholder="e.g. Sash Lock PAS24"
+                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+          </div>
+
+          <div>
+            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Color</label>
+            <select id="product-color" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+              <option value="">-- No Color --</option>
+              <option value="chrome" ${existingProduct?.color === 'chrome' ? 'selected' : ''}>Chrome</option>
+              <option value="satin" ${existingProduct?.color === 'satin' ? 'selected' : ''}>Satin</option>
+              <option value="brass" ${existingProduct?.color === 'brass' ? 'selected' : ''}>Brass</option>
+              <option value="antique-brass" ${existingProduct?.color === 'antique-brass' ? 'selected' : ''}>Antique Brass</option>
+              <option value="black" ${existingProduct?.color === 'black' ? 'selected' : ''}>Black</option>
+              <option value="white" ${existingProduct?.color === 'white' ? 'selected' : ''}>White</option>
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+              <label style="display: block; margin-bottom: 5px; font-weight: 600;">Price NET (£) *</label>
+              <input type="number" id="product-price-net" required step="0.01" min="0"
+                     value="${existingProduct?.prices?.net || existingProduct?.price_net || ''}"
+                     style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 5px; font-weight: 600;">Price VAT (£) *</label>
+              <input type="number" id="product-price-vat" required step="0.01" min="0"
+                     value="${existingProduct?.prices?.vat || existingProduct?.price_vat || ''}"
+                     style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+            </div>
+          </div>
+
+          <div>
+            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Image</label>
+            <input type="file" id="product-image" accept="image/*"
+                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+            ${existingProduct?.image || existingProduct?.image_url ? 
+              `<img src="${existingProduct.image || existingProduct.image_url}" style="max-width: 200px; margin-top: 10px; border-radius: 6px;">` 
+              : ''}
+          </div>
+
+          <div>
+            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Description</label>
+            <textarea id="product-description" rows="3"
+                      style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">${existingProduct?.description || ''}</textarea>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="submit" class="btn" 
+                    style="flex: 1; padding: 12px; background: var(--primary-color); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
+              ${isEdit ? 'Update' : 'Add'} Product
+            </button>
+            <button type="button" class="btn-cancel"
+                    style="flex: 1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+    
+    // Handle form submission
+    const form = modal.querySelector('#productForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await this.saveProduct(existingProduct?.id, modal);
+    });
+    
+    // Handle cancel
+    modal.querySelector('.btn-cancel').addEventListener('click', () => {
+      document.body.removeChild(modal);
+    });
+    
+    // Close on background click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        document.body.removeChild(modal);
+      }
+    });
+    
+    return modal;
+  }
+
+  async saveProduct(existingId, modal) {
+    const formData = {
+      category: document.getElementById('product-category').value,
+      name: document.getElementById('product-name').value,
+      color: document.getElementById('product-color').value || null,
+      price_net: parseFloat(document.getElementById('product-price-net').value),
+      price_vat: parseFloat(document.getElementById('product-price-vat').value),
+      description: document.getElementById('product-description').value || null
+    };
+    
+    try {
+      // Handle image upload
+      const imageFile = document.getElementById('product-image').files[0];
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('ironmongery-images')
+          .upload(fileName, imageFile);
+        
+        if (uploadError) throw uploadError;
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from('ironmongery-images')
+          .getPublicUrl(fileName);
+        
+        formData.image_url = publicUrl;
+      }
+      
+      // Save to Supabase
+      if (existingId) {
+        // Update
+        const { error } = await supabase
+          .from('ironmongery_products')
+          .update(formData)
+          .eq('id', existingId);
+        
+        if (error) throw error;
+        alert('Product updated successfully!');
+      } else {
+        // Insert
+        const { error } = await supabase
+          .from('ironmongery_products')
+          .insert([formData]);
+        
+        if (error) throw error;
+        alert('Product added successfully!');
+      }
+      
+      // Close modal
+      document.body.removeChild(modal);
+      
+      // Reload products
+      await this.loadProductsFromDatabase();
+      this.renderProducts();
+      
+    } catch (error) {
+      console.error('Error saving product:', error);
+      alert('Error saving product: ' + error.message);
+    }
+  }
+
+  async loadProductsFromDatabase() {
+    try {
+      const { data, error } = await supabase
+        .from('ironmongery_products')
+        .select('*')
+        .order('category', { ascending: true })
+        .order('name', { ascending: true });
+      
+      if (error) throw error;
+      
+      // Clear existing products
+      Object.keys(IRONMONGERY_DATA.categories).forEach(key => {
+        IRONMONGERY_DATA.categories[key].products = [];
+      });
+      
+      // Group by category
+      data.forEach(product => {
+        if (IRONMONGERY_DATA.categories[product.category]) {
+          IRONMONGERY_DATA.categories[product.category].products.push(product);
+        }
+      });
+      
+      console.log('Loaded products from database:', data.length);
+      
+    } catch (error) {
+      console.error('Error loading products:', error);
+    }
+  }
 }
 
 // Initialize when DOM ready
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   window.IronmongeryGallery = new IronmongeryGallery();
 });
 
 // Function to open gallery (called from configurator)
 function openIronmongeryGallery() {
   window.IronmongeryGallery?.open();
+}
+
+// Function to open gallery in manager mode (called from admin panel)
+async function openIronmongeryManager() {
+  if (!window.IronmongeryGallery) {
+    window.IronmongeryGallery = new IronmongeryGallery();
+  }
+  
+  window.IronmongeryGallery.isAdminMode = true;
+  await window.IronmongeryGallery.loadProductsFromDatabase();
+  window.IronmongeryGallery.open();
+  
+  // Add "Add Product" button in gallery header
+  const header = document.querySelector('.gallery-header');
+  if (header && !document.getElementById('btn-add-product')) {
+    const addBtn = document.createElement('button');
+    addBtn.id = 'btn-add-product';
+    addBtn.textContent = '+ Add New Product';
+    addBtn.style.cssText = 'padding: 10px 20px; background: var(--primary-color); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-left: 20px;';
+    addBtn.onclick = () => window.IronmongeryGallery.addProduct();
+    header.appendChild(addBtn);
+  }
 }
