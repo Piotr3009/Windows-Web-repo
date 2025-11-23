@@ -181,8 +181,8 @@ class PriceCalculator {
     
     // Horns - USUNIĘTE (teraz w Gallery jako ironmongery)
     
-    // Ironmongery - NOWY SYSTEM: pobierz z Gallery (ConfiguratorCore) + QUANTITY
-    const galleryIronmongery = window.ConfiguratorCore?.currentWindow?.ironmongery || {};
+    // Ironmongery - NOWY SYSTEM: pobierz z Gallery - POPRAWKA: window.currentConfig
+    const galleryIronmongery = window.currentConfig?.ironmongery || {};
     const selectedProducts = [
       galleryIronmongery.lock,
       galleryIronmongery.fingerLift,
