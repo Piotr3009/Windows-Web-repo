@@ -377,7 +377,7 @@ class IronmongeryGallery {
           <div>
             <label style="display: block; margin-bottom: 5px; font-weight: 600;">Category *</label>
             <select id="product-category" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-              <option value="locks" ${existingProduct?.category === 'locks' ? 'selected' : ''}>Sash Locks</option>
+              <option value="locks" ${!existingProduct || existingProduct?.category === 'locks' ? 'selected' : ''}>Sash Locks</option>
               <option value="fingerLifts" ${existingProduct?.category === 'fingerLifts' ? 'selected' : ''}>Finger Lifts</option>
               <option value="pullHandles" ${existingProduct?.category === 'pullHandles' ? 'selected' : ''}>Pull Handles</option>
               <option value="stoppers" ${existingProduct?.category === 'stoppers' ? 'selected' : ''}>Stoppers</option>
