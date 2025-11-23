@@ -492,8 +492,9 @@ class SpecificationController {
   }
 
   applyDetails() {
-    // NOWY SYSTEM - pobierz z Gallery (ConfiguratorCore.currentWindow.ironmongery)
-    const gallerySelection = window.ConfiguratorCore?.currentWindow?.ironmongery || {};
+    // NOWY SYSTEM - pobierz z Gallery - POPRAWKA: window.currentConfig
+    console.log('📋 applyDetails START - window.currentConfig:', window.currentConfig);
+    const gallerySelection = window.currentConfig?.ironmongery || {};
     
     console.log('📋 applyDetails - Gallery selection:', gallerySelection);
 

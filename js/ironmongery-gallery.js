@@ -74,9 +74,9 @@ class IronmongeryGallery {
   }
 
   loadCurrentSelections() {
-    // Load from configurator state
-    if (window.ConfiguratorCore?.currentWindow?.ironmongery) {
-      const ironmongery = window.ConfiguratorCore.currentWindow.ironmongery;
+    // Load from configurator state - POPRAWKA: window.currentConfig
+    if (window.currentConfig?.ironmongery) {
+      const ironmongery = window.currentConfig.ironmongery;
       
       // Map existing selections with quantity
       if (ironmongery.lock) {
@@ -364,18 +364,21 @@ class IronmongeryGallery {
 
     console.log('✅ Confirm Selection - saving ironmongery:', ironmongery);
 
-    // Save to configurator
-    if (window.ConfiguratorCore?.currentWindow) {
-      window.ConfiguratorCore.currentWindow.ironmongery = ironmongery;
-      console.log('✅ Saved to ConfiguratorCore:', window.ConfiguratorCore.currentWindow.ironmongery);
-    }
+    // Save to configurator - POPRAWKA: window.currentConfig zamiast ConfiguratorCore.currentWindow
+    if (!window.currentConfig) window.currentConfig = {};
+    window.currentConfig.ironmongery = ironmongery;
+    console.log('✅ Saved to currentConfig:', window.currentConfig.ironmongery);
+    
+    // DEBUG: Sprawdź czy to samo co zapisaliśmy
+    console.log('🔍 Verify immediately:', window.currentConfig.ironmongery);
 
     // Update display on main page
     this.updateMainPageDisplay();
 
     // NOWE: Wywołaj applyDetails BEZPOŚREDNIO
     if (window.SpecificationController) {
-      console.log('📋 Calling applyDetails with:', ironmongery);
+      console.log('📋 Before applyDetails, currentConfig is:', window.currentConfig);
+      console.log('📋 Calling applyDetails with:', window.currentConfig.ironmongery);
       window.SpecificationController.applyDetails();
     }
     
