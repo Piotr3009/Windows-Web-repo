@@ -46,48 +46,83 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-config.js"></script>
+
     <script>
         async function confirmEmail() {
+            const container = document.querySelector('.container');
+            const h1 = container.querySelector('h1');
+            const p = container.querySelector('p');
+            const spinner = container.querySelector('.spinner');
+
             try {
-                // Get token from URL hash
+                // 1. Pobierz parametry z URL (Nowy standard Supabase - PKCE)
+                const urlParams = new URLSearchParams(window.location.search);
+                const tokenHash = urlParams.get('token_hash');
+                const type = urlParams.get('type');
+                const errorCode = urlParams.get('error_code');
+                const errorDescription = urlParams.get('error_description');
+
+                // Obsługa błędów z URL
+                if (errorCode) {
+                    throw new Error(errorDescription || 'Verification link invalid');
+                }
+
+                // 2. Weryfikacja TOKEN_HASH (Najważniejsza część)
+                if (tokenHash && type) {
+                    const { error } = await supabaseClient.auth.verifyOtp({
+                        token_hash: tokenHash,
+                        type: type,
+                    });
+
+                    if (error) throw error;
+
+                    // Sukces
+                    finishSuccess();
+                    return;
+                }
+
+                // 3. Fallback dla starych linków (Hash fragment)
                 const hashParams = new URLSearchParams(window.location.hash.substring(1));
                 const accessToken = hashParams.get('access_token');
                 const refreshToken = hashParams.get('refresh_token');
-                const type = hashParams.get('type');
 
-                if (!accessToken || type !== 'signup') {
-                    throw new Error('Invalid confirmation link');
+                if (accessToken) {
+                    const { error } = await supabaseClient.auth.setSession({
+                        access_token: accessToken,
+                        refresh_token: refreshToken
+                    });
+                    if (error) throw error;
+                    finishSuccess();
+                    return;
                 }
 
-                // Set session with tokens
-                const { data, error } = await supabaseClient.auth.setSession({
-                    access_token: accessToken,
-                    refresh_token: refreshToken
-                });
-
-                if (error) throw error;
-
-                // Success - redirect to home
-                window.location.href = 'index.html';
+                throw new Error('No verification token found. Link might be expired.');
 
             } catch (error) {
-                console.error('Confirmation error:', error);
+                console.error('Error:', error);
+                spinner.style.display = 'none';
+                h1.innerText = 'Verification Failed';
+                h1.style.color = '#e74c3c'; // Red
+                p.innerHTML = `${error.message}<br><br><a href="login.html" style="color: gold; text-decoration: underline;">Go to Login</a>`;
+            }
+
+            function finishSuccess() {
+                spinner.style.display = 'none';
+                h1.innerText = 'Email Confirmed!';
+                h1.style.color = '#4caf50'; // Green
+                p.innerText = 'Redirecting you to home...';
                 
-                // Show error and redirect to login
-                document.querySelector('.container').innerHTML = `
-                    <h1>Confirmation Failed</h1>
-                    <p>${error.message}</p>
-                    <p>Redirecting to login...</p>
-                `;
-                
+                // Przekierowanie po 2 sekundach
                 setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 3000);
+                    window.location.href = 'index.html'; 
+                }, 2000);
             }
         }
 
-        // Run on page load
-        confirmEmail();
+        // Uruchom po załadowaniu
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(confirmEmail, 500); // Małe opóźnienie dla pewności załadowania libki
+        });
     </script>
 </body>
 </html>
