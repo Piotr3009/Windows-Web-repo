@@ -375,7 +375,13 @@ class IronmongeryGallery {
     // Update display on main page
     this.updateMainPageDisplay();
 
-    // NOWE: Wywołaj applyDetails BEZPOŚREDNIO
+    // NOWE: Wywołaj przeliczenie CENY
+    if (window.priceCalculator) {
+      console.log('💰 Recalculating price...');
+      window.priceCalculator.updatePrice();
+    }
+
+    // Wywołaj applyDetails (specyfikacja)
     if (window.SpecificationController) {
       console.log('📋 Before applyDetails, currentConfig is:', window.currentConfig);
       console.log('📋 Calling applyDetails with:', window.currentConfig.ironmongery);
