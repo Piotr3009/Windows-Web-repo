@@ -341,18 +341,30 @@
         // Handle email confirmation token from URL
         async function handleEmailConfirmation() {
             const hashParams = new URLSearchParams(window.location.hash.substring(1));
-            const accessToken = hashParams.get('access_token');
+            const tokenHash = hashParams.get('token_hash');
             const type = hashParams.get('type');
+            const accessToken = hashParams.get('access_token');
 
-            if (accessToken && type === 'signup') {
+            // Handle both old (access_token) and new (token_hash) formats
+            if (type === 'signup') {
                 try {
-                    // Set session with the token
-                    const { data, error } = await supabaseClient.auth.setSession({
-                        access_token: accessToken,
-                        refresh_token: hashParams.get('refresh_token')
-                    });
-
-                    if (error) throw error;
+                    if (accessToken) {
+                        // Old format - set session directly
+                        const { data, error } = await supabaseClient.auth.setSession({
+                            access_token: accessToken,
+                            refresh_token: hashParams.get('refresh_token')
+                        });
+                        if (error) throw error;
+                    } else if (tokenHash) {
+                        // New format - verify OTP
+                        const { data, error } = await supabaseClient.auth.verifyOtp({
+                            token_hash: tokenHash,
+                            type: 'signup'
+                        });
+                        if (error) throw error;
+                    } else {
+                        return; // No valid token
+                    }
 
                     // Clear URL hash
                     window.history.replaceState(null, null, window.location.pathname);
@@ -367,7 +379,13 @@
 
                 } catch (error) {
                     console.error('Email confirmation error:', error);
-                    showMessage(document.getElementById('login-message'), 'Email confirmation failed. Please try logging in.', 'error');
+                    
+                    // Handle expired token
+                    if (error.message?.includes('expired')) {
+                        showMessage(document.getElementById('login-message'), 'Confirmation link expired. Please request a new one.', 'error');
+                    } else {
+                        showMessage(document.getElementById('login-message'), 'Email confirmation failed. Please try logging in.', 'error');
+                    }
                 }
             }
         }
