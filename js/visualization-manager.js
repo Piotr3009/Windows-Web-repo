@@ -136,19 +136,16 @@ class VisualizationManager {
     }
     
     // Ironmongery
-    const hasIronmongery = config.ironmongery && config.ironmongery !== 'none';
-    UIHelpers.toggle(this.elements.ironmongeryDisplayItem, hasIronmongery, 'flex');
+    // Ironmongery - NOWY SYSTEM: teraz to obiekt {lock, fingerLift...}, nie string
+    // Wyłączamy stary preview (dropdown już nie istnieje)
+    const hasIronmongery = config.ironmongery && 
+                          typeof config.ironmongery === 'object' &&
+                          Object.values(config.ironmongery).some(v => v !== null);
     
-    if (hasIronmongery) {
-      if (this.elements.ironmongeryPreviewImg) {
-        this.elements.ironmongeryPreviewImg.src = `img/details/ironmongery-${config.ironmongery}.png`;
-        this.elements.ironmongeryPreviewImg.alt = `${config.ironmongery} ironmongery`;
-      }
-      UIHelpers.setText(
-        this.elements.ironmongeryPreviewText,
-        UIHelpers.capitalize(config.ironmongery)
-      );
-    }
+    // Ukryj stary display item (był dla dropdown)
+    UIHelpers.toggle(this.elements.ironmongeryDisplayItem, false, 'flex');
+    
+    // Nowy system używa updateMainPageDisplay() w Gallery
     
     // Glass
     if (this.elements.glassDisplay) {
