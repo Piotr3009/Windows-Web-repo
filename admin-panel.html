@@ -98,7 +98,7 @@
   <section class="admin-section">
     <div class="section-header">
       <h2>Section 8: Ironmongery</h2>
-      <button class="btn-add" onclick="AdminController.openAddProductModal()">+ Add Product</button>
+      <button class="btn-add" onclick="openIronmongeryManager()">🛠️ Manage Ironmongery Gallery</button>
     </div>
     <div class="section-content">
       <div class="products-table-container">
@@ -150,81 +150,6 @@
 
 </main>
 
-<!-- MODAL: Add Product -->
-<div id="add-product-modal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="AdminController.closeAddProductModal()">&times;</span>
-    <h2>Add Ironmongery Product</h2>
-    <form id="add-product-form">
-      <div class="form-group">
-        <label>Color:</label>
-        <select id="product-color" required>
-          <option value="">-- Select Color --</option>
-          <option value="chrome">Chrome</option>
-          <option value="satin">Satin</option>
-          <option value="brass">Brass (Gold)</option>
-          <option value="antique-brass">Antique Brass</option>
-          <option value="black">Black</option>
-          <option value="white">White</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Category:</label>
-        <select id="product-category" required>
-          <option value="">-- Select Category --</option>
-          <option value="fingerLifts">Sash Finger Lifts</option>
-          <option value="locks">Sash Locks</option>
-          <option value="pullHandles">Sash Pull Handles</option>
-          <option value="stoppers">Window Stoppers</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Product Name:</label>
-        <input type="text" id="product-name" required placeholder="e.g. Sash Lock PAS24">
-      </div>
-      <div class="form-group">
-        <label>Description:</label>
-        <textarea id="product-description" placeholder="Optional description"></textarea>
-      </div>
-      <div class="form-group">
-        <label>Product Image:</label>
-        <input type="file" id="product-image" accept="image/*">
-      </div>
-      <div class="form-group">
-        <label>Price NET (£):</label>
-        <input type="number" id="product-price-net" step="0.01" min="0" required placeholder="25.00">
-      </div>
-      <div class="form-group" id="stopper-type-group" style="display: none;">
-        <label>Stopper Type:</label>
-        <select id="product-stopper-type">
-          <option value="">-- Select Type --</option>
-          <option value="magnetic">Magnetic</option>
-          <option value="traditional">Traditional</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>
-          <input type="checkbox" id="product-pas24">
-          PAS24 Certified
-        </label>
-      </div>
-      <div class="form-group">
-        <label>
-          <input type="checkbox" id="product-recommended">
-          Recommended
-        </label>
-      </div>
-      <div class="form-group">
-        <label>
-          <input type="checkbox" id="product-mandatory">
-          Mandatory
-        </label>
-      </div>
-      <button type="submit" class="btn-save">Add Product</button>
-    </form>
-  </div>
-</div>
-
 <!-- MODAL: Add Horn -->
 <div id="add-horn-modal" class="modal">
   <div class="modal-content">
@@ -244,8 +169,60 @@
   </div>
 </div>
 
+<!-- Ironmongery Gallery Overlay -->
+<div id="ironmongeryOverlay" class="ironmongery-overlay">
+  <div class="ironmongery-gallery">
+    
+    <!-- Header -->
+    <div class="gallery-header">
+      <h2>Ironmongery Gallery</h2>
+      <button id="galleryClose" class="gallery-close" aria-label="Close">&times;</button>
+    </div>
+
+    <!-- Color Filters -->
+    <div class="gallery-filters">
+      <button class="filter-btn active" data-finish="all">All Finishes</button>
+      <button class="filter-btn" data-finish="chrome">Chrome</button>
+      <button class="filter-btn" data-finish="satin">Satin</button>
+      <button class="filter-btn" data-finish="brass">Brass</button>
+      <button class="filter-btn" data-finish="antique-brass">Antique Brass</button>
+      <button class="filter-btn" data-finish="black">Black</button>
+      <button class="filter-btn" data-finish="white">White</button>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="category-tabs">
+      <button class="category-tab active" data-category="locks">Sash Locks</button>
+      <button class="category-tab" data-category="fingerLifts">Finger Lifts</button>
+      <button class="category-tab" data-category="pullHandles">Pull Handles</button>
+      <button class="category-tab" data-category="stoppers">Stoppers</button>
+      <button class="category-tab" data-category="horns">Sash Horns</button>
+    </div>
+
+    <!-- Products Grid -->
+    <div id="productsGrid" class="products-grid">
+      <!-- Products rendered by JS -->
+    </div>
+
+    <!-- Footer with Total -->
+    <div class="gallery-footer">
+      <div class="selection-total">
+        Selection Total: <span id="selectionTotal">£0.00</span>
+      </div>
+      <button id="confirmSelection" class="btn-confirm-selection">
+        Confirm Selection
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<link rel="stylesheet" href="css/configurator.css">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js"></script>
+<script src="js/ironmongery-data.js"></script>
+<script src="js/ironmongery-gallery.js?v=20250124"></script>
 <script src="js/admin-controller.js"></script>
 <script>
 // Logout handler
