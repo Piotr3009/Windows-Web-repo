@@ -879,85 +879,12 @@
             <button type="button" 
                     class="btn btn-primary" 
                     onclick="openIronmongeryGallery()"
-                    style="width: 100%; padding: 15px; font-size: 1.1rem; margin-bottom: 20px;">
+                    style="width: 100%; padding: 15px; font-size: 1.1rem;">
               🖼️ Browse Ironmongery Gallery
             </button>
-          </div>
-          
-          <div class="input-group">
-            <label for="furniture-finish">Furniture Finish:</label>
-            <select id="furniture-finish" class="furniture-finish-select">
-              <option value="">-- Select Finish --</option>
-              <option value="client-supply">Client Supply (Special Design)</option>
-              <option value="chrome">Chrome</option>
-              <option value="satin">Satin</option>
-              <option value="brass">Brass (Gold)</option>
-              <option value="antique-brass">Antique Brass</option>
-              <option value="black">Black</option>
-              <option value="white">White</option>
-            </select>
-          </div>
-
-          <div id="client-supply-message" class="info-message" style="display: none;">
-            <p><strong>Client Supply Selected</strong></p>
-            <p>Please provide details or links for your custom ironmongery. This will be quoted and invoiced separately.</p>
-          </div>
-
-          <div id="ironmongery-products" class="ironmongery-products" style="display: none;">
-            <!-- Finger Lifts Section -->
-            <div class="ironmongery-category">
-              <div class="category-header" data-category="fingerLifts">
-                <h5>Sash Finger Lifts (Mandatory)</h5>
-                <span class="category-toggle">▼</span>
-              </div>
-              <div class="category-content">
-                <div class="category-inner">
-                  <p class="auto-quantity-info">Always 2 per window - automatically added</p>
-                  <div id="fingerLifts-list" class="products-list"></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Locks Section -->
-            <div class="ironmongery-category">
-              <div class="category-header" data-category="locks">
-                <h5>Sash Locks</h5>
-                <span class="category-toggle">▼</span>
-              </div>
-              <div class="category-content">
-                <div class="category-inner">
-                  <p class="auto-quantity-info">Quantity calculated automatically based on window width and configuration</p>
-                  <div id="locks-list" class="products-list"></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Pull Handles Section -->
-            <div class="ironmongery-category">
-              <div class="category-header" data-category="pullHandles">
-                <h5>Sash Pull Handles</h5>
-                <span class="category-toggle">▼</span>
-              </div>
-              <div class="category-content">
-                <div class="category-inner">
-                  <div id="pullHandles-list" class="products-list"></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Stoppers Section -->
-            <div class="ironmongery-category">
-              <div class="category-header" data-category="stoppers">
-                <h5>Window Stoppers</h5>
-                <span class="category-toggle">▼</span>
-              </div>
-              <div class="category-content">
-                <div class="category-inner">
-                  <p class="auto-quantity-info">Always 2 per window - Choose ONE type only (Stopper OR Weekes)</p>
-                  <div id="stoppers-list" class="products-list"></div>
-                </div>
-              </div>
-            </div>
+            <p style="color: #666; font-size: 0.9rem; margin-top: 10px; text-align: center;">
+              Select locks, handles, lifts, stoppers and horns from our gallery
+            </p>
           </div>
         </div>
 
@@ -1356,6 +1283,7 @@
       <button class="category-tab" data-category="fingerLifts">Finger Lifts</button>
       <button class="category-tab" data-category="pullHandles">Pull Handles</button>
       <button class="category-tab" data-category="stoppers">Stoppers</button>
+      <button class="category-tab" data-category="horns">Sash Horns</button>
     </div>
 
     <!-- Products Grid -->
