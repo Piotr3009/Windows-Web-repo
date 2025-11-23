@@ -98,7 +98,7 @@
   <section class="admin-section">
     <div class="section-header">
       <h2>Section 8: Ironmongery</h2>
-      <button class="btn-add" onclick="openIronmongeryManager()">🛠️ Manage Ironmongery Gallery</button>
+      <button class="btn-add" onclick="AdminController.openAddProductModal()">+ Add Product</button>
     </div>
     <div class="section-content">
       <div class="products-table-container">
@@ -244,60 +244,8 @@
   </div>
 </div>
 
-<!-- Ironmongery Gallery Overlay -->
-<div id="ironmongeryOverlay" class="ironmongery-overlay">
-  <div class="ironmongery-gallery">
-    
-    <!-- Header -->
-    <div class="gallery-header">
-      <h2>Ironmongery Gallery</h2>
-      <button id="galleryClose" class="gallery-close" aria-label="Close">&times;</button>
-    </div>
-
-    <!-- Color Filters -->
-    <div class="gallery-filters">
-      <button class="filter-btn active" data-finish="all">All Finishes</button>
-      <button class="filter-btn" data-finish="chrome">Chrome</button>
-      <button class="filter-btn" data-finish="satin">Satin</button>
-      <button class="filter-btn" data-finish="brass">Brass</button>
-      <button class="filter-btn" data-finish="antique-brass">Antique Brass</button>
-      <button class="filter-btn" data-finish="black">Black</button>
-      <button class="filter-btn" data-finish="white">White</button>
-    </div>
-
-    <!-- Category Tabs -->
-    <div class="category-tabs">
-      <button class="category-tab active" data-category="locks">Sash Locks</button>
-      <button class="category-tab" data-category="fingerLifts">Finger Lifts</button>
-      <button class="category-tab" data-category="pullHandles">Pull Handles</button>
-      <button class="category-tab" data-category="stoppers">Stoppers</button>
-      <button class="category-tab" data-category="horns">Sash Horns</button>
-    </div>
-
-    <!-- Products Grid -->
-    <div id="productsGrid" class="products-grid">
-      <!-- Products rendered by JS -->
-    </div>
-
-    <!-- Footer with Total -->
-    <div class="gallery-footer">
-      <div class="selection-total">
-        Selection Total: <span id="selectionTotal">£0.00</span>
-      </div>
-      <button id="confirmSelection" class="btn-confirm-selection">
-        Confirm Selection
-      </button>
-    </div>
-
-  </div>
-</div>
-
-<link rel="stylesheet" href="css/configurator.css">
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js"></script>
-<script src="js/ironmongery-data.js"></script>
-<script src="js/ironmongery-gallery.js"></script>
 <script src="js/admin-controller.js"></script>
 <script>
 // Logout handler

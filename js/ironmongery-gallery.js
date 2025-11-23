@@ -376,7 +376,7 @@ class IronmongeryGallery {
           
           <div>
             <label style="display: block; margin-bottom: 5px; font-weight: 600;">Category *</label>
-            <select id="product-category" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+            <select id="gallery-product-category" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
               <option value="locks">Sash Locks</option>
               <option value="fingerLifts">Finger Lifts</option>
               <option value="pullHandles">Pull Handles</option>
@@ -387,14 +387,14 @@ class IronmongeryGallery {
 
           <div>
             <label style="display: block; margin-bottom: 5px; font-weight: 600;">Product Name *</label>
-            <input type="text" id="product-name" required 
+            <input type="text" id="gallery-product-name" required 
                    placeholder="e.g. Sash Lock PAS24"
                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
           </div>
 
           <div>
             <label style="display: block; margin-bottom: 5px; font-weight: 600;">Color</label>
-            <select id="product-color" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+            <select id="gallery-product-color" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
               <option value="">-- No Color --</option>
               <option value="chrome">Chrome</option>
               <option value="satin">Satin</option>
@@ -407,20 +407,20 @@ class IronmongeryGallery {
 
           <div>
             <label style="display: block; margin-bottom: 5px; font-weight: 600;">Price (£) *</label>
-            <input type="number" id="product-price" required step="0.01" min="0"
+            <input type="number" id="gallery-product-price" required step="0.01" min="0"
                    placeholder="e.g. 25.00"
                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
           </div>
 
           <div>
             <label style="display: block; margin-bottom: 5px; font-weight: 600;">Image</label>
-            <input type="file" id="product-image" accept="image/*"
+            <input type="file" id="gallery-product-image" accept="image/*"
                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
           </div>
 
           <div>
             <label style="display: block; margin-bottom: 5px; font-weight: 600;">Description</label>
-            <textarea id="product-description" rows="3"
+            <textarea id="gallery-product-description" rows="3"
                       style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;"></textarea>
           </div>
 
@@ -448,16 +448,16 @@ class IronmongeryGallery {
     // Set default values AFTER modal is in DOM
     if (!existingProduct) {
       // New product - set defaults
-      modal.querySelector('#product-category').value = 'locks';
+      modal.querySelector('#gallery-product-category').value = 'locks';
     } else {
       // Edit product - populate values
-      if (existingProduct.category) modal.querySelector('#product-category').value = existingProduct.category;
-      if (existingProduct.name) modal.querySelector('#product-name').value = existingProduct.name;
-      if (existingProduct.color) modal.querySelector('#product-color').value = existingProduct.color;
+      if (existingProduct.category) modal.querySelector('#gallery-product-category').value = existingProduct.category;
+      if (existingProduct.name) modal.querySelector('#gallery-product-name').value = existingProduct.name;
+      if (existingProduct.color) modal.querySelector('#gallery-product-color').value = existingProduct.color;
       if (existingProduct.price || existingProduct.price_net) {
-        modal.querySelector('#product-price').value = existingProduct.price || existingProduct.price_net;
+        modal.querySelector('#gallery-product-price').value = existingProduct.price || existingProduct.price_net;
       }
-      if (existingProduct.description) modal.querySelector('#product-description').value = existingProduct.description;
+      if (existingProduct.description) modal.querySelector('#gallery-product-description').value = existingProduct.description;
     }
     
     // Handle cancel
@@ -477,10 +477,10 @@ class IronmongeryGallery {
 
   async saveProduct(existingId, modal) {
     // Debug - check if elements exist
-    const categoryEl = document.getElementById('product-category');
-    const nameEl = document.getElementById('product-name');
-    const colorEl = document.getElementById('product-color');
-    const priceEl = document.getElementById('product-price');
+    const categoryEl = document.getElementById('gallery-product-category');
+    const nameEl = document.getElementById('gallery-product-name');
+    const colorEl = document.getElementById('gallery-product-color');
+    const priceEl = document.getElementById('gallery-product-price');
     
     console.log('🔍 Form elements check:');
     console.log('  category element:', categoryEl, 'value:', categoryEl?.value);
@@ -489,7 +489,7 @@ class IronmongeryGallery {
     console.log('  price element:', priceEl, 'value:', priceEl?.value);
     
     // Validation
-    const priceInput = document.getElementById('product-price');
+    const priceInput = document.getElementById('gallery-product-price');
     const price = parseFloat(priceInput.value);
     
     if (isNaN(price) || price <= 0) {
@@ -499,12 +499,12 @@ class IronmongeryGallery {
     }
     
     const formData = {
-      category: document.getElementById('product-category').value,
-      name: document.getElementById('product-name').value,
-      color: document.getElementById('product-color').value || null,
+      category: document.getElementById('gallery-product-category').value,
+      name: document.getElementById('gallery-product-name').value,
+      color: document.getElementById('gallery-product-color').value || null,
       price_net: price,
       price_vat: price,
-      description: document.getElementById('product-description').value || null
+      description: document.getElementById('gallery-product-description').value || null
     };
     
     console.log('💾 Saving product with data:', formData);
@@ -512,7 +512,7 @@ class IronmongeryGallery {
     
     try {
       // Handle image upload
-      const imageFile = document.getElementById('product-image').files[0];
+      const imageFile = document.getElementById('gallery-product-image').files[0];
       if (imageFile) {
         const fileExt = imageFile.name.split('.').pop();
         const fileName = `${Date.now()}.${fileExt}`;
