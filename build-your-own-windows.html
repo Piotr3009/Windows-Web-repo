@@ -1330,47 +1330,50 @@
 <script src="js/estimate-manager.js"></script>
 
 <!-- Ironmongery Gallery Overlay -->
-<div id="ironmongery-gallery" class="ironmongery-overlay" style="display: none;">
+<div id="ironmongeryOverlay" class="ironmongery-overlay">
+  <div class="ironmongery-gallery">
     
+    <!-- Header -->
     <div class="gallery-header">
-        <div class="gallery-title">
-            <h2>Ironmongery Selection</h2>
-            <p>Choose the perfect finishing touches for your window</p>
-        </div>
-        <div class="gallery-actions">
-            <div class="total-display">Total: <span id="gallery-total">£0.00</span></div>
-            <button class="btn btn-secondary" onclick="closeIronmongeryGallery()">Save & Return</button>
-        </div>
+      <h2>Ironmongery Gallery</h2>
+      <button id="galleryClose" class="gallery-close" aria-label="Close">&times;</button>
     </div>
 
+    <!-- Color Filters -->
     <div class="gallery-filters">
-        <span class="filter-label">Filter by Finish:</span>
-        <div class="filter-options" id="gallery-finish-filters"></div>
+      <button class="filter-btn active" data-finish="all">All Finishes</button>
+      <button class="filter-btn" data-finish="chrome">Chrome</button>
+      <button class="filter-btn" data-finish="satin">Satin</button>
+      <button class="filter-btn" data-finish="brass">Brass</button>
+      <button class="filter-btn" data-finish="antique-brass">Antique Brass</button>
+      <button class="filter-btn" data-finish="black">Black</button>
+      <button class="filter-btn" data-finish="white">White</button>
     </div>
 
-    <div class="gallery-content">
-        
-        <div class="gallery-section">
-            <h3>Sash Finger Lifts <small>(Mandatory: 2 per window)</small></h3>
-            <div class="products-grid" id="gallery-grid-fingerLifts"></div>
-        </div>
-
-        <div class="gallery-section">
-            <h3>Sash Locks <small>(1 or 2 depending on width)</small></h3>
-            <div class="products-grid" id="gallery-grid-locks"></div>
-        </div>
-
-        <div class="gallery-section">
-            <h3>Pull Handles <small>(Optional)</small></h3>
-            <div class="products-grid" id="gallery-grid-pullHandles"></div>
-        </div>
-
-        <div class="gallery-section">
-            <h3>Security Stoppers <small>(Optional)</small></h3>
-            <div class="products-grid" id="gallery-grid-stoppers"></div>
-        </div>
-
+    <!-- Category Tabs -->
+    <div class="category-tabs">
+      <button class="category-tab active" data-category="locks">Sash Locks</button>
+      <button class="category-tab" data-category="fingerLifts">Finger Lifts</button>
+      <button class="category-tab" data-category="pullHandles">Pull Handles</button>
+      <button class="category-tab" data-category="stoppers">Stoppers</button>
     </div>
+
+    <!-- Products Grid -->
+    <div id="productsGrid" class="products-grid">
+      <!-- Products rendered by JS -->
+    </div>
+
+    <!-- Footer with Total -->
+    <div class="gallery-footer">
+      <div class="selection-total">
+        Selection Total: <span id="selectionTotal">£0.00</span>
+      </div>
+      <button id="confirmSelection" class="btn-confirm-selection">
+        Confirm Selection
+      </button>
+    </div>
+
+  </div>
 </div>
 
 </body>
