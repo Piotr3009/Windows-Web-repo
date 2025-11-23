@@ -873,6 +873,17 @@
         <!-- Ironmongery Section -->
         <div class="ironmongery-section">
           <h4>Ironmongery</h4>
+          
+          <!-- Gallery Button -->
+          <div class="input-group">
+            <button type="button" 
+                    class="btn btn-primary" 
+                    onclick="openIronmongeryGallery()"
+                    style="width: 100%; padding: 15px; font-size: 1.1rem; margin-bottom: 20px;">
+              🖼️ Browse Ironmongery Gallery
+            </button>
+          </div>
+          
           <div class="input-group">
             <label for="furniture-finish">Furniture Finish:</label>
             <select id="furniture-finish" class="furniture-finish-select">
@@ -1294,6 +1305,7 @@
 <!-- 2. Pricing config -->
 <script src="js/ironmongery-data.js"></script>
 <script src="js/ironmongery-controller.js"></script>
+<script src="js/ironmongery-gallery.js"></script>
 <script src="js/pricing-config.js"></script>
 <script src="js/config.js"></script>
 <script src="js/price-calculator.js"></script>
