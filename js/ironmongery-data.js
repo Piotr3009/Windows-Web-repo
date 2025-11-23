@@ -306,6 +306,37 @@ const IRONMONGERY_DATA = {
           description: 'Always 2 per window - Choose this OR Window Stopper'
         }
       ]
+    },
+
+    horns: {
+      name: 'Sash Horns',
+      autoQuantity: 2, // Zawsze 2 sztuki
+      products: [
+        {
+          id: 'horn-25mm',
+          name: 'Sash Horn 25mm',
+          size: '25mm',
+          prices: { net: 8.00, vat: 9.60 },
+          image: 'img/ironmongery/horn-25mm.jpg',
+          description: '25mm traditional sash horn - Always 2 per window'
+        },
+        {
+          id: 'horn-50mm',
+          name: 'Sash Horn 50mm',
+          size: '50mm',
+          prices: { net: 10.00, vat: 12.00 },
+          image: 'img/ironmongery/horn-50mm.jpg',
+          description: '50mm traditional sash horn - Always 2 per window'
+        },
+        {
+          id: 'horn-75mm',
+          name: 'Sash Horn 75mm',
+          size: '75mm',
+          prices: { net: 12.00, vat: 14.40 },
+          image: 'img/ironmongery/horn-75mm.jpg',
+          description: '75mm traditional sash horn - Always 2 per window'
+        }
+      ]
     }
   }
 };
@@ -346,11 +377,8 @@ const IronmongeryHelper = {
     const stored = localStorage.getItem('admin_ironmongery_products');
     
     if (!stored) {
-      // Jeśli nie ma produktów w localStorage, wyczyść domyślne
-      Object.keys(IRONMONGERY_DATA.categories).forEach(categoryKey => {
-        IRONMONGERY_DATA.categories[categoryKey].products = [];
-      });
-      console.log('No products in localStorage - cleared default products');
+      // Jeśli nie ma produktów w localStorage, ZOSTAW domyślne z hardcode
+      console.log('No products in localStorage - using default hardcoded products');
       return;
     }
 
