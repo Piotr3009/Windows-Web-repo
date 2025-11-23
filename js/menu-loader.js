@@ -33,6 +33,7 @@ class MenuLoader {
         const user = await this.getCurrentUser();
         const adminPanelLink = document.getElementById('admin-panel-link');
         const adminDashboardLink = document.getElementById('admin-dashboard-link');
+        const dashboardButton = document.getElementById('dashboard-button');
         
         if (user) {
             // Sprawdź rolę użytkownika
@@ -41,6 +42,17 @@ class MenuLoader {
             if (isAdmin) {
                 if (adminPanelLink) adminPanelLink.style.display = 'inline-block';
                 if (adminDashboardLink) adminDashboardLink.style.display = 'inline-block';
+            }
+
+            // Pulsowanie dashboard button - tylko jeśli nie kliknął wcześniej
+            if (dashboardButton && !localStorage.getItem('dashboard_visited')) {
+                dashboardButton.classList.add('pulse');
+                
+                // Usuń pulsowanie po kliknięciu
+                document.getElementById('dashboard-link').addEventListener('click', () => {
+                    localStorage.setItem('dashboard_visited', 'true');
+                    dashboardButton.classList.remove('pulse');
+                });
             }
         }
 

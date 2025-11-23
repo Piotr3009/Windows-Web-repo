@@ -112,6 +112,22 @@ a:hover {
   }
 }
 
+/* Dashboard button pulse animation */
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(212, 175, 55, 0);
+    transform: scale(1.05);
+  }
+}
+
+#dashboard-button.pulse {
+  animation: pulse 2s infinite;
+}
+
 /* Menu Bar */
 .menu-bar {
   display: flex;
