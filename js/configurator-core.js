@@ -16,6 +16,14 @@ class ConfiguratorCore {
       this.loadSavedConfiguration();
       this.updateAll();
       this.isInitialized = true;
+      
+      // Auto-save przy zamykaniu strony
+      window.addEventListener('beforeunload', () => {
+        const config = this.state.get();
+        this.modules.storage.saveLastConfig(config);
+        console.log('💾 Saved configuration before page unload');
+      });
+      
       console.log('ConfiguratorCore: Ready');
     } catch (error) {
       console.error('ConfiguratorCore: Init failed', error);
@@ -171,6 +179,13 @@ class ConfiguratorCore {
         case 'glassSpec': this.modules.spec.applyGlassSpec(); break;
       }
     }
+    
+    // Save po Apply
+    if (this.modules.storage) {
+      const config = this.state.get();
+      this.modules.storage.saveLastConfig(config);
+      console.log('💾 Saved after Apply:', section);
+    }
   }
 
   updateAll() {
@@ -185,6 +200,12 @@ class ConfiguratorCore {
     if (this.modules.visual) {
       this.modules.visual.update(config);
       this.modules.visual.updatePrice(priceData.unitPrice, priceData.totalPrice);
+    }
+    
+    // AUTO-SAVE - zapisz do localStorage przy każdej zmianie
+    if (this.modules.storage) {
+      this.modules.storage.saveLastConfig(config);
+      console.log('🔄 Auto-saved configuration');
     }
     
     // Update bars if needed
