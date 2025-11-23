@@ -466,6 +466,18 @@ class IronmongeryGallery {
   }
 
   async saveProduct(existingId, modal) {
+    // Debug - check if elements exist
+    const categoryEl = document.getElementById('product-category');
+    const nameEl = document.getElementById('product-name');
+    const colorEl = document.getElementById('product-color');
+    const priceEl = document.getElementById('product-price');
+    
+    console.log('🔍 Form elements check:');
+    console.log('  category element:', categoryEl, 'value:', categoryEl?.value);
+    console.log('  name element:', nameEl, 'value:', nameEl?.value);
+    console.log('  color element:', colorEl, 'value:', colorEl?.value);
+    console.log('  price element:', priceEl, 'value:', priceEl?.value);
+    
     // Validation
     const priceInput = document.getElementById('product-price');
     const price = parseFloat(priceInput.value);
@@ -481,7 +493,7 @@ class IronmongeryGallery {
       name: document.getElementById('product-name').value,
       color: document.getElementById('product-color').value || null,
       price_net: price,
-      price_vat: price, // To samo - VAT będzie na końcu
+      price_vat: price,
       description: document.getElementById('product-description').value || null
     };
     
