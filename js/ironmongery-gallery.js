@@ -376,9 +376,9 @@ class IronmongeryGallery {
     this.updateMainPageDisplay();
 
     // NOWE: Wywołaj przeliczenie CENY
-    if (window.priceCalculator) {
+    if (typeof window.updatePrice === 'function') {
       console.log('💰 Recalculating price...');
-      window.priceCalculator.updatePrice();
+      window.updatePrice();
     }
 
     // Wywołaj applyDetails (specyfikacja)
