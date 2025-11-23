@@ -11,10 +11,11 @@ class IronmongeryGallery {
     this.productsGrid = document.getElementById('productsGrid');
     this.totalElement = document.getElementById('selectionTotal');
     
-    this.selectedProducts = new Map(); // category -> product
+    this.selectedProducts = {}; // ZMIANA: Object zamiast Map, z quantity
+    // Format: { category: { product: {...}, quantity: 1 } }
     this.currentCategory = 'locks';
     this.currentFinish = 'all';
-    this.isAdminMode = false; // Tryb zarządzania dla admina
+    this.isAdminMode = false;
     
     this.init();
   }
@@ -77,21 +78,36 @@ class IronmongeryGallery {
     if (window.ConfiguratorCore?.currentWindow?.ironmongery) {
       const ironmongery = window.ConfiguratorCore.currentWindow.ironmongery;
       
-      // Map existing selections
+      // Map existing selections with quantity
       if (ironmongery.lock) {
-        this.selectedProducts.set('locks', ironmongery.lock);
+        this.selectedProducts['locks'] = {
+          product: ironmongery.lock,
+          quantity: ironmongery.lock.quantity || 1
+        };
       }
       if (ironmongery.fingerLift) {
-        this.selectedProducts.set('fingerLifts', ironmongery.fingerLift);
+        this.selectedProducts['fingerLifts'] = {
+          product: ironmongery.fingerLift,
+          quantity: ironmongery.fingerLift.quantity || 2 // Domyślnie 2 lifts
+        };
       }
       if (ironmongery.horns) {
-        this.selectedProducts.set('horns', ironmongery.horns);
+        this.selectedProducts['horns'] = {
+          product: ironmongery.horns,
+          quantity: ironmongery.horns.quantity || 2 // Domyślnie 2 horns
+        };
       }
-      if (ironmongery.hinges) {
-        this.selectedProducts.set('hinges', ironmongery.hinges);
+      if (ironmongery.pullHandles) {
+        this.selectedProducts['pullHandles'] = {
+          product: ironmongery.pullHandles,
+          quantity: ironmongery.pullHandles.quantity || 1
+        };
       }
-      if (ironmongery.trickleVents) {
-        this.selectedProducts.set('trickleVents', ironmongery.trickleVents);
+      if (ironmongery.stoppers) {
+        this.selectedProducts['stoppers'] = {
+          product: ironmongery.stoppers,
+          quantity: ironmongery.stoppers.quantity || 2 // Domyślnie 2 stoppers
+        };
       }
     }
   }
@@ -164,6 +180,27 @@ class IronmongeryGallery {
 
     // Add click handlers
     this.productsGrid.querySelectorAll('.product-card').forEach(card => {
+      // Quantity buttons
+      const minusBtn = card.querySelector('.qty-btn[data-action="minus"]');
+      const plusBtn = card.querySelector('.qty-btn[data-action="plus"]');
+      
+      if (minusBtn) {
+        minusBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const productId = card.dataset.productId;
+          this.toggleProduct(productId, 'minus');
+        });
+      }
+      
+      if (plusBtn) {
+        plusBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const productId = card.dataset.productId;
+          this.toggleProduct(productId, 'plus');
+        });
+      }
+      
+      // Card click (select/deselect)
       card.addEventListener('click', (e) => {
         // Jeśli kliknięto zdjęcie - powiększ
         if (e.target.classList.contains('product-card-image')) {
@@ -171,8 +208,13 @@ class IronmongeryGallery {
           return;
         }
         
+        // Jeśli kliknięto quantity button - nie toggleuj
+        if (e.target.classList.contains('qty-btn')) {
+          return;
+        }
+        
         const productId = card.dataset.productId;
-        this.toggleProduct(productId);
+        this.toggleProduct(productId, 'select');
       });
     });
 
@@ -180,7 +222,9 @@ class IronmongeryGallery {
   }
 
   renderProductCard(product) {
-    const isSelected = this.selectedProducts.get(this.currentCategory)?.id === product.id;
+    const selection = this.selectedProducts[this.currentCategory];
+    const isSelected = selection?.product?.id === product.id;
+    const quantity = isSelected ? selection.quantity : 0;
     const price = product.price_net || product.price || 0;
     
     // Admin buttons
@@ -210,25 +254,52 @@ class IronmongeryGallery {
              onerror="this.src='img/placeholder-ironmongery.jpg'">
         <div class="product-card-name">${product.name}</div>
         <div class="product-card-price">£${price.toFixed(2)}</div>
+        ${isSelected ? `
+          <div class="quantity-controls" style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px;">
+            <button class="qty-btn" data-action="minus" style="width: 25px; height: 25px; border: 1px solid var(--primary-color); background: white; color: var(--primary-color); border-radius: 4px; cursor: pointer; font-weight: bold;">−</button>
+            <span class="qty-display" style="min-width: 30px; text-align: center; font-weight: 600; color: var(--primary-color);">${quantity}</span>
+            <button class="qty-btn" data-action="plus" style="width: 25px; height: 25px; border: 1px solid var(--primary-color); background: var(--primary-color); color: white; border-radius: 4px; cursor: pointer; font-weight: bold;">+</button>
+          </div>
+        ` : ''}
       </div>
     `;
   }
 
-  toggleProduct(productId) {
+  toggleProduct(productId, action = 'select') {
     const categoryData = IRONMONGERY_DATA.categories[this.currentCategory];
     const product = categoryData.products.find(p => p.id === productId);
     
     if (!product) return;
 
-    // Toggle selection
-    const currentSelection = this.selectedProducts.get(this.currentCategory);
+    const currentSelection = this.selectedProducts[this.currentCategory];
     
-    if (currentSelection?.id === productId) {
-      // Deselect
-      this.selectedProducts.delete(this.currentCategory);
-    } else {
-      // Select
-      this.selectedProducts.set(this.currentCategory, product);
+    if (action === 'select') {
+      // Toggle selection
+      if (currentSelection?.product?.id === productId) {
+        // Deselect
+        delete this.selectedProducts[this.currentCategory];
+      } else {
+        // Select z domyślną ilością
+        const defaultQty = (this.currentCategory === 'fingerLifts' || 
+                           this.currentCategory === 'stoppers' || 
+                           this.currentCategory === 'horns') ? 2 : 1;
+        
+        this.selectedProducts[this.currentCategory] = {
+          product: product,
+          quantity: defaultQty
+        };
+      }
+    } else if (action === 'plus') {
+      if (currentSelection) {
+        currentSelection.quantity++;
+      }
+    } else if (action === 'minus') {
+      if (currentSelection) {
+        currentSelection.quantity--;
+        if (currentSelection.quantity <= 0) {
+          delete this.selectedProducts[this.currentCategory];
+        }
+      }
     }
 
     this.renderProducts();
@@ -237,9 +308,9 @@ class IronmongeryGallery {
   updateTotal() {
     let total = 0;
     
-    this.selectedProducts.forEach(product => {
-      const price = product.price_net || product.price || 0;
-      total += price;
+    Object.values(this.selectedProducts).forEach(selection => {
+      const price = selection.product.price_net || selection.product.price || 0;
+      total += price * selection.quantity;
     });
 
     if (this.totalElement) {
@@ -248,7 +319,7 @@ class IronmongeryGallery {
 
     // Enable/disable confirm button
     if (this.confirmBtn) {
-      this.confirmBtn.disabled = this.selectedProducts.size === 0;
+      this.confirmBtn.disabled = Object.keys(this.selectedProducts).length === 0;
     }
   }
 
@@ -267,15 +338,28 @@ class IronmongeryGallery {
   }
 
   confirmSelection() {
-    // Convert to ironmongery format
+    // Convert to ironmongery format with quantity
     const ironmongery = {
-      lock: this.selectedProducts.get('locks') || null,
-      fingerLift: this.selectedProducts.get('fingerLifts') || null,
-      horns: this.selectedProducts.get('horns') || null,
-      hinges: this.selectedProducts.get('hinges') || null,
-      trickleVents: this.selectedProducts.get('trickleVents') || null,
-      pullHandles: this.selectedProducts.get('pullHandles') || null,
-      stoppers: this.selectedProducts.get('stoppers') || null
+      lock: this.selectedProducts['locks'] ? {
+        ...this.selectedProducts['locks'].product,
+        quantity: this.selectedProducts['locks'].quantity
+      } : null,
+      fingerLift: this.selectedProducts['fingerLifts'] ? {
+        ...this.selectedProducts['fingerLifts'].product,
+        quantity: this.selectedProducts['fingerLifts'].quantity
+      } : null,
+      horns: this.selectedProducts['horns'] ? {
+        ...this.selectedProducts['horns'].product,
+        quantity: this.selectedProducts['horns'].quantity
+      } : null,
+      pullHandles: this.selectedProducts['pullHandles'] ? {
+        ...this.selectedProducts['pullHandles'].product,
+        quantity: this.selectedProducts['pullHandles'].quantity
+      } : null,
+      stoppers: this.selectedProducts['stoppers'] ? {
+        ...this.selectedProducts['stoppers'].product,
+        quantity: this.selectedProducts['stoppers'].quantity
+      } : null
     };
 
     console.log('✅ Confirm Selection - saving ironmongery:', ironmongery);
@@ -305,8 +389,11 @@ class IronmongeryGallery {
 
     if (!displayContainer || !gridContainer || !totalElement) return;
 
+    // Count items
+    const itemCount = Object.keys(this.selectedProducts).length;
+
     // If no products selected, hide the display
-    if (this.selectedProducts.size === 0) {
+    if (itemCount === 0) {
       displayContainer.style.display = 'none';
       return;
     }
@@ -318,9 +405,12 @@ class IronmongeryGallery {
     let html = '';
     let total = 0;
 
-    this.selectedProducts.forEach((product, category) => {
+    Object.entries(this.selectedProducts).forEach(([category, selection]) => {
+      const product = selection.product;
+      const quantity = selection.quantity;
       const price = product.price_net || product.price || 0;
-      total += price;
+      const itemTotal = price * quantity;
+      total += itemTotal;
 
       const categoryName = {
         locks: 'Lock',
@@ -336,14 +426,22 @@ class IronmongeryGallery {
                alt="${product.name}"
                style="width: 100%; height: 60px; object-fit: cover; border-radius: 4px; margin-bottom: 5px;"
                onerror="this.src='img/placeholder-ironmongery.jpg'">
-          <div style="font-size: 0.75rem; color: #666; margin-bottom: 3px;">${categoryName}</div>
-          <div style="font-size: 0.85rem; font-weight: 600; color: var(--primary-color);">£${price.toFixed(2)}</div>
+          <div style="font-size: 0.75rem; color: #666; margin-bottom: 3px;">${categoryName} (${quantity}x)</div>
+          <div style="font-size: 0.85rem; font-weight: 600; color: var(--primary-color);">£${itemTotal.toFixed(2)}</div>
         </div>
       `;
     });
 
     gridContainer.innerHTML = html;
     totalElement.textContent = `£${total.toFixed(2)}`;
+    
+    // PREVIEW pod przyciskiem (Gemini style)
+    const previewElement = document.getElementById('ironmongery-summary-preview');
+    if (previewElement) {
+      previewElement.textContent = `Selected: ${itemCount} items (+£${total.toFixed(2)})`;
+      previewElement.style.color = 'var(--primary-color)';
+      previewElement.style.fontWeight = '600';
+    }
   }
 
   // ==========================================

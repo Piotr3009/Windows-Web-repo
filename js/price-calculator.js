@@ -181,7 +181,7 @@ class PriceCalculator {
     
     // Horns - USUNIĘTE (teraz w Gallery jako ironmongery)
     
-    // Ironmongery - NOWY SYSTEM: pobierz z Gallery (ConfiguratorCore)
+    // Ironmongery - NOWY SYSTEM: pobierz z Gallery (ConfiguratorCore) + QUANTITY
     const galleryIronmongery = window.ConfiguratorCore?.currentWindow?.ironmongery || {};
     const selectedProducts = [
       galleryIronmongery.lock,
@@ -195,7 +195,8 @@ class PriceCalculator {
       let ironmongeryTotal = 0;
       selectedProducts.forEach(product => {
         const price = product.price_net || product.price || 0;
-        ironmongeryTotal += price;
+        const quantity = product.quantity || 1;
+        ironmongeryTotal += (price * quantity);
       });
       
       if (ironmongeryTotal > 0) {

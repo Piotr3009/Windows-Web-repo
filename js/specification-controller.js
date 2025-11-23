@@ -499,24 +499,27 @@ class SpecificationController {
 
     document.getElementById('spec-details').style.display = 'block';
 
-    // Zbierz wszystkie wybrane produkty z Gallery
+    // Zbierz wszystkie wybrane produkty z Gallery (z quantity)
     const selectedProducts = [];
     
-    if (gallerySelection.lock) selectedProducts.push(gallerySelection.lock);
-    if (gallerySelection.fingerLift) selectedProducts.push(gallerySelection.fingerLift);
-    if (gallerySelection.pullHandles) selectedProducts.push(gallerySelection.pullHandles);
-    if (gallerySelection.stoppers) selectedProducts.push(gallerySelection.stoppers);
-    if (gallerySelection.horns) selectedProducts.push(gallerySelection.horns);
+    if (gallerySelection.lock) selectedProducts.push({...gallerySelection.lock, category: 'Lock'});
+    if (gallerySelection.fingerLift) selectedProducts.push({...gallerySelection.fingerLift, category: 'Lift'});
+    if (gallerySelection.pullHandles) selectedProducts.push({...gallerySelection.pullHandles, category: 'Handle'});
+    if (gallerySelection.stoppers) selectedProducts.push({...gallerySelection.stoppers, category: 'Stopper'});
+    if (gallerySelection.horns) selectedProducts.push({...gallerySelection.horns, category: 'Horns'});
 
     const hasIronmongery = selectedProducts.length > 0;
     
     console.log('📋 Selected products:', selectedProducts.length, selectedProducts);
 
-    // Ironmongery - wyświetl listę produktów z Gallery
+    // Ironmongery - wyświetl listę produktów z Gallery + QUANTITY
     if (hasIronmongery) {
       document.getElementById('spec-ironmongery-item').style.display = 'flex';
       const productNames = selectedProducts
-        .map(product => product.name)
+        .map(product => {
+          const qty = product.quantity || 1;
+          return qty > 1 ? `${qty}x ${product.name}` : product.name;
+        })
         .join(', ');
       document.getElementById('spec-ironmongery').textContent = productNames;
       console.log('✅ Ironmongery displayed:', productNames);
