@@ -133,14 +133,44 @@ class IronmongeryGallery {
       );
     }
 
-    // Render
-    this.productsGrid.innerHTML = products.map(product => 
-      this.renderProductCard(product)
-    ).join('');
+    // Group products by category (dla wyświetlania w kolumnach)
+    const productsByCategory = {};
+    
+    // Dla aktualnej kategorii - pokaż wszystkie produkty
+    if (!productsByCategory[this.currentCategory]) {
+      productsByCategory[this.currentCategory] = [];
+    }
+    productsByCategory[this.currentCategory] = products;
+
+    // Render w kolumnach
+    let html = '';
+    
+    for (const [category, categoryProducts] of Object.entries(productsByCategory)) {
+      if (categoryProducts.length === 0) continue;
+      
+      const categoryName = IRONMONGERY_DATA.categories[category]?.name || category;
+      
+      html += `
+        <div class="category-products-column">
+          <h4>${categoryName}</h4>
+          <div class="category-products-row">
+            ${categoryProducts.map(product => this.renderProductCard(product)).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    this.productsGrid.innerHTML = html;
 
     // Add click handlers
     this.productsGrid.querySelectorAll('.product-card').forEach(card => {
-      card.addEventListener('click', () => {
+      card.addEventListener('click', (e) => {
+        // Jeśli kliknięto zdjęcie - powiększ
+        if (e.target.classList.contains('product-card-image')) {
+          this.zoomImage(e.target.src);
+          return;
+        }
+        
         const productId = card.dataset.productId;
         this.toggleProduct(productId);
       });
@@ -155,15 +185,15 @@ class IronmongeryGallery {
     
     // Admin buttons
     const adminButtons = this.isAdminMode ? `
-      <div class="admin-actions" style="position: absolute; top: 5px; right: 5px; display: flex; gap: 5px; z-index: 10;">
+      <div class="admin-actions" style="position: absolute; top: 3px; right: 3px; display: flex; gap: 3px; z-index: 10;">
         <button onclick="event.stopPropagation(); window.IronmongeryGallery.editProduct('${product.id}')" 
                 class="btn-admin-edit" 
-                style="padding: 5px 10px; background: #ffc107; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                style="padding: 3px 6px; background: #ffc107; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.7rem;">
           ✏️
         </button>
         <button onclick="event.stopPropagation(); window.IronmongeryGallery.deleteProduct('${product.id}')" 
                 class="btn-admin-delete"
-                style="padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                style="padding: 3px 6px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.7rem;">
           🗑️
         </button>
       </div>
@@ -176,12 +206,10 @@ class IronmongeryGallery {
         <img src="${product.image || product.image_url || 'img/placeholder-ironmongery.jpg'}" 
              alt="${product.name}"
              class="product-card-image"
+             title="Click to zoom"
              onerror="this.src='img/placeholder-ironmongery.jpg'">
         <div class="product-card-name">${product.name}</div>
         <div class="product-card-price">£${price.toFixed(2)}</div>
-        ${product.description ? 
-          `<div class="product-card-description">${product.description}</div>` 
-          : ''}
       </div>
     `;
   }
@@ -222,6 +250,20 @@ class IronmongeryGallery {
     if (this.confirmBtn) {
       this.confirmBtn.disabled = this.selectedProducts.size === 0;
     }
+  }
+
+  zoomImage(imageSrc) {
+    // Utwórz modal do powiększenia
+    const modal = document.createElement('div');
+    modal.className = 'image-zoom-modal active';
+    modal.innerHTML = `<img src="${imageSrc}" alt="Zoomed product">`;
+    
+    // Zamknij po kliknięciu
+    modal.addEventListener('click', () => {
+      document.body.removeChild(modal);
+    });
+    
+    document.body.appendChild(modal);
   }
 
   confirmSelection() {
