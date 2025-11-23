@@ -278,20 +278,22 @@ class IronmongeryGallery {
       stoppers: this.selectedProducts.get('stoppers') || null
     };
 
+    console.log('✅ Confirm Selection - saving ironmongery:', ironmongery);
+
     // Save to configurator
     if (window.ConfiguratorCore?.currentWindow) {
       window.ConfiguratorCore.currentWindow.ironmongery = ironmongery;
-      
-      // Trigger update in main configurator
-      if (window.IronmongeryController) {
-        window.IronmongeryController.updateFromGallery(ironmongery);
-      }
+      console.log('✅ Saved to ConfiguratorCore:', window.ConfiguratorCore.currentWindow.ironmongery);
     }
 
     // Update display on main page
     this.updateMainPageDisplay();
 
-    console.log('Selected ironmongery:', ironmongery);
+    // NOWE: Wywołaj applyDetails BEZPOŚREDNIO
+    if (window.SpecificationController) {
+      console.log('📋 Calling applyDetails with:', ironmongery);
+      window.SpecificationController.applyDetails();
+    }
     
     this.close();
   }
