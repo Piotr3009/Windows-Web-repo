@@ -48,14 +48,47 @@
     <script src="js/supabase-config.js"></script>
 
     <script>
-        async function confirmEmail() {
+        async function handleConfirmation() {
             const container = document.querySelector('.container');
             const h1 = container.querySelector('h1');
             const p = container.querySelector('p');
             const spinner = container.querySelector('.spinner');
 
+            function showSuccess() {
+                spinner.style.display = 'none';
+                h1.innerText = 'Email Confirmed!';
+                h1.style.color = '#4caf50';
+                p.innerText = 'Redirecting to home...';
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+            }
+
+            function showError(msg) {
+                spinner.style.display = 'none';
+                h1.innerText = 'Verification Issue';
+                h1.style.color = '#e74c3c';
+                p.innerHTML = `${msg}<br><br>
+                <small>Tip: Check if your device clock is synced correctly.</small><br><br>
+                <a href="login.html" style="color: gold; text-decoration: underline;">Go to Login</a>`;
+            }
+
+            // 1. Nasłuchuj zmian stanu (automatyczne logowanie przez Supabase)
+            const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+                    showSuccess();
+                }
+            });
+
+            // 2. Ręczna weryfikacja
             try {
-                // 1. Pobierz parametry z URL (Nowy standard Supabase - PKCE)
+                // Sprawdź czy użytkownik już jest zalogowany
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session) {
+                    showSuccess();
+                    return;
+                }
+
                 const urlParams = new URLSearchParams(window.location.search);
                 const tokenHash = urlParams.get('token_hash');
                 const type = urlParams.get('type');
@@ -63,66 +96,48 @@
                 const errorDescription = urlParams.get('error_description');
 
                 // Obsługa błędów z URL
-                if (errorCode) {
-                    throw new Error(errorDescription || 'Verification link invalid');
-                }
+                if (errorCode) throw new Error(errorDescription || 'Link invalid');
 
-                // 2. Weryfikacja TOKEN_HASH (Najważniejsza część)
+                // Nowy Flow (PKCE)
                 if (tokenHash && type) {
                     const { error } = await supabaseClient.auth.verifyOtp({
                         token_hash: tokenHash,
                         type: type,
                     });
-
                     if (error) throw error;
-
-                    // Sukces
-                    finishSuccess();
                     return;
                 }
 
-                // 3. Fallback dla starych linków (Hash fragment)
+                // Stary Flow (Hash)
                 const hashParams = new URLSearchParams(window.location.hash.substring(1));
                 const accessToken = hashParams.get('access_token');
-                const refreshToken = hashParams.get('refresh_token');
-
+                
                 if (accessToken) {
                     const { error } = await supabaseClient.auth.setSession({
                         access_token: accessToken,
-                        refresh_token: refreshToken
+                        refresh_token: hashParams.get('refresh_token')
                     });
                     if (error) throw error;
-                    finishSuccess();
                     return;
                 }
 
-                throw new Error('No verification token found. Link might be expired.');
+                // Daj czas bibliotece na przetworzenie
+                setTimeout(() => {
+                    supabaseClient.auth.getSession().then(({ data }) => {
+                        if (!data.session && !tokenHash && !accessToken) {
+                            showError('No verification token found. Please try logging in.');
+                        }
+                    });
+                }, 3000);
 
             } catch (error) {
-                console.error('Error:', error);
-                spinner.style.display = 'none';
-                h1.innerText = 'Verification Failed';
-                h1.style.color = '#e74c3c'; // Red
-                p.innerHTML = `${error.message}<br><br><a href="login.html" style="color: gold; text-decoration: underline;">Go to Login</a>`;
-            }
-
-            function finishSuccess() {
-                spinner.style.display = 'none';
-                h1.innerText = 'Email Confirmed!';
-                h1.style.color = '#4caf50'; // Green
-                p.innerText = 'Redirecting you to home...';
-                
-                // Przekierowanie po 2 sekundach
-                setTimeout(() => {
-                    window.location.href = 'index.html'; 
-                }, 2000);
+                console.error(error);
+                showError(error.message);
             }
         }
 
-        // Uruchom po załadowaniu
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(confirmEmail, 500); // Małe opóźnienie dla pewności załadowania libki
-        });
+        // Uruchom natychmiast
+        document.addEventListener('DOMContentLoaded', handleConfirmation);
     </script>
 </body>
 </html>
