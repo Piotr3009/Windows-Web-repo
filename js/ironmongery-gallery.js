@@ -151,7 +151,7 @@ class IronmongeryGallery {
 
   renderProductCard(product) {
     const isSelected = this.selectedProducts.get(this.currentCategory)?.id === product.id;
-    const price = product.prices?.vat || product.price_vat || product.price || 0;
+    const price = product.price_net || product.price || 0;
     
     // Admin buttons
     const adminButtons = this.isAdminMode ? `
@@ -210,7 +210,8 @@ class IronmongeryGallery {
     let total = 0;
     
     this.selectedProducts.forEach(product => {
-      total += product.price;
+      const price = product.price_net || product.price || 0;
+      total += price;
     });
 
     if (this.totalElement) {
@@ -274,7 +275,7 @@ class IronmongeryGallery {
     let total = 0;
 
     this.selectedProducts.forEach((product, category) => {
-      const price = product.prices?.vat || product.price_vat || product.price || 0;
+      const price = product.price_net || product.price || 0;
       total += price;
 
       const categoryName = {
@@ -405,19 +406,12 @@ class IronmongeryGallery {
             </select>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <div>
-              <label style="display: block; margin-bottom: 5px; font-weight: 600;">Price NET (£) *</label>
-              <input type="number" id="product-price-net" required step="0.01" min="0"
-                     value="${existingProduct?.prices?.net || existingProduct?.price_net || ''}"
-                     style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-            </div>
-            <div>
-              <label style="display: block; margin-bottom: 5px; font-weight: 600;">Price VAT (£) *</label>
-              <input type="number" id="product-price-vat" required step="0.01" min="0"
-                     value="${existingProduct?.prices?.vat || existingProduct?.price_vat || ''}"
-                     style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-            </div>
+          <div>
+            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Price (£) *</label>
+            <input type="number" id="product-price" required step="0.01" min="0"
+                   value="${existingProduct?.price || existingProduct?.price_net || ''}"
+                   placeholder="e.g. 25.00"
+                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
           </div>
 
           <div>
@@ -476,8 +470,8 @@ class IronmongeryGallery {
       category: document.getElementById('product-category').value,
       name: document.getElementById('product-name').value,
       color: document.getElementById('product-color').value || null,
-      price_net: parseFloat(document.getElementById('product-price-net').value),
-      price_vat: parseFloat(document.getElementById('product-price-vat').value),
+      price_net: parseFloat(document.getElementById('product-price').value),
+      price_vat: parseFloat(document.getElementById('product-price').value), // To samo - VAT będzie na końcu
       description: document.getElementById('product-description').value || null
     };
     
@@ -488,13 +482,13 @@ class IronmongeryGallery {
         const fileExt = imageFile.name.split('.').pop();
         const fileName = `${Date.now()}.${fileExt}`;
         
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { data: uploadData, error: uploadError } = await window.supabaseClient.storage
           .from('ironmongery-images')
           .upload(fileName, imageFile);
         
         if (uploadError) throw uploadError;
         
-        const { data: { publicUrl } } = supabase.storage
+        const { data: { publicUrl } } = window.supabaseClient.storage
           .from('ironmongery-images')
           .getPublicUrl(fileName);
         
