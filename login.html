@@ -340,22 +340,20 @@
             try {
                 const { data: authData, error: authError } = await supabaseClient.auth.signUp({
                     email: email,
-                    password: password
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: name,
+                            phone: phone,
+                            company_name: company
+                        },
+                        emailRedirectTo: 'https://piotr3009.github.io/Windows-Web-repo/email-confirm.html'
+                    }
                 });
 
                 if (authError) throw authError;
 
-                const { error: customerError } = await supabaseClient
-                    .from('customers')
-                    .insert([{
-                        user_id: authData.user.id,
-                        full_name: name,
-                        company_name: company || null,
-                        email: email,
-                        phone: phone
-                    }]);
-
-                if (customerError) throw customerError;
+                // Trigger SQL automatycznie utworzy wpis w customers - nie robimy tego ręcznie!
 
                 // ✅ Sprawdź czy email wymaga potwierdzenia
                 const needsEmailConfirmation = authData.user && !authData.user.email_confirmed_at;
