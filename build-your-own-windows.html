@@ -1317,5 +1317,49 @@
 <script src="js/estimate-selector.js"></script>
 <script src="js/estimate-manager.js"></script>
 
+<!-- Ironmongery Gallery Overlay -->
+<div id="ironmongery-gallery" class="ironmongery-overlay" style="display: none;">
+    
+    <div class="gallery-header">
+        <div class="gallery-title">
+            <h2>Ironmongery Selection</h2>
+            <p>Choose the perfect finishing touches for your window</p>
+        </div>
+        <div class="gallery-actions">
+            <div class="total-display">Total: <span id="gallery-total">£0.00</span></div>
+            <button class="btn btn-secondary" onclick="closeIronmongeryGallery()">Save & Return</button>
+        </div>
+    </div>
+
+    <div class="gallery-filters">
+        <span class="filter-label">Filter by Finish:</span>
+        <div class="filter-options" id="gallery-finish-filters"></div>
+    </div>
+
+    <div class="gallery-content">
+        
+        <div class="gallery-section">
+            <h3>Sash Finger Lifts <small>(Mandatory: 2 per window)</small></h3>
+            <div class="products-grid" id="gallery-grid-fingerLifts"></div>
+        </div>
+
+        <div class="gallery-section">
+            <h3>Sash Locks <small>(1 or 2 depending on width)</small></h3>
+            <div class="products-grid" id="gallery-grid-locks"></div>
+        </div>
+
+        <div class="gallery-section">
+            <h3>Pull Handles <small>(Optional)</small></h3>
+            <div class="products-grid" id="gallery-grid-pullHandles"></div>
+        </div>
+
+        <div class="gallery-section">
+            <h3>Security Stoppers <small>(Optional)</small></h3>
+            <div class="products-grid" id="gallery-grid-stoppers"></div>
+        </div>
+
+    </div>
+</div>
+
 </body>
 </html>
