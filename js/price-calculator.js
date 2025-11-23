@@ -179,23 +179,28 @@ class PriceCalculator {
       console.log('Glass finish (' + configuration.glassFinish + '): £' + finishPrice);
     }
     
-    // Horns
-    if (configuration.horns && options.horns[configuration.horns]) {
-      const hornsPrice = options.horns[configuration.horns];
-      additionalPrice += hornsPrice;
-      console.log('Horns (' + configuration.horns + '): £' + hornsPrice);
-    }
+    // Horns - USUNIĘTE (teraz w Gallery jako ironmongery)
     
-    // Ironmongery - pobierz z IronmongeryController
-    if (window.IronmongeryController?.selectedProducts) {
+    // Ironmongery - NOWY SYSTEM: pobierz z Gallery (ConfiguratorCore)
+    const galleryIronmongery = window.ConfiguratorCore?.currentWindow?.ironmongery || {};
+    const selectedProducts = [
+      galleryIronmongery.lock,
+      galleryIronmongery.fingerLift,
+      galleryIronmongery.pullHandles,
+      galleryIronmongery.stoppers,
+      galleryIronmongery.horns
+    ].filter(p => p !== null && p !== undefined);
+    
+    if (selectedProducts.length > 0) {
       let ironmongeryTotal = 0;
-      Object.values(window.IronmongeryController.selectedProducts).forEach(item => {
-        ironmongeryTotal += item.totalPrice;
+      selectedProducts.forEach(product => {
+        const price = product.price_net || product.price || 0;
+        ironmongeryTotal += price;
       });
       
       if (ironmongeryTotal > 0) {
         additionalPrice += ironmongeryTotal;
-        console.log('Ironmongery total: £' + ironmongeryTotal);
+        console.log('Ironmongery total: £' + ironmongeryTotal.toFixed(2), selectedProducts);
       }
     }
     

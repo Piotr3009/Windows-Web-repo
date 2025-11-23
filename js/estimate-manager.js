@@ -439,14 +439,12 @@ class EstimateManager {
                 upperBars: window.currentConfig.upperBars || null,
                 lowerBars: window.currentConfig.lowerBars || null,
                 
-                // Detale
-                horns: window.currentConfig.horns,
+                // Detale (horns są w ironmongery)
+                horns: null, // USUNIĘTE - teraz w Gallery
                 
-                // Ironmongery - KOMPLETNA lista produktów
-                ironmongery: window.ironmongeryController ? 
-                    window.ironmongeryController.selectedProducts : null,
-                ironmongeryFinish: window.ironmongeryController ? 
-                    window.ironmongeryController.selectedFinish : null,
+                // Ironmongery - NOWY SYSTEM: z Gallery
+                ironmongery: window.ConfiguratorCore?.currentWindow?.ironmongery || null,
+                ironmongeryFinish: null, // USUNIĘTE - finish teraz w produkcie
                 
                 // PAS24
                 pas24: window.currentConfig.pas24,
