@@ -552,6 +552,8 @@ class IronmongeryGallery {
       
       if (error) throw error;
       
+      console.log('📦 Raw data from DB:', data);
+      
       // Clear existing products
       Object.keys(IRONMONGERY_DATA.categories).forEach(key => {
         IRONMONGERY_DATA.categories[key].products = [];
@@ -559,12 +561,19 @@ class IronmongeryGallery {
       
       // Group by category
       data.forEach(product => {
+        console.log('📌 Processing product:', product.name, 'category:', product.category);
         if (IRONMONGERY_DATA.categories[product.category]) {
           IRONMONGERY_DATA.categories[product.category].products.push(product);
+          console.log('✅ Added to category:', product.category);
+        } else {
+          console.log('❌ Category not found:', product.category);
         }
       });
       
       console.log('Loaded products from database:', data.length);
+      console.log('📊 Products by category:', Object.keys(IRONMONGERY_DATA.categories).map(key => 
+        `${key}: ${IRONMONGERY_DATA.categories[key].products.length}`
+      ));
       
     } catch (error) {
       console.error('Error loading products:', error);
