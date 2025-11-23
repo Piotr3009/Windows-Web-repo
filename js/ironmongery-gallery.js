@@ -609,8 +609,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // Function to open gallery (called from configurator)
-function openIronmongeryGallery() {
-  window.IronmongeryGallery?.open();
+async function openIronmongeryGallery() {
+  if (!window.IronmongeryGallery) {
+    window.IronmongeryGallery = new IronmongeryGallery();
+  }
+  
+  // Load products from database
+  await window.IronmongeryGallery.loadProductsFromDatabase();
+  window.IronmongeryGallery.open();
 }
 
 // Function to open gallery in manager mode (called from admin panel)
