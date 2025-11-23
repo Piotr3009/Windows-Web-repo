@@ -377,18 +377,17 @@ class IronmongeryGallery {
           <div>
             <label style="display: block; margin-bottom: 5px; font-weight: 600;">Category *</label>
             <select id="product-category" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-              <option value="locks" ${!existingProduct || existingProduct?.category === 'locks' ? 'selected' : ''}>Sash Locks</option>
-              <option value="fingerLifts" ${existingProduct?.category === 'fingerLifts' ? 'selected' : ''}>Finger Lifts</option>
-              <option value="pullHandles" ${existingProduct?.category === 'pullHandles' ? 'selected' : ''}>Pull Handles</option>
-              <option value="stoppers" ${existingProduct?.category === 'stoppers' ? 'selected' : ''}>Stoppers</option>
-              <option value="horns" ${existingProduct?.category === 'horns' ? 'selected' : ''}>Sash Horns</option>
+              <option value="locks">Sash Locks</option>
+              <option value="fingerLifts">Finger Lifts</option>
+              <option value="pullHandles">Pull Handles</option>
+              <option value="stoppers">Stoppers</option>
+              <option value="horns">Sash Horns</option>
             </select>
           </div>
 
           <div>
             <label style="display: block; margin-bottom: 5px; font-weight: 600;">Product Name *</label>
             <input type="text" id="product-name" required 
-                   value="${existingProduct?.name || ''}"
                    placeholder="e.g. Sash Lock PAS24"
                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
           </div>
@@ -397,19 +396,18 @@ class IronmongeryGallery {
             <label style="display: block; margin-bottom: 5px; font-weight: 600;">Color</label>
             <select id="product-color" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
               <option value="">-- No Color --</option>
-              <option value="chrome" ${existingProduct?.color === 'chrome' ? 'selected' : ''}>Chrome</option>
-              <option value="satin" ${existingProduct?.color === 'satin' ? 'selected' : ''}>Satin</option>
-              <option value="brass" ${existingProduct?.color === 'brass' ? 'selected' : ''}>Brass</option>
-              <option value="antique-brass" ${existingProduct?.color === 'antique-brass' ? 'selected' : ''}>Antique Brass</option>
-              <option value="black" ${existingProduct?.color === 'black' ? 'selected' : ''}>Black</option>
-              <option value="white" ${existingProduct?.color === 'white' ? 'selected' : ''}>White</option>
+              <option value="chrome">Chrome</option>
+              <option value="satin">Satin</option>
+              <option value="brass">Brass</option>
+              <option value="antique-brass">Antique Brass</option>
+              <option value="black">Black</option>
+              <option value="white">White</option>
             </select>
           </div>
 
           <div>
             <label style="display: block; margin-bottom: 5px; font-weight: 600;">Price (£) *</label>
             <input type="number" id="product-price" required step="0.01" min="0"
-                   value="${existingProduct?.price || existingProduct?.price_net || ''}"
                    placeholder="e.g. 25.00"
                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
           </div>
@@ -418,15 +416,12 @@ class IronmongeryGallery {
             <label style="display: block; margin-bottom: 5px; font-weight: 600;">Image</label>
             <input type="file" id="product-image" accept="image/*"
                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-            ${existingProduct?.image || existingProduct?.image_url ? 
-              `<img src="${existingProduct.image || existingProduct.image_url}" style="max-width: 200px; margin-top: 10px; border-radius: 6px;">` 
-              : ''}
           </div>
 
           <div>
             <label style="display: block; margin-bottom: 5px; font-weight: 600;">Description</label>
             <textarea id="product-description" rows="3"
-                      style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">${existingProduct?.description || ''}</textarea>
+                      style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;"></textarea>
           </div>
 
           <div style="display: flex; gap: 10px; margin-top: 20px;">
@@ -449,6 +444,21 @@ class IronmongeryGallery {
       e.preventDefault();
       await this.saveProduct(existingProduct?.id, modal);
     });
+    
+    // Set default values AFTER modal is in DOM
+    if (!existingProduct) {
+      // New product - set defaults
+      modal.querySelector('#product-category').value = 'locks';
+    } else {
+      // Edit product - populate values
+      if (existingProduct.category) modal.querySelector('#product-category').value = existingProduct.category;
+      if (existingProduct.name) modal.querySelector('#product-name').value = existingProduct.name;
+      if (existingProduct.color) modal.querySelector('#product-color').value = existingProduct.color;
+      if (existingProduct.price || existingProduct.price_net) {
+        modal.querySelector('#product-price').value = existingProduct.price || existingProduct.price_net;
+      }
+      if (existingProduct.description) modal.querySelector('#product-description').value = existingProduct.description;
+    }
     
     // Handle cancel
     modal.querySelector('.btn-cancel').addEventListener('click', () => {
