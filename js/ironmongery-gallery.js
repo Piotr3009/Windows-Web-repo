@@ -129,7 +129,7 @@ class IronmongeryGallery {
     // Filter by finish if not 'all'
     if (this.currentFinish !== 'all') {
       products = products.filter(p => 
-        p.finishColor?.toLowerCase() === this.currentFinish.toLowerCase()
+        p.color?.toLowerCase() === this.currentFinish.toLowerCase()
       );
     }
 
@@ -484,6 +484,9 @@ class IronmongeryGallery {
       price_vat: price, // To samo - VAT będzie na końcu
       description: document.getElementById('product-description').value || null
     };
+    
+    console.log('💾 Saving product with data:', formData);
+    console.log('🔌 Supabase client exists:', !!window.supabaseClient);
     
     try {
       // Handle image upload
