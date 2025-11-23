@@ -492,17 +492,11 @@ class SpecificationController {
   }
 
   applyDetails() {
-    const hornsEl = document.getElementById('horns');
+    // Horns są teraz w Gallery, nie w dropdownie
     
-    if (!hornsEl) {
-      console.warn('Horns element not found');
-      return;
-    }
-    
-    const horns = hornsEl.value;
-    
-    // Ironmongery - pobierz z IronmongeryController
+    // Ironmongery - pobierz z IronmongeryController lub Gallery
     const ironmongeryProducts = window.IronmongeryController?.selectedProducts || {};
+    const gallerySelection = window.ConfiguratorCore?.currentWindow?.ironmongery || {};
     const hasIronmongery = Object.keys(ironmongeryProducts).length > 0;
     
     console.log('applyDetails - ironmongeryProducts:', ironmongeryProducts);
@@ -531,8 +525,9 @@ class SpecificationController {
       console.log('No ironmongery to display');
     }
 
-    // Hide section if both are none
-    if ((!horns || horns === 'none') && !hasIronmongery) {
+    // Hide section if no ironmongery (horns są w gallerySelection.horns)
+    const hasHorns = gallerySelection?.horns;
+    if (!hasHorns && !hasIronmongery) {
       document.getElementById('spec-details').style.display = 'none';
     }
 
