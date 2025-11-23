@@ -46,6 +46,11 @@ class IronmongeryGallery {
   }
 
   open() {
+    // Reload products from localStorage (in case admin added new products)
+    if (window.IronmongeryHelper) {
+      IronmongeryHelper.loadProductsFromStorage();
+    }
+    
     this.overlay?.classList.add('active');
     document.body.style.overflow = 'hidden';
     
@@ -201,7 +206,9 @@ class IronmongeryGallery {
       fingerLift: this.selectedProducts.get('fingerLifts') || null,
       horns: this.selectedProducts.get('horns') || null,
       hinges: this.selectedProducts.get('hinges') || null,
-      trickleVents: this.selectedProducts.get('trickleVents') || null
+      trickleVents: this.selectedProducts.get('trickleVents') || null,
+      pullHandles: this.selectedProducts.get('pullHandles') || null,
+      stoppers: this.selectedProducts.get('stoppers') || null
     };
 
     // Save to configurator
@@ -214,9 +221,60 @@ class IronmongeryGallery {
       }
     }
 
+    // Update display on main page
+    this.updateMainPageDisplay();
+
     console.log('Selected ironmongery:', ironmongery);
     
     this.close();
+  }
+
+  updateMainPageDisplay() {
+    const displayContainer = document.getElementById('ironmongery-selection-display');
+    const gridContainer = document.getElementById('selected-products-grid');
+    const totalElement = document.getElementById('ironmongery-total');
+
+    if (!displayContainer || !gridContainer || !totalElement) return;
+
+    // If no products selected, hide the display
+    if (this.selectedProducts.size === 0) {
+      displayContainer.style.display = 'none';
+      return;
+    }
+
+    // Show the display
+    displayContainer.style.display = 'block';
+
+    // Generate miniatures
+    let html = '';
+    let total = 0;
+
+    this.selectedProducts.forEach((product, category) => {
+      const price = product.prices?.vat || product.price || 0;
+      total += price;
+
+      const categoryName = {
+        locks: 'Lock',
+        fingerLifts: 'Lifts',
+        pullHandles: 'Handle',
+        stoppers: 'Stopper',
+        horns: 'Horns'
+      }[category] || category;
+
+      html += `
+        <div style="text-align: center; padding: 8px; background: white; border-radius: 6px; border: 1px solid #e0e0e0;">
+          <img src="${product.image || 'img/placeholder-ironmongery.jpg'}" 
+               alt="${product.name}"
+               style="width: 100%; height: 60px; object-fit: cover; border-radius: 4px; margin-bottom: 5px;"
+               onerror="this.src='img/placeholder-ironmongery.jpg'">
+          <div style="font-size: 0.75rem; color: #666; margin-bottom: 3px;">${categoryName}</div>
+          <div style="font-size: 0.85rem; font-weight: 600; color: var(--primary-color);">£${price.toFixed(2)}</div>
+        </div>
+      `;
+    });
+
+    gridContainer.innerHTML = html;
+    totalElement.textContent = `£${total.toFixed(2)}`;
   }
 }
 
