@@ -297,6 +297,34 @@
 }
 
 /* Responsive */
+/* Small buttons for tables */
+.btn-small {
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  border: 1px solid var(--admin-primary);
+  background: white;
+  color: var(--admin-primary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-right: 5px;
+}
+
+.btn-small:hover {
+  background: var(--admin-primary);
+  color: white;
+}
+
+.btn-danger-small {
+  border-color: var(--admin-danger);
+  color: var(--admin-danger);
+}
+
+.btn-danger-small:hover {
+  background: var(--admin-danger);
+  color: white;
+}
+
 @media (max-width: 768px) {
   .admin-header h1 {
     font-size: 1.5rem;
