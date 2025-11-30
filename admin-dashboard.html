@@ -287,7 +287,7 @@
                 <div class="stat-card" onclick="switchView('all-quotes')" style="cursor: pointer;">
                     <div class="stat-icon">📋</div>
                     <div class="stat-value" id="stat-total-quotes">0</div>
-                    <div class="stat-label">Total Quotes</div>
+                    <div class="stat-label">Awaiting Confirmation</div>
                 </div>
                 <div class="stat-card" onclick="switchView('production')" style="cursor: pointer;">
                     <div class="stat-icon">🔨</div>
@@ -309,7 +309,7 @@
                     📬 New Requests <span class="badge" id="badge-new">0</span>
                 </button>
                 <button class="admin-tab" data-view="all-quotes">
-                    📋 All Quotes
+                    📋 Awaiting Confirmation <span class="badge" id="badge-quoted">0</span>
                 </button>
                 <button class="admin-tab" data-view="production">
                     🔨 In Production <span class="badge" id="badge-prod">0</span>
@@ -331,18 +331,10 @@
                 </div>
             </div>
 
-            <!-- All Quotes View -->
+            <!-- Awaiting Confirmation View -->
             <div id="view-all-quotes" class="admin-view">
-                <h2 class="section-title">📋 All Quotes</h2>
-                
-                <div class="filter-tabs" id="status-filters">
-                    <button class="filter-tab active" data-status="all">All</button>
-                    <button class="filter-tab" data-status="sent">Awaiting Quote</button>
-                    <button class="filter-tab" data-status="quoted">Quoted</button>
-                    <button class="filter-tab" data-status="confirmed">Confirmed</button>
-                    <button class="filter-tab" data-status="in_production">In Production</button>
-                    <button class="filter-tab" data-status="completed">Completed</button>
-                </div>
+                <h2 class="section-title">📋 Awaiting Confirmation</h2>
+                <p style="color: #666; margin-bottom: 20px;">Quotes sent to customers, waiting for their confirmation.</p>
                 
                 <div id="all-quotes-list">
                     <div class="empty-state">
@@ -404,7 +396,6 @@
         
         let allEstimates = [];
         let allCustomers = [];
-        let currentStatusFilter = 'all';
         
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
@@ -432,16 +423,6 @@
                 tab.addEventListener('click', () => {
                     const view = tab.dataset.view;
                     switchView(view);
-                });
-            });
-            
-            // Status filter tabs
-            document.querySelectorAll('#status-filters .filter-tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    document.querySelectorAll('#status-filters .filter-tab').forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    currentStatusFilter = tab.dataset.status;
-                    renderAllQuotes();
                 });
             });
         }
@@ -508,15 +489,17 @@
         // Update Stats
         function updateStats() {
             const newQuotes = allEstimates.filter(e => e.status === 'sent').length;
+            const awaitingConfirm = allEstimates.filter(e => e.status === 'quoted').length;
             const inProduction = allEstimates.filter(e => e.status === 'in_production' || e.status === 'confirmed').length;
             
             document.getElementById('stat-new-quotes').textContent = newQuotes;
-            document.getElementById('stat-total-quotes').textContent = allEstimates.length;
+            document.getElementById('stat-total-quotes').textContent = awaitingConfirm;
             document.getElementById('stat-production').textContent = inProduction;
             document.getElementById('stat-customers').textContent = allCustomers.length;
             
             // Badges
             document.getElementById('badge-new').textContent = newQuotes;
+            document.getElementById('badge-quoted').textContent = awaitingConfirm;
             document.getElementById('badge-prod').textContent = inProduction;
         }
         
@@ -538,26 +521,64 @@
             container.innerHTML = renderTable(newQuotes, true);
         }
         
-        // Render All Quotes
+        // Render Awaiting Confirmation (quoted only)
         function renderAllQuotes() {
             const container = document.getElementById('all-quotes-list');
-            let filtered = allEstimates;
+            const quoted = allEstimates.filter(e => e.status === 'quoted');
             
-            if (currentStatusFilter !== 'all') {
-                filtered = allEstimates.filter(e => e.status === currentStatusFilter);
-            }
-            
-            if (filtered.length === 0) {
+            if (quoted.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="icon">📋</div>
-                        <p>No quotes found</p>
+                        <p>No quotes awaiting confirmation</p>
                     </div>
                 `;
                 return;
             }
             
-            container.innerHTML = renderTable(filtered);
+            container.innerHTML = renderTableWithConfirmButton(quoted);
+        }
+        
+        // Render Table with Confirm Button
+        function renderTableWithConfirmButton(estimates) {
+            return `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Estimate #</th>
+                            <th>Customer</th>
+                            <th>Project</th>
+                            <th>Windows</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${estimates.map(est => {
+                            const customer = est.customers || {};
+                            const itemCount = est.estimate_items?.length || 0;
+                            
+                            return `
+                                <tr>
+                                    <td><strong>${est.estimate_number || est.id.substring(0, 8).toUpperCase()}</strong></td>
+                                    <td>${customer.full_name || customer.company_name || customer.email || 'Unknown'}</td>
+                                    <td>${est.project_name || '-'}</td>
+                                    <td>${itemCount}</td>
+                                    <td><strong>£${formatPrice(est.total_price)}</strong></td>
+                                    <td><span class="status-badge status-${est.status}">${getStatusLabel(est.status)}</span></td>
+                                    <td>${formatDate(est.created_at)}</td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm" onclick="viewEstimate('${est.id}')">View</button>
+                                        <button class="btn btn-success btn-sm" onclick="confirmDepositPaid('${est.id}')">Deposit Paid</button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
         }
         
         // Render Production
@@ -766,6 +787,11 @@
             await updateStatus(id, 'quoted');
         }
         
+        async function confirmDepositPaid(id) {
+            if (!confirm('Confirm deposit paid - move to production?')) return;
+            await updateStatus(id, 'confirmed');
+        }
+        
         async function confirmOrder(id) {
             if (!confirm('Confirm this order?')) return;
             await updateStatus(id, 'confirmed');
@@ -807,7 +833,7 @@
                 'draft': 'Draft',
                 'saved': 'Draft',
                 'sent': 'Awaiting Quote',
-                'quoted': 'Quote Sent',
+                'quoted': 'Awaiting Confirmation',
                 'confirmed': 'Confirmed',
                 'in_production': 'In Production',
                 'completed': 'Completed',
