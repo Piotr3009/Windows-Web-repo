@@ -1,18 +1,11 @@
 // Admin Controller
 const AdminController = {
-  // Storage keys
-  STORAGE_KEYS: {
-    BARS_PRICE: 'admin_bars_price',
-    GLASS_PRICES: 'admin_glass_prices',
-    OPENING_PRICES: 'admin_opening_prices',
-    FROSTED_PRICE: 'admin_frosted_price',
-    IRONMONGERY_PRODUCTS: 'admin_ironmongery_products',
-    HORNS: 'admin_horns'
-  },
+  // Cached pricing config
+  pricingConfig: null,
 
-  init: function() {
+  init: async function() {
     console.log('Admin Controller initialized');
-    this.loadAllData();
+    await this.loadAllData();
     this.setupEventListeners();
     this.renderIronmongeryTable();
     this.renderHornsGrid();
@@ -51,85 +44,110 @@ const AdminController = {
     }
   },
 
-  // Load all saved data
-  loadAllData: function() {
-    // Bars price
-    const barsPrice = localStorage.getItem(this.STORAGE_KEYS.BARS_PRICE);
-    if (barsPrice) {
-      document.getElementById('bar-price').value = barsPrice;
+  // Load all saved data from Supabase
+  loadAllData: async function() {
+    try {
+      // Load pricing config from DB
+      const { data, error } = await window.supabaseClient
+        .from('pricing_config')
+        .select('*')
+        .eq('id', 1)
+        .single();
+      
+      if (error) {
+        console.error('Error loading pricing config:', error);
+        return;
+      }
+      
+      this.pricingConfig = data;
+      console.log('Loaded pricing config from DB:', data);
+      
+      // Fill form fields
+      if (data.bar_price) {
+        document.getElementById('bar-price').value = data.bar_price;
+      }
+      if (data.glass_triple_price) {
+        document.getElementById('triple-price').value = data.glass_triple_price;
+      }
+      if (data.glass_passive_price) {
+        document.getElementById('passive-price').value = data.glass_passive_price;
+      }
+      if (data.glass_frosted_price) {
+        document.getElementById('frosted-price').value = data.glass_frosted_price;
+      }
+      
+    } catch (err) {
+      console.error('Error in loadAllData:', err);
     }
+  },
 
-    // Glass prices
-    const glassPrices = JSON.parse(localStorage.getItem(this.STORAGE_KEYS.GLASS_PRICES) || '{}');
-    if (glassPrices.triple) document.getElementById('triple-price').value = glassPrices.triple;
-    if (glassPrices.passive) document.getElementById('passive-price').value = glassPrices.passive;
-
-    // Opening prices
-    const openingPrices = JSON.parse(localStorage.getItem(this.STORAGE_KEYS.OPENING_PRICES) || '{}');
-    if (openingPrices.bottomBase) document.getElementById('bottom-base').value = openingPrices.bottomBase;
-    if (openingPrices.bottomPerSqm) document.getElementById('bottom-per-sqm').value = openingPrices.bottomPerSqm;
-    if (openingPrices.bothBase) document.getElementById('both-base').value = openingPrices.bothBase;
-    if (openingPrices.bothPerSqm) document.getElementById('both-per-sqm').value = openingPrices.bothPerSqm;
-
-    // Frosted price
-    const frostedPrice = localStorage.getItem(this.STORAGE_KEYS.FROSTED_PRICE);
-    if (frostedPrice) {
-      document.getElementById('frosted-price').value = frostedPrice;
+  // Save price to DB
+  async updatePricingConfig(updates) {
+    try {
+      const { error } = await window.supabaseClient
+        .from('pricing_config')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', 1);
+      
+      if (error) throw error;
+      return true;
+    } catch (err) {
+      console.error('Error updating pricing config:', err);
+      alert('Error saving to database: ' + err.message);
+      return false;
     }
   },
 
   // SECTION 2: Bars Price
-  saveBarsPrice: function() {
-    const price = document.getElementById('bar-price').value;
+  saveBarsPrice: async function() {
+    const price = parseFloat(document.getElementById('bar-price').value);
     if (!price || price <= 0) {
       alert('Please enter a valid price');
       return;
     }
-    localStorage.setItem(this.STORAGE_KEYS.BARS_PRICE, price);
-    alert('Bars price saved successfully!');
+    
+    const success = await this.updatePricingConfig({ bar_price: price });
+    if (success) {
+      alert('Bars price saved successfully!');
+    }
   },
 
   // SECTION 5: Glass Prices
-  saveGlassPrices: function() {
-    const triple = document.getElementById('triple-price').value;
-    const passive = document.getElementById('passive-price').value;
+  saveGlassPrices: async function() {
+    const triple = parseFloat(document.getElementById('triple-price').value);
+    const passive = parseFloat(document.getElementById('passive-price').value);
     
     if (!triple || !passive || triple <= 0 || passive <= 0) {
       alert('Please enter valid prices for both glass types');
       return;
     }
 
-    const prices = { triple, passive };
-    localStorage.setItem(this.STORAGE_KEYS.GLASS_PRICES, JSON.stringify(prices));
-    alert('Glass prices saved successfully!');
+    const success = await this.updatePricingConfig({ 
+      glass_triple_price: triple,
+      glass_passive_price: passive
+    });
+    if (success) {
+      alert('Glass prices saved successfully!');
+    }
   },
 
-  // SECTION 6: Opening Prices
+  // SECTION 6: Opening Prices - keeping for future use
   saveOpeningPrices: function() {
-    const bottomBase = document.getElementById('bottom-base').value;
-    const bottomPerSqm = document.getElementById('bottom-per-sqm').value;
-    const bothBase = document.getElementById('both-base').value;
-    const bothPerSqm = document.getElementById('both-per-sqm').value;
-
-    if (!bottomBase || !bottomPerSqm || !bothBase || !bothPerSqm) {
-      alert('Please fill all opening mechanism prices');
-      return;
-    }
-
-    const prices = { bottomBase, bottomPerSqm, bothBase, bothPerSqm };
-    localStorage.setItem(this.STORAGE_KEYS.OPENING_PRICES, JSON.stringify(prices));
-    alert('Opening mechanism prices saved successfully!');
+    alert('Opening prices are set in code. Contact developer to change.');
   },
 
   // SECTION 9: Frosted Price
-  saveFrostedPrice: function() {
-    const price = document.getElementById('frosted-price').value;
+  saveFrostedPrice: async function() {
+    const price = parseFloat(document.getElementById('frosted-price').value);
     if (!price || price <= 0) {
       alert('Please enter a valid price');
       return;
     }
-    localStorage.setItem(this.STORAGE_KEYS.FROSTED_PRICE, price);
-    alert('Frosted glass price saved successfully!');
+    
+    const success = await this.updatePricingConfig({ glass_frosted_price: price });
+    if (success) {
+      alert('Frosted glass price saved successfully!');
+    }
   },
 
   // SECTION 8: IRONMONGERY

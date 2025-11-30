@@ -15,7 +15,7 @@ const pricingConfig = {
   
   // Ceny za szprosy Georgian bars
   barPricing: {
-    pricePerBar: 15,  // 15£ za jeden bar
+    pricePerBar: 15,  // 15£ za jeden bar - ŁADOWANE Z DB
     
     // Liczba barów dla każdego wzoru (PER SASH, nie x2!)
     barsPerPattern: {
@@ -39,7 +39,7 @@ const pricingConfig = {
       'slim': 50          // +50£ za slim frame
     },
     
-    // Glass
+    // Glass - ŁADOWANE Z DB
     glassTypes: {
       'double': 0,        // bazowe
       'triple': 150,      // +150£
@@ -52,7 +52,7 @@ const pricingConfig = {
       'laminated': 100    // +100£
     },
     
-    // Glass finish
+    // Glass finish - ŁADOWANE Z DB
     glassFinish: {
       'clear': 0,         // bazowe
       'frosted': 80       // +80£
@@ -106,46 +106,66 @@ const pricingConfig = {
   vatRate: 0.20  // 20% VAT
 };
 
-// Funkcja do ładowania cen z Admin Panelu (localStorage)
-function loadAdminPrices() {
-  // 1. Bars price
-  const barsPrice = localStorage.getItem('admin_bars_price');
-  if (barsPrice) {
-    pricingConfig.barPricing.pricePerBar = parseFloat(barsPrice);
-    console.log('Loaded bars price from admin:', barsPrice);
-  }
-
-  // 2. Glass prices
-  const glassPrices = localStorage.getItem('admin_glass_prices');
-  if (glassPrices) {
-    const prices = JSON.parse(glassPrices);
-    if (prices.triple) {
-      pricingConfig.additionalOptions.glassTypes.triple = parseFloat(prices.triple);
+// Funkcja do ładowania cen z Supabase
+async function loadAdminPricesFromDB() {
+  try {
+    // Sprawdź czy supabaseClient jest dostępny
+    if (!window.supabaseClient) {
+      console.warn('Supabase client not available, using default prices');
+      return;
     }
-    if (prices.passive) {
-      pricingConfig.additionalOptions.glassTypes.passive = parseFloat(prices.passive);
+    
+    const { data, error } = await window.supabaseClient
+      .from('pricing_config')
+      .select('bar_price, glass_triple_price, glass_passive_price, glass_frosted_price')
+      .eq('id', 1)
+      .single();
+    
+    if (error) {
+      console.error('Error loading prices from DB:', error);
+      return;
     }
-    console.log('Loaded glass prices from admin:', prices);
-  }
-
-  // 3. Opening mechanism prices
-  const openingPrices = localStorage.getItem('admin_opening_prices');
-  if (openingPrices) {
-    const prices = JSON.parse(openingPrices);
-    // TODO: Dodać logikę dla opening prices (wymaga zmiany w price-calculator)
-    console.log('Loaded opening prices from admin:', prices);
-  }
-
-  // 4. Frosted price
-  const frostedPrice = localStorage.getItem('admin_frosted_price');
-  if (frostedPrice) {
-    pricingConfig.additionalOptions.glassFinish.frosted = parseFloat(frostedPrice);
-    console.log('Loaded frosted price from admin:', frostedPrice);
+    
+    if (data) {
+      // Bar price
+      if (data.bar_price) {
+        pricingConfig.barPricing.pricePerBar = parseFloat(data.bar_price);
+        console.log('Loaded bar price from DB:', data.bar_price);
+      }
+      
+      // Glass triple price
+      if (data.glass_triple_price) {
+        pricingConfig.additionalOptions.glassTypes.triple = parseFloat(data.glass_triple_price);
+        console.log('Loaded triple glass price from DB:', data.glass_triple_price);
+      }
+      
+      // Glass passive price
+      if (data.glass_passive_price) {
+        pricingConfig.additionalOptions.glassTypes.passive = parseFloat(data.glass_passive_price);
+        console.log('Loaded passive glass price from DB:', data.glass_passive_price);
+      }
+      
+      // Frosted price
+      if (data.glass_frosted_price) {
+        pricingConfig.additionalOptions.glassFinish.frosted = parseFloat(data.glass_frosted_price);
+        console.log('Loaded frosted price from DB:', data.glass_frosted_price);
+      }
+      
+      console.log('All prices loaded from DB successfully');
+    }
+  } catch (err) {
+    console.error('Error in loadAdminPricesFromDB:', err);
   }
 }
 
-// Załaduj ceny z admin panelu przy starcie
-loadAdminPrices();
+// Załaduj ceny z DB gdy supabase będzie gotowy
+document.addEventListener('DOMContentLoaded', () => {
+  // Poczekaj chwilę na inicjalizację supabase
+  setTimeout(() => {
+    loadAdminPricesFromDB();
+  }, 100);
+});
 
 // Export dla użycia w innych modułach
 window.pricingConfig = pricingConfig;
+window.loadAdminPricesFromDB = loadAdminPricesFromDB;
