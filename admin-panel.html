@@ -178,51 +178,202 @@
   <section class="admin-section" style="grid-column: 1 / -1;">
     <div class="section-header">
       <h2>Appointments Management</h2>
-      <button class="btn-add" onclick="AppointmentsAdmin.openAddSlotModal()">+ Add Time Slot</button>
+      <div>
+        <button class="btn-add" onclick="AdminCalendar.generateSlotsForWeek()">+ Generate Week Slots</button>
+      </div>
     </div>
     <div class="section-content">
       
-      <!-- Slots Management -->
-      <h4 style="margin-bottom: 10px;">Available Time Slots</h4>
-      <div class="products-table-container" style="margin-bottom: 25px;">
-        <table class="products-table" id="slots-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="slots-tbody">
-            <!-- Slots loaded by JS -->
-          </tbody>
-        </table>
-      </div>
-      
-      <!-- Appointment Requests -->
-      <h4 style="margin-bottom: 10px;">Appointment Requests</h4>
-      <div class="products-table-container">
-        <table class="products-table" id="requests-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Preferred Slots</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="requests-tbody">
-            <!-- Requests loaded by JS -->
-          </tbody>
-        </table>
+      <!-- Admin Calendar -->
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+        
+        <div>
+          <div class="admin-calendar-container">
+            <div class="admin-calendar-header">
+              <button class="admin-cal-nav" onclick="AdminCalendar.prevMonth()">‹</button>
+              <h4 id="admin-calendar-month-year"></h4>
+              <button class="admin-cal-nav" onclick="AdminCalendar.nextMonth()">›</button>
+            </div>
+            <div class="admin-calendar-weekdays">
+              <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+            </div>
+            <div class="admin-calendar-days" id="admin-calendar-days"></div>
+          </div>
+          
+          <!-- Day Detail -->
+          <div id="admin-day-detail" class="admin-day-detail">
+            <h4 id="admin-day-title">Select a day</h4>
+            <div id="admin-day-slots"></div>
+            <button class="btn-add" style="margin-top: 15px;" onclick="AdminCalendar.generateSlotsForDay()">+ Add All Slots for This Day</button>
+          </div>
+        </div>
+        
+        <!-- Pending Requests -->
+        <div>
+          <h4 style="margin-bottom: 15px; color: var(--admin-primary);">Pending Requests</h4>
+          <div id="pending-requests-list"></div>
+        </div>
+        
       </div>
       
     </div>
   </section>
+
+<style>
+.admin-calendar-container {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.admin-calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background: var(--admin-primary);
+  color: white;
+}
+.admin-calendar-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: white;
+}
+.admin-cal-nav {
+  background: none;
+  border: 2px solid white;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+.admin-cal-nav:hover {
+  background: white;
+  color: var(--admin-primary);
+}
+.admin-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: #f0f0f0;
+  padding: 8px 0;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: #666;
+}
+.admin-calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  padding: 8px;
+}
+.admin-cal-day {
+  min-height: 70px;
+  padding: 5px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  background: #fafafa;
+  border: 1px solid #eee;
+}
+.admin-cal-day:hover {
+  background: #e8f5e9;
+}
+.admin-cal-day.other-month {
+  color: #ccc;
+  background: #f5f5f5;
+}
+.admin-cal-day.today {
+  border: 2px solid var(--admin-secondary);
+}
+.admin-cal-day.selected {
+  background: #c8e6c9;
+  border: 2px solid var(--admin-primary);
+}
+.admin-cal-day .day-num {
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+.admin-cal-day .slot-count {
+  font-size: 0.65rem;
+  color: #666;
+}
+.admin-cal-day .slot-count.has-booked {
+  color: #d32f2f;
+  font-weight: 600;
+}
+.admin-day-detail {
+  margin-top: 15px;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+.admin-day-detail h4 {
+  margin: 0 0 15px 0;
+  color: var(--admin-primary);
+}
+.admin-slot-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  background: #f8f9fa;
+  border-radius: 5px;
+  border-left: 4px solid #28a745;
+}
+.admin-slot-item.booked {
+  border-left-color: #dc3545;
+  background: #fff5f5;
+}
+.admin-slot-item.unavailable {
+  border-left-color: #999;
+  background: #f0f0f0;
+  opacity: 0.7;
+}
+.admin-slot-info {
+  flex: 1;
+}
+.admin-slot-time {
+  font-weight: 600;
+  color: var(--admin-primary);
+}
+.admin-slot-customer {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 3px;
+}
+.admin-slot-actions button {
+  margin-left: 5px;
+}
+.pending-request-card {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.pending-request-card h5 {
+  margin: 0 0 8px 0;
+  color: var(--admin-primary);
+}
+.pending-request-card p {
+  margin: 3px 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+.pending-request-card .slots-list {
+  font-size: 0.8rem;
+  color: #333;
+  margin: 8px 0;
+  padding: 8px;
+  background: white;
+  border-radius: 4px;
+}
+</style>
 
 </main>
 
@@ -246,25 +397,6 @@
         <input type="number" id="project-order" value="0" min="0" placeholder="0">
       </div>
       <button type="submit" class="btn-save">Save Project</button>
-    </form>
-  </div>
-</div>
-
-<!-- MODAL: Add Appointment Slot -->
-<div id="add-slot-modal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="AppointmentsAdmin.closeSlotModal()">&times;</span>
-    <h2>Add Time Slot</h2>
-    <form id="add-slot-form" onsubmit="AppointmentsAdmin.saveSlot(event)">
-      <div class="form-group">
-        <label>Date:</label>
-        <input type="date" id="slot-date" required>
-      </div>
-      <div class="form-group">
-        <label>Time:</label>
-        <input type="text" id="slot-time" required placeholder="e.g. 10:00 - 12:00">
-      </div>
-      <button type="submit" class="btn-save">Add Slot</button>
     </form>
   </div>
 </div>
@@ -377,179 +509,329 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load gallery projects
   GalleryAdmin.loadProjects();
   
-  // Load appointments
-  AppointmentsAdmin.loadSlots();
-  AppointmentsAdmin.loadRequests();
+  // Load admin calendar
+  AdminCalendar.init();
 });
 
-// Appointments Admin Controller
-const AppointmentsAdmin = {
+// Admin Calendar Controller
+const AdminCalendar = {
+  currentDate: new Date(),
+  selectedDate: null,
+  slots: {},
+  requests: [],
   
-  async loadSlots() {
-    const tbody = document.getElementById('slots-tbody');
-    if (!tbody) return;
-    
-    tbody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
-    
+  SLOT_TIMES: ['09:00 - 11:00', '11:00 - 13:00', '13:00 - 15:00', '15:00 - 17:00'],
+  
+  async init() {
+    await this.loadData();
+    this.render();
+    this.loadPendingRequests();
+  },
+  
+  async loadData() {
     try {
-      const { data: slots, error } = await window.supabaseClient
+      const { data, error } = await window.supabaseClient
         .from('appointment_slots')
         .select('*')
-        .order('slot_date', { ascending: true })
-        .order('slot_time', { ascending: true });
+        .order('slot_date')
+        .order('slot_time');
       
       if (error) throw error;
       
-      if (!slots || slots.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #666;">No slots yet. Click "Add Time Slot" to create one.</td></tr>';
-        return;
-      }
-      
-      tbody.innerHTML = slots.map(slot => {
-        const date = new Date(slot.slot_date);
-        const dateStr = date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
-        const statusClass = slot.is_available ? 'color: green;' : 'color: red;';
-        const statusText = slot.is_available ? 'Available' : 'Blocked';
-        
-        return `
-          <tr>
-            <td>${dateStr}</td>
-            <td>${slot.slot_time}</td>
-            <td style="${statusClass} font-weight: 600;">${statusText}</td>
-            <td>
-              <button class="btn-small" onclick="AppointmentsAdmin.toggleSlot('${slot.id}', ${slot.is_available})">
-                ${slot.is_available ? '🔒 Block' : '🔓 Unblock'}
-              </button>
-              <button class="btn-small btn-danger-small" onclick="AppointmentsAdmin.deleteSlot('${slot.id}')">🗑️ Delete</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
-      
+      this.slots = {};
+      (data || []).forEach(slot => {
+        if (!this.slots[slot.slot_date]) {
+          this.slots[slot.slot_date] = [];
+        }
+        this.slots[slot.slot_date].push(slot);
+      });
     } catch (error) {
       console.error('Error loading slots:', error);
-      tbody.innerHTML = '<tr><td colspan="4" style="color: red;">Error loading slots</td></tr>';
     }
   },
   
-  async loadRequests() {
-    const tbody = document.getElementById('requests-tbody');
-    if (!tbody) return;
-    
-    tbody.innerHTML = '<tr><td colspan="7">Loading...</td></tr>';
+  async loadPendingRequests() {
+    const container = document.getElementById('pending-requests-list');
+    if (!container) return;
     
     try {
       const { data: requests, error } = await window.supabaseClient
         .from('appointment_requests')
         .select('*')
+        .eq('status', 'pending')
         .order('created_at', { ascending: false });
       
       if (error) throw error;
       
       if (!requests || requests.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #666;">No appointment requests yet.</td></tr>';
+        container.innerHTML = '<p style="color: #666; text-align: center;">No pending requests</p>';
         return;
       }
       
-      // Load all slots for reference
-      const { data: allSlots } = await window.supabaseClient
-        .from('appointment_slots')
-        .select('id, slot_date, slot_time');
+      // Get slot details for preferred slots
+      const allSlotIds = requests.flatMap(r => r.preferred_slots || []);
+      let slotsMap = {};
       
-      const slotsMap = {};
-      if (allSlots) {
-        allSlots.forEach(s => {
-          const date = new Date(s.slot_date);
-          slotsMap[s.id] = `${date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} ${s.slot_time}`;
+      if (allSlotIds.length > 0) {
+        const { data: slotsData } = await window.supabaseClient
+          .from('appointment_slots')
+          .select('id, slot_date, slot_time')
+          .in('id', allSlotIds);
+        
+        (slotsData || []).forEach(s => {
+          const d = new Date(s.slot_date);
+          slotsMap[s.id] = `${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} ${s.slot_time}`;
         });
       }
       
-      tbody.innerHTML = requests.map(req => {
-        const createdDate = new Date(req.created_at).toLocaleDateString('en-GB');
-        const preferredSlotsText = req.preferred_slots && req.preferred_slots.length > 0
-          ? req.preferred_slots.map(id => slotsMap[id] || 'Unknown').join('<br>')
-          : '-';
-        
-        let statusBadge = '';
-        switch (req.status) {
-          case 'pending':
-            statusBadge = '<span style="background: #ffc107; color: #000; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;">Pending</span>';
-            break;
-          case 'confirmed':
-            statusBadge = '<span style="background: #28a745; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;">Confirmed</span>';
-            break;
-          case 'cancelled':
-            statusBadge = '<span style="background: #dc3545; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;">Cancelled</span>';
-            break;
-          default:
-            statusBadge = req.status;
-        }
+      container.innerHTML = requests.map(req => {
+        const preferredList = (req.preferred_slots || [])
+          .map(id => slotsMap[id] || 'Unknown')
+          .join('<br>');
         
         return `
-          <tr>
-            <td>${createdDate}</td>
-            <td><strong>${req.customer_name}</strong></td>
-            <td><a href="mailto:${req.email}">${req.email}</a></td>
-            <td>${req.phone || '-'}</td>
-            <td style="font-size: 0.85rem;">${preferredSlotsText}</td>
-            <td>${statusBadge}</td>
-            <td>
-              ${req.status === 'pending' ? `
-                <button class="btn-small" onclick="AppointmentsAdmin.confirmRequest('${req.id}')">✓ Confirm</button>
-                <button class="btn-small btn-danger-small" onclick="AppointmentsAdmin.cancelRequest('${req.id}')">✕ Cancel</button>
-              ` : ''}
-              <button class="btn-small btn-danger-small" onclick="AppointmentsAdmin.deleteRequest('${req.id}')">🗑️</button>
-            </td>
-          </tr>
+          <div class="pending-request-card">
+            <h5>${req.customer_name}</h5>
+            <p>📧 ${req.email}</p>
+            <p>📞 ${req.phone || '-'}</p>
+            ${req.message ? `<p>📝 ${req.message}</p>` : ''}
+            <div class="slots-list">
+              <strong>Preferred:</strong><br>${preferredList || 'None'}
+            </div>
+            <div style="margin-top: 10px;">
+              <button class="btn-small" onclick="AdminCalendar.confirmRequest('${req.id}', '${req.customer_name}', '${(req.message || '').replace(/'/g, "\\'")}')">✓ Confirm</button>
+              <button class="btn-small btn-danger-small" onclick="AdminCalendar.cancelRequest('${req.id}')">✕ Cancel</button>
+            </div>
+          </div>
         `;
       }).join('');
       
     } catch (error) {
       console.error('Error loading requests:', error);
-      tbody.innerHTML = '<tr><td colspan="7" style="color: red;">Error loading requests</td></tr>';
     }
   },
   
-  openAddSlotModal() {
-    // Set default date to tomorrow
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    document.getElementById('slot-date').value = tomorrow.toISOString().split('T')[0];
-    document.getElementById('slot-time').value = '';
-    document.getElementById('add-slot-modal').style.display = 'block';
-  },
-  
-  closeSlotModal() {
-    document.getElementById('add-slot-modal').style.display = 'none';
-  },
-  
-  async saveSlot(e) {
-    e.preventDefault();
+  render() {
+    const year = this.currentDate.getFullYear();
+    const month = this.currentDate.getMonth();
     
-    const slotData = {
-      slot_date: document.getElementById('slot-date').value,
-      slot_time: document.getElementById('slot-time').value.trim(),
-      is_available: true
-    };
+    document.getElementById('admin-calendar-month-year').textContent = 
+      new Date(year, month).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+    
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDay = (firstDay.getDay() + 6) % 7;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    let html = '';
+    
+    // Previous month
+    const prevMonth = new Date(year, month, 0);
+    for (let i = startDay - 1; i >= 0; i--) {
+      const day = prevMonth.getDate() - i;
+      html += `<div class="admin-cal-day other-month"><span class="day-num">${day}</span></div>`;
+    }
+    
+    // Current month
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+      const date = new Date(year, month, day);
+      const dateStr = date.toISOString().split('T')[0];
+      const isToday = date.getTime() === today.getTime();
+      const isSelected = this.selectedDate === dateStr;
+      const daySlots = this.slots[dateStr] || [];
+      const bookedCount = daySlots.filter(s => !s.is_available || s.customer_name).length;
+      const availableCount = daySlots.filter(s => s.is_available && !s.customer_name).length;
+      
+      let classes = 'admin-cal-day';
+      if (isToday) classes += ' today';
+      if (isSelected) classes += ' selected';
+      
+      let slotInfo = '';
+      if (daySlots.length > 0) {
+        slotInfo = `<span class="slot-count ${bookedCount > 0 ? 'has-booked' : ''}">${availableCount} free, ${bookedCount} booked</span>`;
+      }
+      
+      html += `
+        <div class="${classes}" onclick="AdminCalendar.selectDay('${dateStr}')">
+          <span class="day-num">${day}</span>
+          ${slotInfo}
+        </div>
+      `;
+    }
+    
+    // Next month
+    const totalCells = startDay + lastDay.getDate();
+    const remaining = (7 - (totalCells % 7)) % 7;
+    for (let day = 1; day <= remaining; day++) {
+      html += `<div class="admin-cal-day other-month"><span class="day-num">${day}</span></div>`;
+    }
+    
+    document.getElementById('admin-calendar-days').innerHTML = html;
+  },
+  
+  prevMonth() {
+    this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+    this.render();
+  },
+  
+  nextMonth() {
+    this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+    this.render();
+  },
+  
+  selectDay(dateStr) {
+    this.selectedDate = dateStr;
+    this.render();
+    this.showDayDetail(dateStr);
+  },
+  
+  showDayDetail(dateStr) {
+    const date = new Date(dateStr);
+    const title = date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    document.getElementById('admin-day-title').textContent = title;
+    
+    const daySlots = this.slots[dateStr] || [];
+    
+    if (daySlots.length === 0) {
+      document.getElementById('admin-day-slots').innerHTML = '<p style="color: #666;">No slots for this day. Click button below to add.</p>';
+      return;
+    }
+    
+    const html = daySlots.map(slot => {
+      const isBooked = slot.customer_name || !slot.is_available;
+      let classes = 'admin-slot-item';
+      if (slot.customer_name) classes += ' booked';
+      else if (!slot.is_available) classes += ' unavailable';
+      
+      let customerInfo = '';
+      if (slot.customer_name) {
+        customerInfo = `
+          <div class="admin-slot-customer">
+            👤 ${slot.customer_name}<br>
+            ${slot.customer_address ? '📍 ' + slot.customer_address + '<br>' : ''}
+            ${slot.assigned_to ? '🚗 ' + slot.assigned_to : ''}
+          </div>
+        `;
+      }
+      
+      return `
+        <div class="${classes}">
+          <div class="admin-slot-info">
+            <div class="admin-slot-time">${slot.slot_time}</div>
+            ${customerInfo}
+          </div>
+          <div class="admin-slot-actions">
+            ${slot.customer_name ? `
+              <button class="btn-small" onclick="AdminCalendar.editSlot('${slot.id}')">✏️</button>
+            ` : `
+              <button class="btn-small" onclick="AdminCalendar.toggleAvailability('${slot.id}', ${slot.is_available})">
+                ${slot.is_available ? '🔒' : '🔓'}
+              </button>
+            `}
+            <button class="btn-small btn-danger-small" onclick="AdminCalendar.deleteSlot('${slot.id}')">🗑️</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+    document.getElementById('admin-day-slots').innerHTML = html;
+  },
+  
+  async generateSlotsForDay() {
+    if (!this.selectedDate) {
+      alert('Please select a day first.');
+      return;
+    }
+    
+    const existingSlots = this.slots[this.selectedDate] || [];
+    const existingTimes = existingSlots.map(s => s.slot_time);
+    const newSlots = this.SLOT_TIMES.filter(t => !existingTimes.includes(t));
+    
+    if (newSlots.length === 0) {
+      alert('All slots already exist for this day.');
+      return;
+    }
+    
+    try {
+      const slotsToInsert = newSlots.map(time => ({
+        slot_date: this.selectedDate,
+        slot_time: time,
+        is_available: true
+      }));
+      
+      const { error } = await window.supabaseClient
+        .from('appointment_slots')
+        .insert(slotsToInsert);
+      
+      if (error) throw error;
+      
+      await this.loadData();
+      this.render();
+      this.showDayDetail(this.selectedDate);
+      
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error adding slots: ' + error.message);
+    }
+  },
+  
+  async generateSlotsForWeek() {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() + 1); // Start from tomorrow
+    
+    const weekday = startDate.getDay();
+    if (weekday === 0) startDate.setDate(startDate.getDate() + 1); // Skip Sunday
+    if (weekday === 6) startDate.setDate(startDate.getDate() + 2); // Skip Saturday
+    
+    const slotsToInsert = [];
+    
+    for (let i = 0; i < 5; i++) { // 5 working days
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + i);
+      
+      // Skip weekends
+      if (date.getDay() === 0 || date.getDay() === 6) continue;
+      
+      const dateStr = date.toISOString().split('T')[0];
+      const existingSlots = this.slots[dateStr] || [];
+      const existingTimes = existingSlots.map(s => s.slot_time);
+      
+      this.SLOT_TIMES.forEach(time => {
+        if (!existingTimes.includes(time)) {
+          slotsToInsert.push({
+            slot_date: dateStr,
+            slot_time: time,
+            is_available: true
+          });
+        }
+      });
+    }
+    
+    if (slotsToInsert.length === 0) {
+      alert('All slots already exist for the coming week.');
+      return;
+    }
     
     try {
       const { error } = await window.supabaseClient
         .from('appointment_slots')
-        .insert([slotData]);
+        .insert(slotsToInsert);
       
       if (error) throw error;
       
-      alert('Slot added!');
-      this.closeSlotModal();
-      this.loadSlots();
+      alert(`Added ${slotsToInsert.length} slots for the coming week.`);
+      await this.loadData();
+      this.render();
       
     } catch (error) {
-      console.error('Error saving slot:', error);
-      alert('Error saving slot: ' + error.message);
+      console.error('Error:', error);
+      alert('Error: ' + error.message);
     }
   },
   
-  async toggleSlot(slotId, currentStatus) {
+  async toggleAvailability(slotId, currentStatus) {
     try {
       const { error } = await window.supabaseClient
         .from('appointment_slots')
@@ -558,10 +840,12 @@ const AppointmentsAdmin = {
       
       if (error) throw error;
       
-      this.loadSlots();
+      await this.loadData();
+      this.render();
+      if (this.selectedDate) this.showDayDetail(this.selectedDate);
       
     } catch (error) {
-      console.error('Error toggling slot:', error);
+      console.error('Error:', error);
       alert('Error: ' + error.message);
     }
   },
@@ -577,28 +861,131 @@ const AppointmentsAdmin = {
       
       if (error) throw error;
       
-      this.loadSlots();
+      await this.loadData();
+      this.render();
+      if (this.selectedDate) this.showDayDetail(this.selectedDate);
       
     } catch (error) {
-      console.error('Error deleting slot:', error);
+      console.error('Error:', error);
       alert('Error: ' + error.message);
     }
   },
   
-  async confirmRequest(requestId) {
+  async editSlot(slotId) {
+    const slot = Object.values(this.slots).flat().find(s => s.id === slotId);
+    if (!slot) return;
+    
+    const assignedTo = prompt('Who will do the measurement?', slot.assigned_to || '');
+    if (assignedTo === null) return;
+    
+    const notes = prompt('Notes:', slot.notes || '');
+    
     try {
       const { error } = await window.supabaseClient
-        .from('appointment_requests')
-        .update({ status: 'confirmed' })
-        .eq('id', requestId);
+        .from('appointment_slots')
+        .update({ 
+          assigned_to: assignedTo,
+          notes: notes 
+        })
+        .eq('id', slotId);
       
       if (error) throw error;
       
-      alert('Request confirmed! Remember to block the confirmed slot.');
-      this.loadRequests();
+      await this.loadData();
+      if (this.selectedDate) this.showDayDetail(this.selectedDate);
       
     } catch (error) {
-      console.error('Error confirming request:', error);
+      console.error('Error:', error);
+      alert('Error: ' + error.message);
+    }
+  },
+  
+  async confirmRequest(requestId, customerName, customerAddress) {
+    // Get the request details to show preferred slots
+    try {
+      const { data: request, error: reqErr } = await window.supabaseClient
+        .from('appointment_requests')
+        .select('preferred_slots')
+        .eq('id', requestId)
+        .single();
+      
+      if (reqErr) throw reqErr;
+      
+      const preferredSlotIds = request.preferred_slots || [];
+      
+      if (preferredSlotIds.length === 0) {
+        alert('No preferred slots in this request.');
+        return;
+      }
+      
+      // Get slot details
+      const { data: slots, error: slotsErr } = await window.supabaseClient
+        .from('appointment_slots')
+        .select('*')
+        .in('id', preferredSlotIds);
+      
+      if (slotsErr) throw slotsErr;
+      
+      // Build selection prompt
+      const slotOptions = slots.map((s, i) => {
+        const d = new Date(s.slot_date);
+        const dateStr = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+        const status = s.is_available ? '✓' : '✗ taken';
+        return `${i + 1}. ${dateStr} ${s.slot_time} ${status}`;
+      }).join('\n');
+      
+      const choice = prompt(`Select slot to confirm:\n\n${slotOptions}\n\nEnter number (1-${slots.length}):`);
+      
+      if (!choice) return;
+      
+      const index = parseInt(choice) - 1;
+      if (isNaN(index) || index < 0 || index >= slots.length) {
+        alert('Invalid selection.');
+        return;
+      }
+      
+      const selectedSlot = slots[index];
+      
+      if (!selectedSlot.is_available) {
+        alert('This slot is already taken. Choose another.');
+        return;
+      }
+      
+      // Ask who will do the measurement
+      const assignedTo = prompt('Who will do the measurement?', '');
+      
+      // Update the slot with customer info and mark unavailable
+      const { error: slotError } = await window.supabaseClient
+        .from('appointment_slots')
+        .update({
+          is_available: false,
+          customer_name: customerName,
+          customer_address: customerAddress,
+          assigned_to: assignedTo || null
+        })
+        .eq('id', selectedSlot.id);
+      
+      if (slotError) throw slotError;
+      
+      // Update request status
+      const { error: reqError } = await window.supabaseClient
+        .from('appointment_requests')
+        .update({ 
+          status: 'confirmed',
+          confirmed_slot_id: selectedSlot.id
+        })
+        .eq('id', requestId);
+      
+      if (reqError) throw reqError;
+      
+      alert('Request confirmed!');
+      await this.loadData();
+      this.render();
+      this.loadPendingRequests();
+      if (this.selectedDate) this.showDayDetail(this.selectedDate);
+      
+    } catch (error) {
+      console.error('Error:', error);
       alert('Error: ' + error.message);
     }
   },
@@ -614,29 +1001,10 @@ const AppointmentsAdmin = {
       
       if (error) throw error;
       
-      this.loadRequests();
+      this.loadPendingRequests();
       
     } catch (error) {
-      console.error('Error cancelling request:', error);
-      alert('Error: ' + error.message);
-    }
-  },
-  
-  async deleteRequest(requestId) {
-    if (!confirm('Delete this request permanently?')) return;
-    
-    try {
-      const { error } = await window.supabaseClient
-        .from('appointment_requests')
-        .delete()
-        .eq('id', requestId);
-      
-      if (error) throw error;
-      
-      this.loadRequests();
-      
-    } catch (error) {
-      console.error('Error deleting request:', error);
+      console.error('Error:', error);
       alert('Error: ' + error.message);
     }
   }
