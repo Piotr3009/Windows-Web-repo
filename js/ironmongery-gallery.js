@@ -651,6 +651,17 @@ class IronmongeryGallery {
             </select>
           </div>
 
+          <!-- PAS24 Checkbox - only for locks -->
+          <div id="pas24-field" style="display: none; background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #ddd;">
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600;">
+              <input type="checkbox" id="gallery-product-pas24" style="width: 20px; height: 20px;">
+              <span>PAS24 Certified Lock</span>
+            </label>
+            <p style="margin: 8px 0 0 30px; font-size: 0.85rem; color: #666;">
+              Check this if the lock is PAS24 certified for enhanced security windows.
+            </p>
+          </div>
+
           <div>
             <label style="display: block; margin-bottom: 5px; font-weight: 600;">Product Name *</label>
             <input type="text" id="gallery-product-name" required 
@@ -704,6 +715,16 @@ class IronmongeryGallery {
       </div>
     `;
     
+    // Handle category change - show/hide PAS24 field
+    const categorySelect = modal.querySelector('#gallery-product-category');
+    const pas24Field = modal.querySelector('#pas24-field');
+    
+    const updatePas24Visibility = () => {
+      pas24Field.style.display = categorySelect.value === 'locks' ? 'block' : 'none';
+    };
+    
+    categorySelect.addEventListener('change', updatePas24Visibility);
+    
     // Handle form submission
     const form = modal.querySelector('#productForm');
     form.addEventListener('submit', async (e) => {
@@ -715,9 +736,14 @@ class IronmongeryGallery {
     if (!existingProduct) {
       // New product - set defaults
       modal.querySelector('#gallery-product-category').value = 'locks';
+      updatePas24Visibility();
     } else {
       // Edit product - populate values
       if (existingProduct.category) modal.querySelector('#gallery-product-category').value = existingProduct.category;
+      updatePas24Visibility();
+      if (existingProduct.is_pas24 || existingProduct.isPAS24) {
+        modal.querySelector('#gallery-product-pas24').checked = true;
+      }
       if (existingProduct.name) modal.querySelector('#gallery-product-name').value = existingProduct.name;
       if (existingProduct.color) modal.querySelector('#gallery-product-color').value = existingProduct.color;
       if (existingProduct.price || existingProduct.price_net) {
@@ -770,7 +796,8 @@ class IronmongeryGallery {
       color: document.getElementById('gallery-product-color').value || null,
       price_net: price,
       price_vat: price,
-      description: document.getElementById('gallery-product-description').value || null
+      description: document.getElementById('gallery-product-description').value || null,
+      is_pas24: document.getElementById('gallery-product-pas24')?.checked || false
     };
     
     console.log('💾 Saving product with data:', formData);
