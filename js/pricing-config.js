@@ -1,7 +1,7 @@
 // pricing-config.js - Zaawansowana konfiguracja cennika
 const pricingConfig = {
   // Cena bazowa za m²
-  basePricePerSqm: 1000,
+  basePricePerSqm: 900,
   
   // Mnożniki degresywne - im większe okno, tym taniej za m²
   sizeMultipliers: [
@@ -36,7 +36,7 @@ const pricingConfig = {
     // Frame
     frameTypes: {
       'standard': 0,      // bez dopłaty
-      'slim': 50          // +50£ za slim frame
+      'slim': 100         // +100£ za slim frame
     },
     
     // Glass - ŁADOWANE Z DB
@@ -49,7 +49,7 @@ const pricingConfig = {
     // Glass specification
     glassSpec: {
       'toughened': 0,     // bazowe
-      'laminated': 100    // +100£
+      'laminated': 30     // +30£ za m² (mnożone przez powierzchnię)
     },
     
     // Glass finish - ŁADOWANE Z DB
@@ -74,23 +74,23 @@ const pricingConfig = {
       'gold': 60
     },
     
-    // Opening mechanism
+    // Opening mechanism - ŁADOWANE Z DB
     openingTypes: {
       'both': 0,          // bazowe
-      'bottom': -30,      // -30£ (taniej)
-      'fixed': -50        // -50£ (taniej)
+      'bottom': -30,      // domyślnie -30£
+      'fixed': -50        // domyślnie -50£
     },
     
     // Color
     colorTypes: {
       'single': 0,        // bazowe
-      'dual': 100         // +100£ za dual color
+      'dual': 0.10        // +10% od ceny bazowej
     },
     
     // Security
     pas24: {
       'no': 0,
-      'yes': 100          // +100£ za PAS24
+      'yes': 0            // PAS24 w cenie okna
     }
   },
   
@@ -117,7 +117,7 @@ async function loadAdminPricesFromDB() {
     
     const { data, error } = await window.supabaseClient
       .from('pricing_config')
-      .select('bar_price, glass_triple_price, glass_passive_price, glass_frosted_price')
+      .select('bar_price, glass_triple_price, glass_passive_price, glass_frosted_price, opening_bottom_price, opening_fixed_price')
       .eq('id', 1)
       .single();
     
@@ -149,6 +149,18 @@ async function loadAdminPricesFromDB() {
       if (data.glass_frosted_price) {
         pricingConfig.additionalOptions.glassFinish.frosted = parseFloat(data.glass_frosted_price);
         console.log('Loaded frosted price from DB:', data.glass_frosted_price);
+      }
+      
+      // Opening bottom price
+      if (data.opening_bottom_price !== null && data.opening_bottom_price !== undefined) {
+        pricingConfig.additionalOptions.openingTypes.bottom = -Math.abs(parseFloat(data.opening_bottom_price));
+        console.log('Loaded opening bottom price from DB:', data.opening_bottom_price);
+      }
+      
+      // Opening fixed price
+      if (data.opening_fixed_price !== null && data.opening_fixed_price !== undefined) {
+        pricingConfig.additionalOptions.openingTypes.fixed = -Math.abs(parseFloat(data.opening_fixed_price));
+        console.log('Loaded opening fixed price from DB:', data.opening_fixed_price);
       }
       
       console.log('All prices loaded from DB successfully');

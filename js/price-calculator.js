@@ -52,8 +52,8 @@ class PriceCalculator {
       configuration.customBars
     );
     
-    // 3. DODATKOWE OPCJE
-    const additionalPrice = this.calculateAdditionalOptions(configuration);
+    // 3. DODATKOWE OPCJE (przekazujemy sqm i basePrice)
+    const additionalPrice = this.calculateAdditionalOptions(configuration, sqm, basePrice);
     
     // 4. SUMA PRZED RABATEM
     const subtotal = basePrice + barsPrice + additionalPrice;
@@ -145,7 +145,7 @@ class PriceCalculator {
     return barsPrice;
   }
 
-  calculateAdditionalOptions(configuration) {
+  calculateAdditionalOptions(configuration, sqm, basePrice) {
     const options = this.pricing.additionalOptions;
     let additionalPrice = 0;
     
@@ -165,11 +165,12 @@ class PriceCalculator {
       console.log('Glass (' + configuration.glassType + '): £' + glassPrice);
     }
     
-    // Glass specification
+    // Glass specification - LAMINATED: £/m²
     if (configuration.glassSpec && options.glassSpec[configuration.glassSpec]) {
-      const specPrice = options.glassSpec[configuration.glassSpec];
+      const specPricePerSqm = options.glassSpec[configuration.glassSpec];
+      const specPrice = specPricePerSqm * sqm; // mnożenie przez m²
       additionalPrice += specPrice;
-      console.log('Glass spec (' + configuration.glassSpec + '): £' + specPrice);
+      console.log('Glass spec (' + configuration.glassSpec + '): £' + specPricePerSqm + '/m² × ' + sqm.toFixed(2) + 'm² = £' + specPrice.toFixed(2));
     }
     
     // Glass finish
@@ -212,11 +213,19 @@ class PriceCalculator {
       console.log('Opening (' + configuration.openingType + '): £' + openingPrice);
     }
     
-    // Color type
+    // Color type - DUAL: 10% od ceny bazowej
     if (configuration.colorType && options.colorTypes[configuration.colorType]) {
-      const colorPrice = options.colorTypes[configuration.colorType];
-      additionalPrice += colorPrice;
-      console.log('Color type (' + configuration.colorType + '): £' + colorPrice);
+      const colorMultiplier = options.colorTypes[configuration.colorType];
+      if (colorMultiplier > 0 && colorMultiplier < 1) {
+        // To jest procent (np. 0.10 = 10%)
+        const colorPrice = basePrice * colorMultiplier;
+        additionalPrice += colorPrice;
+        console.log('Color type (' + configuration.colorType + '): ' + (colorMultiplier * 100) + '% × £' + basePrice.toFixed(2) + ' = £' + colorPrice.toFixed(2));
+      } else {
+        // Stała kwota
+        additionalPrice += colorMultiplier;
+        console.log('Color type (' + configuration.colorType + '): £' + colorMultiplier);
+      }
     }
     
     // PAS24

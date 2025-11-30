@@ -76,6 +76,16 @@ const AdminController = {
         document.getElementById('frosted-price').value = data.glass_frosted_price;
       }
       
+      // Opening prices (zapisane jako wartości dodatnie, wyświetlane jako rabat)
+      if (data.opening_bottom_price !== null && data.opening_bottom_price !== undefined) {
+        const bottomInput = document.getElementById('bottom-base');
+        if (bottomInput) bottomInput.value = Math.abs(data.opening_bottom_price);
+      }
+      if (data.opening_fixed_price !== null && data.opening_fixed_price !== undefined) {
+        const fixedInput = document.getElementById('both-base');
+        if (fixedInput) fixedInput.value = Math.abs(data.opening_fixed_price);
+      }
+      
     } catch (err) {
       console.error('Error in loadAllData:', err);
     }
@@ -131,9 +141,23 @@ const AdminController = {
     }
   },
 
-  // SECTION 6: Opening Prices - keeping for future use
-  saveOpeningPrices: function() {
-    alert('Opening prices are set in code. Contact developer to change.');
+  // SECTION 6: Opening Prices
+  saveOpeningPrices: async function() {
+    const bottomPrice = parseFloat(document.getElementById('bottom-base').value);
+    const fixedPrice = parseFloat(document.getElementById('both-base').value);
+
+    if (isNaN(bottomPrice) || isNaN(fixedPrice)) {
+      alert('Please fill all opening mechanism prices');
+      return;
+    }
+
+    const success = await this.updatePricingConfig({ 
+      opening_bottom_price: bottomPrice,
+      opening_fixed_price: fixedPrice
+    });
+    if (success) {
+      alert('Opening mechanism prices saved successfully!');
+    }
   },
 
   // SECTION 9: Frosted Price
