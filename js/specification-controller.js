@@ -524,9 +524,33 @@ class SpecificationController {
         .join(', ');
       document.getElementById('spec-ironmongery').textContent = productNames;
       console.log('✅ Ironmongery displayed:', productNames);
+      
+      // MINIATURKI - generuj obrazki w specification
+      const thumbnailsContainer = document.getElementById('spec-ironmongery-thumbnails');
+      if (thumbnailsContainer) {
+        thumbnailsContainer.style.display = 'block';
+        const thumbnailsGrid = thumbnailsContainer.querySelector('div');
+        thumbnailsGrid.innerHTML = selectedProducts.map(product => {
+          const imgSrc = product.image_url || 'images/placeholder.png';
+          const qty = product.quantity || 1;
+          return `
+            <div style="position: relative; width: 45px; height: 45px;">
+              <img src="${imgSrc}" 
+                   alt="${product.name}" 
+                   title="${product.name}"
+                   style="width: 45px; height: 45px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+              ${qty > 1 ? `<span style="position: absolute; top: -5px; right: -5px; background: var(--primary-color); color: white; font-size: 10px; padding: 1px 4px; border-radius: 50%; font-weight: bold;">${qty}</span>` : ''}
+            </div>
+          `;
+        }).join('');
+      }
     } else {
       document.getElementById('spec-ironmongery-item').style.display = 'none';
       document.getElementById('spec-details').style.display = 'none';
+      const thumbnailsContainer = document.getElementById('spec-ironmongery-thumbnails');
+      if (thumbnailsContainer) {
+        thumbnailsContainer.style.display = 'none';
+      }
       console.log('❌ No ironmongery to display');
     }
 

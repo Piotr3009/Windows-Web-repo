@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Build Your Own Windows | Skylon Timber & Glazing </title>
+  <title>Build Your Own Windows | Skylon Timber & Glazing House</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -866,20 +866,19 @@
           <!-- Gallery Button -->
           <div class="input-group">
             <button type="button" 
-                    class="btn btn-primary" 
-                    onclick="openIronmongeryGallery()"
-                    style="width: 100%; padding: 15px; font-size: 1.1rem;">
-              🖼️ Browse Ironmongery Gallery
+                    class="btn btn-ironmongery-gallery" 
+                    onclick="openIronmongeryGallery()">
+              🔧 Browse Ironmongery Gallery
             </button>
             
             <!-- PREVIEW: Selected items -->
             <div id="ironmongery-summary-preview" 
-                 style="margin-top: 12px; text-align: center; font-size: 0.95rem; color: #666; font-weight: 600;">
+                 style="margin-top: 10px; text-align: center; font-size: 0.85rem; color: #666; font-weight: 600;">
               No ironmongery selected
             </div>
             
-            <p style="color: #666; font-size: 0.9rem; margin-top: 10px; text-align: center;">
-              Select locks, handles, lifts, stoppers and horns from our gallery
+            <p style="color: #666; font-size: 0.8rem; margin-top: 8px; text-align: center;">
+              Select locks, handles, lifts, stoppers and horns
             </p>
           </div>
 
@@ -1071,6 +1070,12 @@
             <span class="spec-label">Ironmongery:</span>
             <span class="spec-value" id="spec-ironmongery">-</span>
           </div>
+          <!-- Miniaturki Ironmongery -->
+          <div id="spec-ironmongery-thumbnails" style="display: none; margin-top: 10px;">
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;">
+              <!-- Miniaturki generowane przez JS -->
+            </div>
+          </div>
         </div>
         
         <div class="spec-section" id="spec-glass-spec" style="display: none;">
@@ -1211,12 +1216,12 @@
   </div>
 </div>
 
-<footer class="footer">
-  <p>&copy; 2025 Skylon Timber & Glazing. All rights reserved.<br>
-  <small>A trading name of Skylon Joinery LTD</small></p>
+<footer class="footer-new">
+  <p>&copy; 2025 Skylon Timber & Glazing. All rights reserved.</p>
+  <p>A trading name of Skylon Joinery LTD</p>
   <div class="footer-links">
-    <a href="privacy.html">Privacy Policy</a>
-    <a href="terms.html">Terms of Service</a>
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Service</a>
     <a href="contact.html">Contact Us</a>
   </div>
 </footer>

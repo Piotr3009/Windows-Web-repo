@@ -148,20 +148,70 @@ class ConfiguratorCore {
 
   attachApplyButtons() {
     const applyButtons = [
-      { id: 'apply-dimensions', handler: () => this.applySection('dimensions') },
-      { id: 'apply-bars', handler: () => this.applySection('bars') },
-      { id: 'apply-frame', handler: () => this.applySection('frame') },
-      { id: 'apply-color', handler: () => this.applySection('color') },
-      { id: 'apply-glass', handler: () => this.applySection('glass') },
-      { id: 'apply-opening', handler: () => this.applySection('opening') },
-      { id: 'apply-pas24', handler: () => this.applySection('pas24') },
-      { id: 'apply-details', handler: () => this.applySection('details') },
-      { id: 'apply-glass-spec', handler: () => this.applySection('glassSpec') }
+      { id: 'apply-dimensions', handler: () => this.applySection('dimensions'), order: 1 },
+      { id: 'apply-bars', handler: () => this.applySection('bars'), order: 2 },
+      { id: 'apply-frame', handler: () => this.applySection('frame'), order: 3 },
+      { id: 'apply-color', handler: () => this.applySection('color'), order: 4 },
+      { id: 'apply-glass', handler: () => this.applySection('glass'), order: 5 },
+      { id: 'apply-opening', handler: () => this.applySection('opening'), order: 6 },
+      { id: 'apply-pas24', handler: () => this.applySection('pas24'), order: 7 },
+      { id: 'apply-details', handler: () => this.applySection('details'), order: 8 },
+      { id: 'apply-glass-spec', handler: () => this.applySection('glassSpec'), order: 9 }
     ];
     
-    applyButtons.forEach(({ id, handler }) => {
-      UIHelpers.onClick(`#${id}`, handler);
+    // Zapamiętaj listę buttonów
+    this.applyButtonsOrder = applyButtons;
+    
+    // Pobierz zapisany stan z localStorage
+    this.appliedSections = JSON.parse(localStorage.getItem('byow_applied_sections') || '{}');
+    
+    applyButtons.forEach(({ id, handler, order }) => {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      
+      btn.addEventListener('click', () => {
+        handler();
+        // Zapisz że ta sekcja została zatwierdzona
+        this.appliedSections[id] = true;
+        localStorage.setItem('byow_applied_sections', JSON.stringify(this.appliedSections));
+        // Odblokuj następny button
+        this.updateApplyButtonsState();
+      });
     });
+    
+    // Ustaw początkowy stan buttonów
+    this.updateApplyButtonsState();
+  }
+  
+  updateApplyButtonsState() {
+    this.applyButtonsOrder.forEach(({ id, order }) => {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      
+      // Pierwszy button zawsze odblokowany
+      if (order === 1) {
+        btn.disabled = false;
+        btn.classList.remove('btn-locked');
+        return;
+      }
+      
+      // Sprawdź czy poprzedni jest zatwierdzony
+      const prevButton = this.applyButtonsOrder.find(b => b.order === order - 1);
+      if (prevButton && this.appliedSections[prevButton.id]) {
+        btn.disabled = false;
+        btn.classList.remove('btn-locked');
+      } else {
+        btn.disabled = true;
+        btn.classList.add('btn-locked');
+      }
+    });
+  }
+  
+  // Reset sekwencji (np. przy nowej konfiguracji)
+  resetApplySequence() {
+    this.appliedSections = {};
+    localStorage.removeItem('byow_applied_sections');
+    this.updateApplyButtonsState();
   }
 
   applySection(section) {
