@@ -234,7 +234,6 @@ class ConfiguratorCore {
     // Zapisz całą konfigurację do localStorage
     const config = window.currentConfig || this.state?.get() || {};
     localStorage.setItem('byow_saved_config', JSON.stringify(config));
-    console.log('💾 Configuration saved to localStorage:', config);
   }
   
   loadSavedConfiguration() {
