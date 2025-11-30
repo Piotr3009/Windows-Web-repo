@@ -69,10 +69,11 @@ class IronmongeryGallery {
       btn.classList.toggle('active', btn.dataset.type === type);
     });
     
-    // Show/hide PAS24 info box
+    // Show/hide PAS24 info box based on window PAS24 setting
     const pas24Info = document.getElementById('pas24-info-box');
     if (pas24Info) {
-      pas24Info.style.display = type === 'pas24' ? 'block' : 'none';
+      // Show info when PAS24 window or when viewing PAS24 tab
+      pas24Info.style.display = (this.windowRequiresPas24 || type === 'pas24') ? 'block' : 'none';
     }
     
     // Update category tabs visibility
@@ -83,12 +84,31 @@ class IronmongeryGallery {
       if (type === 'pas24') {
         // PAS24: only locks
         tab.style.display = category === 'locks' ? 'block' : 'none';
+        tab.classList.remove('disabled');
+        tab.style.opacity = '';
+        tab.style.pointerEvents = '';
       } else if (type === 'horns') {
         // Horns: only horns
         tab.style.display = category === 'horns' ? 'block' : 'none';
+        tab.classList.remove('disabled');
+        tab.style.opacity = '';
+        tab.style.pointerEvents = '';
       } else {
         // Standard: all except horns
         tab.style.display = category !== 'horns' ? 'block' : 'none';
+        
+        // If PAS24 window selected, disable locks category in Standard
+        if (this.windowRequiresPas24 && category === 'locks') {
+          tab.classList.add('disabled');
+          tab.style.opacity = '0.4';
+          tab.style.pointerEvents = 'none';
+          tab.title = 'PAS24 window selected - please use PAS24 Sash Locks tab';
+        } else {
+          tab.classList.remove('disabled');
+          tab.style.opacity = '';
+          tab.style.pointerEvents = '';
+          tab.title = '';
+        }
       }
     });
     
@@ -98,8 +118,10 @@ class IronmongeryGallery {
     } else if (type === 'horns') {
       this.switchCategory('horns');
     } else {
-      // Standard - if current category is horns, switch to locks
-      if (this.currentCategory === 'horns') {
+      // Standard - if PAS24 window and current category is locks, switch to fingerLifts
+      if (this.windowRequiresPas24 && (this.currentCategory === 'locks' || this.currentCategory === 'horns')) {
+        this.switchCategory('fingerLifts');
+      } else if (this.currentCategory === 'horns') {
         this.switchCategory('locks');
       } else {
         this.renderProducts();
@@ -125,35 +147,25 @@ class IronmongeryGallery {
     const pas24InfoBox = document.getElementById('pas24-info-box');
     
     if (this.windowRequiresPas24) {
-      // Hide Standard button - only PAS24 locks allowed
-      if (standardBtn) {
-        standardBtn.style.display = 'none';
-      }
-      // Update info box message
+      // Standard button stays visible - user needs access to Finger Lifts, Pull Handles, Stoppers
+      // Only Sash Lock category will be disabled in Standard view
       if (pas24InfoBox) {
-        pas24InfoBox.innerHTML = '<p>🔒 <strong>PAS24 Window Selected</strong> - Only PAS24 certified Sash Locks are available. For other hardware (Finger Lifts, Pull Handles, Stoppers) these are compatible with PAS24 windows.</p>';
+        pas24InfoBox.innerHTML = '<p>🔒 <strong>PAS24 Window Selected</strong> - Standard Sash Locks are not available. Please select a PAS24 certified Sash Lock. Other hardware (Finger Lifts, Pull Handles, Stoppers) are available in Standard.</p>';
         pas24InfoBox.style.display = 'block';
       }
     } else {
-      // Show Standard button
-      if (standardBtn) {
-        standardBtn.style.display = '';
-      }
       // Reset info box to default message
       if (pas24InfoBox) {
         pas24InfoBox.innerHTML = '<p>⚠️ For PAS24 certified windows, select Sash Lock here. For other hardware (Finger Lifts, Pull Handles, Stoppers) please choose from <strong>Standard</strong> list.</p>';
+        pas24InfoBox.style.display = 'none';
       }
     }
     
     // Load current selections from configurator
     this.loadCurrentSelections();
     
-    // Set default type view based on window PAS24 setting
-    if (this.windowRequiresPas24) {
-      this.switchType('pas24');
-    } else {
-      this.switchType('standard');
-    }
+    // Always start with Standard view - user can switch to PAS24 if needed
+    this.switchType('standard');
     
     // Render products
     this.renderProducts();
@@ -242,16 +254,28 @@ class IronmongeryGallery {
     
     // Filter by PAS24 type (only for locks category)
     if (this.currentCategory === 'locks') {
-      if (this.windowRequiresPas24) {
-        // Window has PAS24 = YES → ONLY PAS24 locks allowed (forced)
-        products = products.filter(p => p.is_pas24 === true || p.isPAS24 === true);
+      if (this.windowRequiresPas24 && this.currentType === 'standard') {
+        // Window has PAS24 = YES, user in Standard → block, show message
+        this.productsGrid.innerHTML = `
+          <div class="no-products-message" style="
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+          ">
+            <div style="font-size: 3rem; margin-bottom: 15px;">🔒</div>
+            <h3 style="color: #333; margin-bottom: 10px;">PAS24 Window Selected</h3>
+            <p style="margin: 0;">
+              Standard Sash Locks are not available for PAS24 windows.<br>
+              Please select a <strong>PAS24 Sash Lock</strong> from the PAS24 tab.
+            </p>
+          </div>
+        `;
+        return;
       } else if (this.currentType === 'pas24') {
-        // Window PAS24 = NO, but user browsing PAS24 section
+        // PAS24 section → show only PAS24 locks
         products = products.filter(p => p.is_pas24 === true || p.isPAS24 === true);
-      } else if (this.currentType === 'standard') {
-        // Window PAS24 = NO, Standard section → show ALL locks (standard + PAS24 as recommended)
-        // Don't filter - show everything, but mark PAS24 as recommended
       }
+      // Standard section with PAS24 = NO → show all locks (no filter)
     }
 
     // Group products by category (dla wyświetlania w kolumnach)
