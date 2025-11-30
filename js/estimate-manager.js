@@ -240,6 +240,12 @@ class EstimateManager {
             if (estimate) {
                 this.showToast(`✅ ${windowNumber} added to ${estimate.estimate_number} (${estimate.project_name})`, 'success');
             }
+            
+            // Reset sekwencji apply buttons dla następnego okna
+            if (window.configuratorCore && window.configuratorCore.resetApplySequence) {
+                window.configuratorCore.resetApplySequence();
+                console.log('🔄 Apply sequence reset for new window');
+            }
 
             // Odśwież estimate selector żeby pokazać zaktualizowaną liczbę okien
             if (window.estimateSelectorManager) {
@@ -557,6 +563,12 @@ class EstimateManager {
             
             console.log('Window saved to localStorage:', windowNumber);
             this.showToast(`✅ ${windowNumber} saved locally. Login to sync your estimates.`, 'warning');
+            
+            // Reset sekwencji apply buttons dla następnego okna
+            if (window.configuratorCore && window.configuratorCore.resetApplySequence) {
+                window.configuratorCore.resetApplySequence();
+                console.log('🔄 Apply sequence reset for new window');
+            }
             
             // Zaktualizuj licznik w przycisku "View My Estimates"
             this.updateLocalStorageCounter();

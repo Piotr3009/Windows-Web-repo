@@ -581,7 +581,8 @@ class ConfiguratorCore {
 
   saveConfiguration() {
     const saved = this.modules.storage.saveConfig(this.state.get());
-    alert(saved ? 'Configuration saved!' : 'Save failed. Try again.');
+    // Silent save - no alert needed
+    console.log('Configuration saved:', saved);
   }
 
   saveAsVariant() {
