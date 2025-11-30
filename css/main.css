@@ -340,6 +340,34 @@ a:hover {
   }
 }
 
+/* Footer New */
+.footer-new {
+  background: #0f2d22;
+  color: white;
+  text-align: center;
+  padding: 2rem;
+  margin-top: 4rem;
+}
+
+.footer-new p {
+  margin: 0.5rem 0;
+}
+
+.footer-new .footer-links {
+  margin-top: 1rem;
+}
+
+.footer-new .footer-links a {
+  color: #c9a648;
+  text-decoration: none;
+  margin: 0 1rem;
+  transition: color 0.3s;
+}
+
+.footer-new .footer-links a:hover {
+  color: #b08f3a;
+}
+
 @media (max-width: 480px) {
   .logo-line1 {
     font-size: 1.6rem;
