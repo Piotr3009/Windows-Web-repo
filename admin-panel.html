@@ -664,6 +664,10 @@ const AdminCalendar = {
           .map(id => slotsMap[id] || 'Unknown')
           .join('<br>');
         
+        // Escape data for HTML attributes
+        const safeName = (req.customer_name || '').replace(/"/g, '&quot;');
+        const safeMessage = (req.message || '').replace(/"/g, '&quot;');
+        
         return `
           <div class="pending-request-card">
             <h5>${req.customer_name}</h5>
@@ -674,12 +678,25 @@ const AdminCalendar = {
               <strong>Preferred:</strong><br>${preferredList || 'None'}
             </div>
             <div style="margin-top: 10px;">
-              <button class="btn-small" onclick="AdminCalendar.confirmRequest('${req.id}', '${req.customer_name}', '${(req.message || '').replace(/'/g, "\\'")}')">✓ Confirm</button>
-              <button class="btn-small btn-danger-small" onclick="AdminCalendar.cancelRequest('${req.id}')">✕ Cancel</button>
+              <button class="btn-small" data-action="confirm" data-id="${req.id}" data-name="${safeName}" data-address="${safeMessage}">✓ Confirm</button>
+              <button class="btn-small btn-danger-small" data-action="cancel" data-id="${req.id}">✕ Cancel</button>
             </div>
           </div>
         `;
       }).join('');
+      
+      // Add event listeners
+      container.querySelectorAll('[data-action="confirm"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          AdminCalendar.confirmRequest(btn.dataset.id, btn.dataset.name, btn.dataset.address);
+        });
+      });
+      
+      container.querySelectorAll('[data-action="cancel"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          AdminCalendar.cancelRequest(btn.dataset.id);
+        });
+      });
       
     } catch (error) {
       console.error('Error loading requests:', error);
