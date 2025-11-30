@@ -446,9 +446,9 @@ class SpecificationController {
     const glassType = document.querySelector('input[name="glass-type"]:checked')?.value;
 
     const glassNames = {
-      'double': 'Double Glazing (U-value: 1.1)',
-      'triple': 'Triple Glazing (U-value: 0.7)',
-      'passive': 'Passive Glass (U-value: 0.5)'
+      'double': 'Double Glazing (U-value: 1.4)',
+      'triple': 'Triple Glazing (U-value: 1.2)',
+      'passive': 'Passive Glass (U-value: 0.8)'
     };
 
     document.getElementById('spec-glass').style.display = 'block';

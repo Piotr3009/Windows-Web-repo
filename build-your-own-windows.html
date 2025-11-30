@@ -510,9 +510,8 @@
       <div class="config-section">
         <h3>Step 2: Georgian Bars</h3>
         <div class="bars-group">
-          <h4>Upper Sash Bars:</h4>
-          <div class="input-group">
-            <label for="upper-bars">Select Bar Pattern:</label>
+          <div class="bars-inline-group">
+            <h4>Upper Sash Bars:</h4>
             <select id="upper-bars" class="detail-select" data-detail-type="bars">
               <option value="none">No Bars</option>
               <option value="2x2">2x2 Pattern</option>
@@ -532,9 +531,8 @@
         </div>
         
         <div class="bars-group">
-          <h4>Lower Sash Bars:</h4>
-          <div class="input-group">
-            <label for="lower-bars">Select Bar Pattern:</label>
+          <div class="bars-inline-group">
+            <h4>Lower Sash Bars:</h4>
             <select id="lower-bars" class="detail-select" data-detail-type="bars">
               <option value="none">No Bars</option>
               <option value="2x2">2x2 Pattern</option>
@@ -804,15 +802,15 @@
         <div class="radio-group">
           <div class="radio-option">
             <input type="radio" id="double-glazing" name="glass-type" value="double" checked>
-            <label for="double-glazing" class="radio-label">Double Glazing<br>(U-value: 1.1)</label>
+            <label for="double-glazing" class="radio-label">Double Glazing<br>(U-value: 1.4)</label>
           </div>
           <div class="radio-option">
             <input type="radio" id="triple-glazing" name="glass-type" value="triple">
-            <label for="triple-glazing" class="radio-label">Triple Glazing<br>(U-value: 0.7)</label>
+            <label for="triple-glazing" class="radio-label">Triple Glazing<br>(U-value: 1.2)</label>
           </div>
           <div class="radio-option">
             <input type="radio" id="passive-glass" name="glass-type" value="passive">
-            <label for="passive-glass" class="radio-label">Passive Glass<br>(U-value: 0.5)</label>
+            <label for="passive-glass" class="radio-label">Passive Glass<br>(U-value: 0.8)</label>
           </div>
         </div>
         <button class="btn btn-apply" id="apply-glass">Apply Glass Type</button>
@@ -852,16 +850,15 @@
             </div>
           </div>
         </div>
-        <button class="btn btn-secondary btn-small" id="pas24-info">What is PAS 24?</button>
+        <button class="btn btn-pas24-info" id="pas24-info">What is PAS 24?</button>
         <button class="btn btn-apply" id="apply-pas24">Apply Security Standard</button>
       </div>
       
       <div class="config-section">
-        <h3>Step 8: Window Details & Ironmongery</h3>
+        <h3>Step 8: Windows Ironmongery & Horns</h3>
 
         <!-- Ironmongery Section -->
         <div class="ironmongery-section">
-          <h4>Ironmongery</h4>
           
           <!-- Gallery Button -->
           <div class="input-group">

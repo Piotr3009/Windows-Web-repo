@@ -523,6 +523,75 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 0 0 2px var(--white), 0 0 0 4px var(--secondary-color);
 }
 
+.btn-apply.btn-locked,
+.btn-apply:disabled {
+  background-color: #ccc;
+  color: #888;
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-apply.btn-locked::after {
+  content: ' 🔒';
+}
+
+/* Ironmongery Gallery Button - OUTLINE STYLE */
+.btn-ironmongery-gallery {
+  background: transparent !important;
+  color: var(--primary-color) !important;
+  border: 2px solid var(--primary-color) !important;
+  padding: 10px 15px;
+  font-size: 0.9rem;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-ironmongery-gallery:hover {
+  background: var(--primary-color) !important;
+  color: white !important;
+}
+
+/* PAS24 Info Button - OUTLINE YELLOW */
+.btn-pas24-info {
+  background: transparent !important;
+  color: #856404 !important;
+  border: 2px solid var(--secondary-color) !important;
+  padding: 8px 15px;
+  font-size: 0.85rem;
+  margin-top: 10px;
+}
+
+.btn-pas24-info:hover {
+  background: var(--secondary-color) !important;
+  color: var(--primary-color) !important;
+}
+
+/* Georgian Bars Inline Group */
+.bars-inline-group {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.bars-inline-group h4 {
+  margin: 0;
+  white-space: nowrap;
+  font-size: 0.95rem;
+  min-width: 120px;
+}
+
+.bars-inline-group select {
+  flex: 1;
+  padding: 8px;
+  font-size: 0.85rem;
+}
+
 /* Georgian Bars */
 .bars-group {
   margin-bottom: 20px;
@@ -866,33 +935,36 @@ h1, h2, h3, h4, h5, h6 {
 .measurement-info-box {
   background: #fff3cd;
   border: 2px solid #ffc107;
-  border-radius: 8px;
-  padding: 15px;
-  margin: 15px 0;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin: 10px 0;
   animation: slideDown 0.3s ease;
+  font-size: 0.85rem;
 }
 
 .measurement-info-box strong {
   color: #856404;
+  font-size: 0.9rem;
 }
 
 .measurement-info-box p {
-  margin: 5px 0;
+  margin: 3px 0;
   color: #856404;
 }
 
 .info-note {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-style: italic;
-  margin-top: 10px !important;
+  margin-top: 6px !important;
 }
 
 .measurement-link {
   display: inline-block;
-  margin-top: 10px;
+  margin-top: 6px;
   color: #0056b3;
   font-weight: 600;
   text-decoration: none;
+  font-size: 0.85rem;
 }
 
 .measurement-link:hover {
