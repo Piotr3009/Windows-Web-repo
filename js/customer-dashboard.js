@@ -353,6 +353,7 @@ class CustomerDashboard {
         const itemsHTML = estimate.estimate_items?.map(item => {
             // Parse ironmongery if it's a JSON string
             let ironmongeryDisplay = '';
+            let ironmongeryThumbnails = '';
             if (item.ironmongery) {
                 try {
                     const ironData = typeof item.ironmongery === 'string' ? JSON.parse(item.ironmongery) : item.ironmongery;
@@ -361,6 +362,25 @@ class CustomerDashboard {
                             `${p.quantity}x ${p.product.name}`
                         ).join(', ');
                         ironmongeryDisplay = productsList;
+                        
+                        // Generate thumbnails
+                        ironmongeryThumbnails = `
+                            <div class="ironmongery-thumbnails" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;">
+                                ${Object.values(ironData.products).map(p => {
+                                    const imgSrc = p.product.image_url || p.product.image || 'img/placeholder-ironmongery.jpg';
+                                    const qty = p.quantity;
+                                    return `
+                                        <div style="position: relative; width: 50px; height: 50px;">
+                                            <img src="${imgSrc}" 
+                                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;"
+                                                 onerror="this.src='img/placeholder-ironmongery.jpg'"
+                                                 title="${p.product.name}">
+                                            ${qty > 1 ? `<span style="position: absolute; top: -5px; right: -5px; background: var(--primary-color, #0F3124); color: white; font-size: 10px; padding: 2px 5px; border-radius: 50%; min-width: 16px; text-align: center;">${qty}</span>` : ''}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        `;
                     }
                 } catch(e) {
                     ironmongeryDisplay = typeof item.ironmongery === 'string' ? item.ironmongery : JSON.stringify(item.ironmongery);
@@ -395,7 +415,7 @@ class CustomerDashboard {
                         `<p><strong>Georgian Bars:</strong> Upper: ${item.upper_bars || 'None'}, Lower: ${item.lower_bars || 'None'}</p>` : ''
                     }
                     ${item.horns ? `<p><strong>Horns:</strong> ${item.horns}</p>` : ''}
-                    ${ironmongeryDisplay ? `<p><strong>Ironmongery:</strong> ${ironmongeryDisplay}</p>` : ''}
+                    ${ironmongeryDisplay ? `<p><strong>Ironmongery:</strong> ${ironmongeryDisplay}</p>${ironmongeryThumbnails}` : ''}
                     ${item.ironmongery_finish ? `<p><strong>Ironmongery Finish:</strong> ${item.ironmongery_finish}</p>` : ''}
                     ${item.pas24 ? `<p><strong>PAS24:</strong> Yes ✓</p>` : ''}
                     <p><strong>Quantity:</strong> ${item.quantity}</p>
@@ -445,7 +465,10 @@ class CustomerDashboard {
                     </button>
                 ` : ''}
                 <button class="btn btn-secondary" id="download-estimate-pdf">
-                    Download PDF
+                    📄 Download PDF
+                </button>
+                <button class="btn btn-secondary" id="download-estimate-excel">
+                    📊 Download Excel
                 </button>
                 <button class="btn-secondary" onclick="dashboard.closeModal()">
                     Close
@@ -459,6 +482,12 @@ class CustomerDashboard {
         const pdfBtn = document.getElementById('download-estimate-pdf');
         if (pdfBtn) {
             pdfBtn.addEventListener('click', () => this.downloadEstimatePDF(estimate));
+        }
+        
+        // Attach Excel download listener
+        const excelBtn = document.getElementById('download-estimate-excel');
+        if (excelBtn) {
+            excelBtn.addEventListener('click', () => this.downloadEstimateExcel(estimate));
         }
     }
 
@@ -527,21 +556,157 @@ class CustomerDashboard {
     // Download estimate as PDF
     async downloadEstimatePDF(estimate) {
         try {
-            // TODO: Implement PDF generation
-            // For now, show alert
-            alert('PDF download will be implemented soon.\n\nEstimate: ' + estimate.estimate_number + '\nProject: ' + estimate.project_name + '\nTotal: £' + this.formatPrice(estimate.total_price));
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
             
-            // Placeholder for future implementation:
-            // const pdf = await this.generateEstimatePDF(estimate);
-            // const blob = new Blob([pdf], { type: 'application/pdf' });
-            // const url = window.URL.createObjectURL(blob);
-            // const a = document.createElement('a');
-            // a.href = url;
-            // a.download = `Estimate_${estimate.estimate_number}.pdf`;
-            // a.click();
+            // Header
+            doc.setFontSize(20);
+            doc.setTextColor(15, 49, 36); // Primary color
+            doc.text('Skylon Timber & Glazing', 105, 20, { align: 'center' });
+            
+            doc.setFontSize(14);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Estimate: ${estimate.estimate_number || estimate.id.substring(0, 8).toUpperCase()}`, 105, 30, { align: 'center' });
+            
+            // Project info
+            let yPos = 45;
+            doc.setFontSize(11);
+            if (estimate.project_name) {
+                doc.text(`Project: ${estimate.project_name}`, 14, yPos);
+                yPos += 7;
+            }
+            if (estimate.delivery_address) {
+                doc.text(`Address: ${estimate.delivery_address}`, 14, yPos);
+                yPos += 7;
+            }
+            doc.text(`Date: ${new Date(estimate.created_at).toLocaleDateString('en-GB')}`, 14, yPos);
+            yPos += 7;
+            doc.text(`Status: ${this.getStatusConfig(estimate.status).label}`, 14, yPos);
+            yPos += 15;
+            
+            // Windows table
+            doc.setFontSize(12);
+            doc.setTextColor(15, 49, 36);
+            doc.text('Windows', 14, yPos);
+            yPos += 5;
+            
+            const tableData = estimate.estimate_items?.map(item => {
+                let ironmongeryText = '';
+                if (item.ironmongery) {
+                    try {
+                        const ironData = typeof item.ironmongery === 'string' ? JSON.parse(item.ironmongery) : item.ironmongery;
+                        if (ironData?.products) {
+                            ironmongeryText = Object.values(ironData.products).map(p => `${p.quantity}x ${p.product.name}`).join(', ');
+                        }
+                    } catch(e) {}
+                }
+                
+                return [
+                    item.window_number,
+                    `${item.width}mm × ${item.height}mm`,
+                    `${item.frame_type}, ${item.glass_type}`,
+                    item.color_type === 'single' ? item.color_single : `${item.color_interior}/${item.color_exterior}`,
+                    ironmongeryText || '-',
+                    item.quantity,
+                    `£${this.formatPrice(item.total_price)}`
+                ];
+            }) || [];
+            
+            doc.autoTable({
+                startY: yPos,
+                head: [['Window', 'Size', 'Frame/Glass', 'Color', 'Ironmongery', 'Qty', 'Price']],
+                body: tableData,
+                headStyles: { fillColor: [15, 49, 36] },
+                styles: { fontSize: 8 },
+                columnStyles: {
+                    0: { cellWidth: 20 },
+                    4: { cellWidth: 40 }
+                }
+            });
+            
+            // Total
+            const finalY = doc.lastAutoTable.finalY + 10;
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Total: £${this.formatPrice(estimate.total_price)}`, 196, finalY, { align: 'right' });
+            
+            // Footer
+            doc.setFontSize(9);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Skylon Timber & Glazing | A trading name of Skylon Joinery LTD', 105, 285, { align: 'center' });
+            doc.text('info@skylonjoinery.co.uk | 07842 510 060', 105, 290, { align: 'center' });
+            
+            // Download
+            doc.save(`Estimate_${estimate.estimate_number || estimate.id.substring(0, 8)}.pdf`);
+            
         } catch (error) {
             console.error('Error downloading PDF:', error);
-            this.showError('Failed to download PDF');
+            this.showError('Failed to download PDF: ' + error.message);
+        }
+    }
+    
+    // Download estimate as Excel
+    downloadEstimateExcel(estimate) {
+        try {
+            // Prepare data
+            const wsData = [
+                ['Skylon Timber & Glazing - Estimate'],
+                [''],
+                ['Estimate Number:', estimate.estimate_number || estimate.id.substring(0, 8).toUpperCase()],
+                ['Project:', estimate.project_name || '-'],
+                ['Address:', estimate.delivery_address || '-'],
+                ['Date:', new Date(estimate.created_at).toLocaleDateString('en-GB')],
+                ['Status:', this.getStatusConfig(estimate.status).label],
+                [''],
+                ['Windows:'],
+                ['Window', 'Width (mm)', 'Height (mm)', 'Frame', 'Glass', 'Color', 'Ironmongery', 'Qty', 'Price']
+            ];
+            
+            estimate.estimate_items?.forEach(item => {
+                let ironmongeryText = '';
+                if (item.ironmongery) {
+                    try {
+                        const ironData = typeof item.ironmongery === 'string' ? JSON.parse(item.ironmongery) : item.ironmongery;
+                        if (ironData?.products) {
+                            ironmongeryText = Object.values(ironData.products).map(p => `${p.quantity}x ${p.product.name}`).join(', ');
+                        }
+                    } catch(e) {}
+                }
+                
+                wsData.push([
+                    item.window_number,
+                    item.width,
+                    item.height,
+                    item.frame_type,
+                    item.glass_type,
+                    item.color_type === 'single' ? item.color_single : `${item.color_interior}/${item.color_exterior}`,
+                    ironmongeryText || '-',
+                    item.quantity,
+                    item.total_price
+                ]);
+            });
+            
+            wsData.push(['']);
+            wsData.push(['', '', '', '', '', '', '', 'TOTAL:', estimate.total_price]);
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            
+            // Set column widths
+            ws['!cols'] = [
+                { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 },
+                { wch: 12 }, { wch: 20 }, { wch: 35 }, { wch: 6 }, { wch: 12 }
+            ];
+            
+            XLSX.utils.book_append_sheet(wb, ws, 'Estimate');
+            
+            // Download
+            XLSX.writeFile(wb, `Estimate_${estimate.estimate_number || estimate.id.substring(0, 8)}.xlsx`);
+            
+        } catch (error) {
+            console.error('Error downloading Excel:', error);
+            this.showError('Failed to download Excel: ' + error.message);
         }
     }
 
