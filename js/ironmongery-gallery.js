@@ -116,11 +116,44 @@ class IronmongeryGallery {
     this.overlay?.classList.add('active');
     document.body.style.overflow = 'hidden';
     
+    // Check if window requires PAS24
+    this.windowRequiresPas24 = window.currentConfig?.pas24 === 'yes';
+    console.log('🔐 Window requires PAS24:', this.windowRequiresPas24);
+    
+    // Update type-selector based on window PAS24 setting
+    const standardBtn = document.querySelector('.type-btn[data-type="standard"]');
+    const pas24InfoBox = document.getElementById('pas24-info-box');
+    
+    if (this.windowRequiresPas24) {
+      // Hide Standard button - only PAS24 locks allowed
+      if (standardBtn) {
+        standardBtn.style.display = 'none';
+      }
+      // Update info box message
+      if (pas24InfoBox) {
+        pas24InfoBox.innerHTML = '<p>🔒 <strong>PAS24 Window Selected</strong> - Only PAS24 certified Sash Locks are available. For other hardware (Finger Lifts, Pull Handles, Stoppers) these are compatible with PAS24 windows.</p>';
+        pas24InfoBox.style.display = 'block';
+      }
+    } else {
+      // Show Standard button
+      if (standardBtn) {
+        standardBtn.style.display = '';
+      }
+      // Reset info box to default message
+      if (pas24InfoBox) {
+        pas24InfoBox.innerHTML = '<p>⚠️ For PAS24 certified windows, select Sash Lock here. For other hardware (Finger Lifts, Pull Handles, Stoppers) please choose from <strong>Standard</strong> list.</p>';
+      }
+    }
+    
     // Load current selections from configurator
     this.loadCurrentSelections();
     
-    // Set default type view
-    this.switchType('standard');
+    // Set default type view based on window PAS24 setting
+    if (this.windowRequiresPas24) {
+      this.switchType('pas24');
+    } else {
+      this.switchType('standard');
+    }
     
     // Render products
     this.renderProducts();
@@ -209,12 +242,15 @@ class IronmongeryGallery {
     
     // Filter by PAS24 type (only for locks category)
     if (this.currentCategory === 'locks') {
-      if (this.currentType === 'pas24') {
-        // Show only PAS24 certified locks
+      if (this.windowRequiresPas24) {
+        // Window has PAS24 = YES → ONLY PAS24 locks allowed (forced)
+        products = products.filter(p => p.is_pas24 === true || p.isPAS24 === true);
+      } else if (this.currentType === 'pas24') {
+        // Window PAS24 = NO, but user browsing PAS24 section
         products = products.filter(p => p.is_pas24 === true || p.isPAS24 === true);
       } else if (this.currentType === 'standard') {
-        // Show only non-PAS24 locks
-        products = products.filter(p => p.is_pas24 !== true && p.isPAS24 !== true);
+        // Window PAS24 = NO, Standard section → show ALL locks (standard + PAS24 as recommended)
+        // Don't filter - show everything, but mark PAS24 as recommended
       }
     }
 
@@ -317,6 +353,12 @@ class IronmongeryGallery {
     const quantity = isSelected ? selection.quantity : 0;
     const price = product.price_net || product.price || 0;
     
+    // Check if product should show "Recommended" badge
+    const isPas24Product = product.is_pas24 === true || product.isPAS24 === true;
+    const showRecommendedBadge = !this.windowRequiresPas24 && 
+                                  this.currentCategory === 'locks' && 
+                                  isPas24Product;
+    
     // Admin buttons
     const adminButtons = this.isAdminMode ? `
       <div class="admin-actions" style="position: absolute; top: 3px; right: 3px; display: flex; gap: 3px; z-index: 10;">
@@ -333,10 +375,27 @@ class IronmongeryGallery {
       </div>
     ` : '';
     
+    // Recommended badge for PAS24 locks when window doesn't require PAS24
+    const recommendedBadge = showRecommendedBadge ? `
+      <div class="recommended-badge" style="
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        background: #28a745;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        z-index: 5;
+      ">⭐ Recommended</div>
+    ` : '';
+    
     return `
       <div class="product-card ${isSelected ? 'selected' : ''}" 
            data-product-id="${product.id}">
         ${adminButtons}
+        ${recommendedBadge}
         <img src="${product.image || product.image_url || 'img/placeholder-ironmongery.jpg'}" 
              alt="${product.name}"
              class="product-card-image"
