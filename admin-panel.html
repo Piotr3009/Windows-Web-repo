@@ -148,7 +148,145 @@
     </div>
   </section>
 
+  <!-- SECTION: GALLERY MANAGEMENT -->
+  <section class="admin-section">
+    <div class="section-header">
+      <h2>Gallery Management</h2>
+      <button class="btn-add" onclick="GalleryAdmin.openAddProjectModal()">+ Add Project</button>
+    </div>
+    <div class="section-content">
+      <div class="products-table-container">
+        <table class="products-table" id="gallery-projects-table">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Title</th>
+              <th>Address</th>
+              <th>Images</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="gallery-projects-tbody">
+            <!-- Projects loaded by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION: APPOINTMENTS MANAGEMENT -->
+  <section class="admin-section" style="grid-column: 1 / -1;">
+    <div class="section-header">
+      <h2>Appointments Management</h2>
+      <button class="btn-add" onclick="AppointmentsAdmin.openAddSlotModal()">+ Add Time Slot</button>
+    </div>
+    <div class="section-content">
+      
+      <!-- Slots Management -->
+      <h4 style="margin-bottom: 10px;">Available Time Slots</h4>
+      <div class="products-table-container" style="margin-bottom: 25px;">
+        <table class="products-table" id="slots-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="slots-tbody">
+            <!-- Slots loaded by JS -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Appointment Requests -->
+      <h4 style="margin-bottom: 10px;">Appointment Requests</h4>
+      <div class="products-table-container">
+        <table class="products-table" id="requests-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Preferred Slots</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="requests-tbody">
+            <!-- Requests loaded by JS -->
+          </tbody>
+        </table>
+      </div>
+      
+    </div>
+  </section>
+
 </main>
+
+<!-- MODAL: Add/Edit Gallery Project -->
+<div id="gallery-project-modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="GalleryAdmin.closeProjectModal()">&times;</span>
+    <h2 id="gallery-modal-title">Add Project</h2>
+    <form id="gallery-project-form" onsubmit="GalleryAdmin.saveProject(event)">
+      <input type="hidden" id="project-id">
+      <div class="form-group">
+        <label>Project Title:</label>
+        <input type="text" id="project-title" required placeholder="e.g. Victorian Renovation">
+      </div>
+      <div class="form-group">
+        <label>Address / Location:</label>
+        <input type="text" id="project-address" required placeholder="e.g. Clerkenwell, London">
+      </div>
+      <div class="form-group">
+        <label>Display Order:</label>
+        <input type="number" id="project-order" value="0" min="0" placeholder="0">
+      </div>
+      <button type="submit" class="btn-save">Save Project</button>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Add Appointment Slot -->
+<div id="add-slot-modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="AppointmentsAdmin.closeSlotModal()">&times;</span>
+    <h2>Add Time Slot</h2>
+    <form id="add-slot-form" onsubmit="AppointmentsAdmin.saveSlot(event)">
+      <div class="form-group">
+        <label>Date:</label>
+        <input type="date" id="slot-date" required>
+      </div>
+      <div class="form-group">
+        <label>Time:</label>
+        <input type="text" id="slot-time" required placeholder="e.g. 10:00 - 12:00">
+      </div>
+      <button type="submit" class="btn-save">Add Slot</button>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Manage Project Images -->
+<div id="gallery-images-modal" class="modal">
+  <div class="modal-content" style="max-width: 800px;">
+    <span class="close" onclick="GalleryAdmin.closeImagesModal()">&times;</span>
+    <h2>Manage Images: <span id="images-modal-project-title"></span></h2>
+    <input type="hidden" id="images-project-id">
+    
+    <div class="form-group" style="margin-bottom: 20px;">
+      <label>Upload New Images:</label>
+      <input type="file" id="gallery-image-upload" accept="image/*" multiple onchange="GalleryAdmin.uploadImages()">
+      <small style="display: block; margin-top: 5px; color: #666;">You can select multiple images at once</small>
+    </div>
+    
+    <div id="project-images-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 20px;">
+      <!-- Images loaded by JS -->
+    </div>
+  </div>
+</div>
 
 <!-- MODAL: Add Horn -->
 <div id="add-horn-modal" class="modal">
@@ -235,7 +373,588 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.href = 'index.html';
     });
   }
+  
+  // Load gallery projects
+  GalleryAdmin.loadProjects();
+  
+  // Load appointments
+  AppointmentsAdmin.loadSlots();
+  AppointmentsAdmin.loadRequests();
 });
+
+// Appointments Admin Controller
+const AppointmentsAdmin = {
+  
+  async loadSlots() {
+    const tbody = document.getElementById('slots-tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
+    
+    try {
+      const { data: slots, error } = await window.supabaseClient
+        .from('appointment_slots')
+        .select('*')
+        .order('slot_date', { ascending: true })
+        .order('slot_time', { ascending: true });
+      
+      if (error) throw error;
+      
+      if (!slots || slots.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #666;">No slots yet. Click "Add Time Slot" to create one.</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = slots.map(slot => {
+        const date = new Date(slot.slot_date);
+        const dateStr = date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+        const statusClass = slot.is_available ? 'color: green;' : 'color: red;';
+        const statusText = slot.is_available ? 'Available' : 'Blocked';
+        
+        return `
+          <tr>
+            <td>${dateStr}</td>
+            <td>${slot.slot_time}</td>
+            <td style="${statusClass} font-weight: 600;">${statusText}</td>
+            <td>
+              <button class="btn-small" onclick="AppointmentsAdmin.toggleSlot('${slot.id}', ${slot.is_available})">
+                ${slot.is_available ? '🔒 Block' : '🔓 Unblock'}
+              </button>
+              <button class="btn-small btn-danger-small" onclick="AppointmentsAdmin.deleteSlot('${slot.id}')">🗑️ Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+      
+    } catch (error) {
+      console.error('Error loading slots:', error);
+      tbody.innerHTML = '<tr><td colspan="4" style="color: red;">Error loading slots</td></tr>';
+    }
+  },
+  
+  async loadRequests() {
+    const tbody = document.getElementById('requests-tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '<tr><td colspan="7">Loading...</td></tr>';
+    
+    try {
+      const { data: requests, error } = await window.supabaseClient
+        .from('appointment_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      if (!requests || requests.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #666;">No appointment requests yet.</td></tr>';
+        return;
+      }
+      
+      // Load all slots for reference
+      const { data: allSlots } = await window.supabaseClient
+        .from('appointment_slots')
+        .select('id, slot_date, slot_time');
+      
+      const slotsMap = {};
+      if (allSlots) {
+        allSlots.forEach(s => {
+          const date = new Date(s.slot_date);
+          slotsMap[s.id] = `${date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} ${s.slot_time}`;
+        });
+      }
+      
+      tbody.innerHTML = requests.map(req => {
+        const createdDate = new Date(req.created_at).toLocaleDateString('en-GB');
+        const preferredSlotsText = req.preferred_slots && req.preferred_slots.length > 0
+          ? req.preferred_slots.map(id => slotsMap[id] || 'Unknown').join('<br>')
+          : '-';
+        
+        let statusBadge = '';
+        switch (req.status) {
+          case 'pending':
+            statusBadge = '<span style="background: #ffc107; color: #000; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;">Pending</span>';
+            break;
+          case 'confirmed':
+            statusBadge = '<span style="background: #28a745; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;">Confirmed</span>';
+            break;
+          case 'cancelled':
+            statusBadge = '<span style="background: #dc3545; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;">Cancelled</span>';
+            break;
+          default:
+            statusBadge = req.status;
+        }
+        
+        return `
+          <tr>
+            <td>${createdDate}</td>
+            <td><strong>${req.customer_name}</strong></td>
+            <td><a href="mailto:${req.email}">${req.email}</a></td>
+            <td>${req.phone || '-'}</td>
+            <td style="font-size: 0.85rem;">${preferredSlotsText}</td>
+            <td>${statusBadge}</td>
+            <td>
+              ${req.status === 'pending' ? `
+                <button class="btn-small" onclick="AppointmentsAdmin.confirmRequest('${req.id}')">✓ Confirm</button>
+                <button class="btn-small btn-danger-small" onclick="AppointmentsAdmin.cancelRequest('${req.id}')">✕ Cancel</button>
+              ` : ''}
+              <button class="btn-small btn-danger-small" onclick="AppointmentsAdmin.deleteRequest('${req.id}')">🗑️</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+      
+    } catch (error) {
+      console.error('Error loading requests:', error);
+      tbody.innerHTML = '<tr><td colspan="7" style="color: red;">Error loading requests</td></tr>';
+    }
+  },
+  
+  openAddSlotModal() {
+    // Set default date to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('slot-date').value = tomorrow.toISOString().split('T')[0];
+    document.getElementById('slot-time').value = '';
+    document.getElementById('add-slot-modal').style.display = 'block';
+  },
+  
+  closeSlotModal() {
+    document.getElementById('add-slot-modal').style.display = 'none';
+  },
+  
+  async saveSlot(e) {
+    e.preventDefault();
+    
+    const slotData = {
+      slot_date: document.getElementById('slot-date').value,
+      slot_time: document.getElementById('slot-time').value.trim(),
+      is_available: true
+    };
+    
+    try {
+      const { error } = await window.supabaseClient
+        .from('appointment_slots')
+        .insert([slotData]);
+      
+      if (error) throw error;
+      
+      alert('Slot added!');
+      this.closeSlotModal();
+      this.loadSlots();
+      
+    } catch (error) {
+      console.error('Error saving slot:', error);
+      alert('Error saving slot: ' + error.message);
+    }
+  },
+  
+  async toggleSlot(slotId, currentStatus) {
+    try {
+      const { error } = await window.supabaseClient
+        .from('appointment_slots')
+        .update({ is_available: !currentStatus })
+        .eq('id', slotId);
+      
+      if (error) throw error;
+      
+      this.loadSlots();
+      
+    } catch (error) {
+      console.error('Error toggling slot:', error);
+      alert('Error: ' + error.message);
+    }
+  },
+  
+  async deleteSlot(slotId) {
+    if (!confirm('Delete this slot?')) return;
+    
+    try {
+      const { error } = await window.supabaseClient
+        .from('appointment_slots')
+        .delete()
+        .eq('id', slotId);
+      
+      if (error) throw error;
+      
+      this.loadSlots();
+      
+    } catch (error) {
+      console.error('Error deleting slot:', error);
+      alert('Error: ' + error.message);
+    }
+  },
+  
+  async confirmRequest(requestId) {
+    try {
+      const { error } = await window.supabaseClient
+        .from('appointment_requests')
+        .update({ status: 'confirmed' })
+        .eq('id', requestId);
+      
+      if (error) throw error;
+      
+      alert('Request confirmed! Remember to block the confirmed slot.');
+      this.loadRequests();
+      
+    } catch (error) {
+      console.error('Error confirming request:', error);
+      alert('Error: ' + error.message);
+    }
+  },
+  
+  async cancelRequest(requestId) {
+    if (!confirm('Cancel this request?')) return;
+    
+    try {
+      const { error } = await window.supabaseClient
+        .from('appointment_requests')
+        .update({ status: 'cancelled' })
+        .eq('id', requestId);
+      
+      if (error) throw error;
+      
+      this.loadRequests();
+      
+    } catch (error) {
+      console.error('Error cancelling request:', error);
+      alert('Error: ' + error.message);
+    }
+  },
+  
+  async deleteRequest(requestId) {
+    if (!confirm('Delete this request permanently?')) return;
+    
+    try {
+      const { error } = await window.supabaseClient
+        .from('appointment_requests')
+        .delete()
+        .eq('id', requestId);
+      
+      if (error) throw error;
+      
+      this.loadRequests();
+      
+    } catch (error) {
+      console.error('Error deleting request:', error);
+      alert('Error: ' + error.message);
+    }
+  }
+};
+
+// Gallery Admin Controller
+const GalleryAdmin = {
+  
+  async loadProjects() {
+    const tbody = document.getElementById('gallery-projects-tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
+    
+    try {
+      const { data: projects, error } = await window.supabaseClient
+        .from('gallery_projects')
+        .select(`
+          id,
+          title,
+          address,
+          display_order,
+          gallery_images (id)
+        `)
+        .order('display_order', { ascending: true });
+      
+      if (error) throw error;
+      
+      if (!projects || projects.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #666;">No projects yet. Click "Add Project" to create one.</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = projects.map(p => `
+        <tr>
+          <td>${p.display_order || 0}</td>
+          <td><strong>${p.title}</strong></td>
+          <td>${p.address}</td>
+          <td>${p.gallery_images?.length || 0} images</td>
+          <td>
+            <button class="btn-small" onclick="GalleryAdmin.openImagesModal('${p.id}', '${p.title.replace(/'/g, "\\'")}')">📷 Images</button>
+            <button class="btn-small" onclick="GalleryAdmin.editProject('${p.id}')">✏️ Edit</button>
+            <button class="btn-small btn-danger-small" onclick="GalleryAdmin.deleteProject('${p.id}')">🗑️ Delete</button>
+          </td>
+        </tr>
+      `).join('');
+      
+    } catch (error) {
+      console.error('Error loading projects:', error);
+      tbody.innerHTML = '<tr><td colspan="5" style="color: red;">Error loading projects</td></tr>';
+    }
+  },
+  
+  openAddProjectModal() {
+    document.getElementById('gallery-modal-title').textContent = 'Add Project';
+    document.getElementById('project-id').value = '';
+    document.getElementById('project-title').value = '';
+    document.getElementById('project-address').value = '';
+    document.getElementById('project-order').value = '0';
+    document.getElementById('gallery-project-modal').style.display = 'block';
+  },
+  
+  async editProject(projectId) {
+    try {
+      const { data: project, error } = await window.supabaseClient
+        .from('gallery_projects')
+        .select('*')
+        .eq('id', projectId)
+        .single();
+      
+      if (error) throw error;
+      
+      document.getElementById('gallery-modal-title').textContent = 'Edit Project';
+      document.getElementById('project-id').value = project.id;
+      document.getElementById('project-title').value = project.title;
+      document.getElementById('project-address').value = project.address;
+      document.getElementById('project-order').value = project.display_order || 0;
+      document.getElementById('gallery-project-modal').style.display = 'block';
+      
+    } catch (error) {
+      console.error('Error loading project:', error);
+      alert('Error loading project');
+    }
+  },
+  
+  closeProjectModal() {
+    document.getElementById('gallery-project-modal').style.display = 'none';
+  },
+  
+  async saveProject(e) {
+    e.preventDefault();
+    
+    const projectId = document.getElementById('project-id').value;
+    const projectData = {
+      title: document.getElementById('project-title').value.trim(),
+      address: document.getElementById('project-address').value.trim(),
+      display_order: parseInt(document.getElementById('project-order').value) || 0
+    };
+    
+    try {
+      if (projectId) {
+        // Update existing
+        const { error } = await window.supabaseClient
+          .from('gallery_projects')
+          .update(projectData)
+          .eq('id', projectId);
+        
+        if (error) throw error;
+        alert('Project updated!');
+      } else {
+        // Create new
+        const { error } = await window.supabaseClient
+          .from('gallery_projects')
+          .insert([projectData]);
+        
+        if (error) throw error;
+        alert('Project created!');
+      }
+      
+      this.closeProjectModal();
+      this.loadProjects();
+      
+    } catch (error) {
+      console.error('Error saving project:', error);
+      alert('Error saving project: ' + error.message);
+    }
+  },
+  
+  async deleteProject(projectId) {
+    if (!confirm('Delete this project and ALL its images? This cannot be undone.')) return;
+    
+    try {
+      // 1. Get all images for this project
+      const { data: images, error: fetchError } = await window.supabaseClient
+        .from('gallery_images')
+        .select('image_url')
+        .eq('project_id', projectId);
+      
+      if (fetchError) throw fetchError;
+      
+      // 2. Delete images from bucket
+      if (images && images.length > 0) {
+        const fileNames = images
+          .filter(img => img.image_url && img.image_url.includes('gallery-images'))
+          .map(img => img.image_url.split('/').pop());
+        
+        if (fileNames.length > 0) {
+          const { error: storageError } = await window.supabaseClient.storage
+            .from('gallery-images')
+            .remove(fileNames);
+          
+          if (storageError) {
+            console.warn('Could not delete some images from storage:', storageError);
+          }
+        }
+      }
+      
+      // 3. Delete project (CASCADE will delete gallery_images rows)
+      const { error } = await window.supabaseClient
+        .from('gallery_projects')
+        .delete()
+        .eq('id', projectId);
+      
+      if (error) throw error;
+      
+      alert('Project deleted!');
+      this.loadProjects();
+      
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      alert('Error deleting project: ' + error.message);
+    }
+  },
+  
+  async openImagesModal(projectId, projectTitle) {
+    document.getElementById('images-modal-project-title').textContent = projectTitle;
+    document.getElementById('images-project-id').value = projectId;
+    document.getElementById('gallery-image-upload').value = '';
+    document.getElementById('gallery-images-modal').style.display = 'block';
+    
+    await this.loadProjectImages(projectId);
+  },
+  
+  closeImagesModal() {
+    document.getElementById('gallery-images-modal').style.display = 'none';
+    this.loadProjects(); // Refresh count
+  },
+  
+  async loadProjectImages(projectId) {
+    const grid = document.getElementById('project-images-grid');
+    grid.innerHTML = '<p>Loading...</p>';
+    
+    try {
+      const { data: images, error } = await window.supabaseClient
+        .from('gallery_images')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('display_order', { ascending: true });
+      
+      if (error) throw error;
+      
+      if (!images || images.length === 0) {
+        grid.innerHTML = '<p style="color: #666;">No images yet. Upload some above.</p>';
+        return;
+      }
+      
+      grid.innerHTML = images.map((img, index) => `
+        <div style="position: relative; border: 1px solid #ddd; border-radius: 5px; overflow: hidden;">
+          <img src="${img.image_url}" style="width: 100%; height: 120px; object-fit: cover;">
+          <div style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.7); color: white; padding: 2px 6px; border-radius: 3px; font-size: 12px;">
+            #${index + 1}
+          </div>
+          <button onclick="GalleryAdmin.deleteImage('${img.id}', '${img.image_url}')" 
+                  style="position: absolute; top: 5px; right: 5px; background: #d32f2f; color: white; border: none; border-radius: 3px; padding: 4px 8px; cursor: pointer; font-size: 12px;">
+            ✕
+          </button>
+        </div>
+      `).join('');
+      
+    } catch (error) {
+      console.error('Error loading images:', error);
+      grid.innerHTML = '<p style="color: red;">Error loading images</p>';
+    }
+  },
+  
+  async uploadImages() {
+    const fileInput = document.getElementById('gallery-image-upload');
+    const projectId = document.getElementById('images-project-id').value;
+    const files = fileInput.files;
+    
+    if (!files || files.length === 0) return;
+    
+    const grid = document.getElementById('project-images-grid');
+    grid.innerHTML = '<p>Uploading ' + files.length + ' image(s)...</p>';
+    
+    try {
+      // Get current max display_order
+      const { data: existing } = await window.supabaseClient
+        .from('gallery_images')
+        .select('display_order')
+        .eq('project_id', projectId)
+        .order('display_order', { ascending: false })
+        .limit(1);
+      
+      let nextOrder = (existing && existing.length > 0) ? (existing[0].display_order + 1) : 0;
+      
+      for (const file of files) {
+        const fileExt = file.name.split('.').pop().toLowerCase();
+        const fileName = `${projectId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+        
+        // Upload to bucket
+        const { error: uploadError } = await window.supabaseClient.storage
+          .from('gallery-images')
+          .upload(fileName, file);
+        
+        if (uploadError) throw uploadError;
+        
+        // Get public URL
+        const { data: { publicUrl } } = window.supabaseClient.storage
+          .from('gallery-images')
+          .getPublicUrl(fileName);
+        
+        // Save to DB
+        const { error: dbError } = await window.supabaseClient
+          .from('gallery_images')
+          .insert([{
+            project_id: projectId,
+            image_url: publicUrl,
+            display_order: nextOrder++
+          }]);
+        
+        if (dbError) throw dbError;
+      }
+      
+      fileInput.value = '';
+      await this.loadProjectImages(projectId);
+      
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      alert('Error uploading: ' + error.message);
+      await this.loadProjectImages(projectId);
+    }
+  },
+  
+  async deleteImage(imageId, imageUrl) {
+    if (!confirm('Delete this image?')) return;
+    
+    const projectId = document.getElementById('images-project-id').value;
+    
+    try {
+      // 1. Delete from bucket
+      if (imageUrl && imageUrl.includes('gallery-images')) {
+        const fileName = imageUrl.split('/').pop();
+        const { error: storageError } = await window.supabaseClient.storage
+          .from('gallery-images')
+          .remove([fileName]);
+        
+        if (storageError) {
+          console.warn('Could not delete from storage:', storageError);
+        }
+      }
+      
+      // 2. Delete from DB
+      const { error } = await window.supabaseClient
+        .from('gallery_images')
+        .delete()
+        .eq('id', imageId);
+      
+      if (error) throw error;
+      
+      await this.loadProjectImages(projectId);
+      
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      alert('Error deleting image: ' + error.message);
+    }
+  }
+};
 </script>
 
 </body>
