@@ -19,8 +19,15 @@ class ConfiguratorCore {
       
       // Auto-save przy zamykaniu strony
       window.addEventListener('beforeunload', () => {
+        // Zapisz currentConfig (ma wszystkie dane)
+        if (window.currentConfig) {
+          localStorage.setItem('lastWindowConfig', JSON.stringify(window.currentConfig));
+        }
+        // Zapisz też przez storage manager
         const config = this.state.get();
-        this.modules.storage.saveLastConfig(config);
+        if (this.modules.storage) {
+          this.modules.storage.saveLastConfig(config);
+        }
         console.log('💾 Saved configuration before page unload');
       });
       
@@ -237,8 +244,14 @@ class ConfiguratorCore {
   }
   
   loadSavedConfiguration() {
-    // Wczytaj zapisaną konfigurację
-    const savedConfig = localStorage.getItem('byow_saved_config');
+    // Najpierw spróbuj załadować z lastWindowConfig (auto-save)
+    let savedConfig = localStorage.getItem('lastWindowConfig');
+    
+    // Fallback do starego klucza
+    if (!savedConfig) {
+      savedConfig = localStorage.getItem('byow_saved_config');
+    }
+    
     if (savedConfig) {
       try {
         const config = JSON.parse(savedConfig);
@@ -249,6 +262,13 @@ class ConfiguratorCore {
         
         // Odtwórz wartości w formularzu
         this.restoreFormValues(config);
+        
+        // Przywróć stan applied sections jeśli były
+        const appliedSections = localStorage.getItem('byow_applied_sections');
+        if (appliedSections) {
+          this.appliedSections = JSON.parse(appliedSections);
+          this.updateApplyButtonsState();
+        }
       } catch (e) {
         console.error('Error loading saved config:', e);
       }
@@ -282,6 +302,16 @@ class ConfiguratorCore {
       if (lowerBars) lowerBars.value = config.lowerBars;
     }
     
+    // Bar positions
+    if (config.upperBarPosition) {
+      const upperPos = document.getElementById('upper-bar-position');
+      if (upperPos) upperPos.value = config.upperBarPosition;
+    }
+    if (config.lowerBarPosition) {
+      const lowerPos = document.getElementById('lower-bar-position');
+      if (lowerPos) lowerPos.value = config.lowerBarPosition;
+    }
+    
     // Frame type
     if (config.frameType) {
       const radio = document.querySelector(`input[name="frame-type"][value="${config.frameType}"]`);
@@ -297,7 +327,39 @@ class ConfiguratorCore {
     // Color type
     if (config.colorType) {
       const radio = document.querySelector(`input[name="color-type"][value="${config.colorType}"]`);
-      if (radio) radio.checked = true;
+      if (radio) {
+        radio.checked = true;
+        // Trigger change to show correct color selector
+        radio.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
+    
+    // Single color
+    if (config.colorSingle || config.singleColor || config.color) {
+      const colorValue = config.colorSingle || config.singleColor || config.color;
+      const colorOption = document.querySelector(`#single-color-selector .color-option[data-color="${colorValue}"]`);
+      if (colorOption) {
+        document.querySelectorAll('#single-color-selector .color-option').forEach(opt => opt.classList.remove('selected'));
+        colorOption.classList.add('selected');
+      }
+    }
+    
+    // Dual colors
+    if (config.colorInterior || config.interiorColor) {
+      const colorValue = config.colorInterior || config.interiorColor;
+      const colorOption = document.querySelector(`.interior-color[data-color="${colorValue}"]`);
+      if (colorOption) {
+        document.querySelectorAll('.interior-color').forEach(opt => opt.classList.remove('selected'));
+        colorOption.classList.add('selected');
+      }
+    }
+    if (config.colorExterior || config.exteriorColor) {
+      const colorValue = config.colorExterior || config.exteriorColor;
+      const colorOption = document.querySelector(`.exterior-color[data-color="${colorValue}"]`);
+      if (colorOption) {
+        document.querySelectorAll('.exterior-color').forEach(opt => opt.classList.remove('selected'));
+        colorOption.classList.add('selected');
+      }
     }
     
     // Opening type
@@ -326,7 +388,7 @@ class ConfiguratorCore {
     
     // Quantity
     if (config.quantity) {
-      const qtyInput = document.getElementById('quantity');
+      const qtyInput = document.getElementById('window-quantity');
       if (qtyInput) qtyInput.value = config.quantity;
     }
     

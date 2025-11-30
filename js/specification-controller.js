@@ -16,6 +16,32 @@ class SpecificationController {
     this.setupColorPreviews();
     this.setupSectionChangeListeners();
     this.setupFrostedOptions();
+    this.setupGlobalAutoSave();
+  }
+  
+  setupGlobalAutoSave() {
+    // Debounced auto-save przy każdej zmianie
+    let saveTimeout;
+    const debouncedSave = () => {
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        if (window.currentConfig) {
+          localStorage.setItem('lastWindowConfig', JSON.stringify(window.currentConfig));
+          console.log('💾 Auto-saved (debounced)');
+        }
+      }, 1000); // 1 sekunda debounce
+    };
+    
+    // Słuchaj na wszystkie inputy, selecty i radio buttons
+    document.querySelectorAll('.config-section input, .config-section select').forEach(element => {
+      element.addEventListener('change', debouncedSave);
+      element.addEventListener('input', debouncedSave);
+    });
+    
+    // Słuchaj na kliknięcia w color options
+    document.querySelectorAll('.color-option').forEach(option => {
+      option.addEventListener('click', debouncedSave);
+    });
   }
 
   setupSectionChangeListeners() {
@@ -434,7 +460,8 @@ class SpecificationController {
         // ✅ AKTUALIZUJ window.currentConfig
         if (window.currentConfig) {
           window.currentConfig.colorType = 'single';
-          window.currentConfig.colorSingle = name;
+          window.currentConfig.colorSingle = selectedColor.dataset.color; // data-color value
+          window.currentConfig.colorSingleName = name; // display name
           window.currentConfig.colorInterior = null;
           window.currentConfig.colorExterior = null;
           window.currentConfig.customExteriorColor = null;
@@ -460,8 +487,10 @@ class SpecificationController {
         if (window.currentConfig) {
           window.currentConfig.colorType = 'dual';
           window.currentConfig.colorSingle = null;
-          window.currentConfig.colorInterior = intName;
-          window.currentConfig.colorExterior = extName;
+          window.currentConfig.colorInterior = selectedInterior.dataset.color; // data-color value
+          window.currentConfig.colorInteriorName = intName; // display name
+          window.currentConfig.colorExterior = selectedExterior.dataset.color; // data-color value  
+          window.currentConfig.colorExteriorName = extName; // display name
           window.currentConfig.customExteriorColor = extName === 'Custom' ? extName : null;
         }
       }
@@ -641,6 +670,12 @@ class SpecificationController {
     const originalText = button.textContent;
     button.textContent = '✓ Applied';
     button.classList.add('applied');
+
+    // AUTO-SAVE przy każdym Apply
+    if (window.currentConfig) {
+      localStorage.setItem('lastWindowConfig', JSON.stringify(window.currentConfig));
+      console.log('💾 Auto-saved after', buttonId);
+    }
 
     // NIE USUWAMY klasy applied - zostaje aż użytkownik coś zmieni
     // setTimeout został usunięty
