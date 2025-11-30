@@ -225,8 +225,15 @@ class SpecificationController {
 
         const name = option.dataset.name;
         const ral = option.dataset.ral;
+        const color = option.dataset.color;
         document.getElementById('single-preview-name').textContent = name;
         document.getElementById('single-preview-ral').textContent = ral;
+        
+        // ✅ Zapisz do currentConfig od razu
+        if (window.currentConfig) {
+          window.currentConfig.colorSingle = color;
+          window.currentConfig.colorSingleName = name;
+        }
       });
     });
 
@@ -241,7 +248,14 @@ class SpecificationController {
 
         const name = option.dataset.name;
         const ral = option.dataset.ral;
+        const color = option.dataset.color;
         document.getElementById('dual-preview-interior').textContent = `${name} (${ral})`;
+        
+        // ✅ Zapisz do currentConfig od razu
+        if (window.currentConfig) {
+          window.currentConfig.colorInterior = color;
+          window.currentConfig.colorInteriorName = name;
+        }
       });
     });
 
@@ -256,7 +270,14 @@ class SpecificationController {
 
         const name = option.dataset.name;
         const ral = option.dataset.ral;
+        const color = option.dataset.color;
         document.getElementById('dual-preview-exterior').textContent = `${name} (${ral})`;
+        
+        // ✅ Zapisz do currentConfig od razu
+        if (window.currentConfig) {
+          window.currentConfig.colorExterior = color;
+          window.currentConfig.colorExteriorName = name;
+        }
       });
     });
 
@@ -264,6 +285,11 @@ class SpecificationController {
     const colorTypeRadios = document.querySelectorAll('input[name="color-type"]');
     colorTypeRadios.forEach(radio => {
       radio.addEventListener('change', () => {
+        // ✅ Zapisz colorType do currentConfig
+        if (window.currentConfig) {
+          window.currentConfig.colorType = radio.value;
+        }
+        
         if (radio.value === 'single') {
           document.getElementById('single-color-selector').style.display = 'block';
           document.getElementById('dual-color-selector').style.display = 'none';

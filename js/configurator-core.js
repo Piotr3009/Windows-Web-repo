@@ -70,6 +70,15 @@ class ConfiguratorCore {
     // Eksportuj dla kompatybilności
     window.currentConfig = this.state.config;
     
+    // Ustaw domyślne wartości dla kolorów jeśli nie są ustawione
+    if (!window.currentConfig.colorType) {
+      window.currentConfig.colorType = 'single';
+    }
+    if (!window.currentConfig.colorSingle) {
+      window.currentConfig.colorSingle = 'white';
+      window.currentConfig.colorSingleName = 'Pure White';
+    }
+    
     // Subskrybuj zmiany
     this.state.subscribe(() => {
       window.currentConfig = this.state.config;
@@ -464,7 +473,9 @@ class ConfiguratorCore {
   updateAll() {
     if (!this.isInitialized) return;
     
-    const config = this.state.get();
+    // Merge state with currentConfig (currentConfig has color data)
+    const stateConfig = this.state.get();
+    const config = { ...stateConfig, ...window.currentConfig };
     
     // Calculate price
     const priceData = this.modules.price.calculate(config);
