@@ -659,7 +659,7 @@ const GalleryAdmin = {
           title,
           address,
           display_order,
-          gallery_images (id)
+          gallery_images (id, image_url, display_order)
         `)
         .order('display_order', { ascending: true });
       
@@ -670,23 +670,59 @@ const GalleryAdmin = {
         return;
       }
       
-      tbody.innerHTML = projects.map(p => `
-        <tr>
-          <td>${p.display_order || 0}</td>
-          <td><strong>${p.title}</strong></td>
-          <td>${p.address}</td>
-          <td>${p.gallery_images?.length || 0} images</td>
-          <td>
-            <button class="btn-small" onclick="GalleryAdmin.openImagesModal('${p.id}', '${p.title.replace(/'/g, "\\'")}')">📷 Images</button>
-            <button class="btn-small" onclick="GalleryAdmin.editProject('${p.id}')">✏️ Edit</button>
-            <button class="btn-small btn-danger-small" onclick="GalleryAdmin.deleteProject('${p.id}')">🗑️ Delete</button>
-          </td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = projects.map(p => {
+        const images = (p.gallery_images || []).sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+        
+        let thumbnailsHtml = '';
+        if (images.length > 0) {
+          thumbnailsHtml = `
+            <div style="margin-top: 5px;">
+              <button class="btn-small" onclick="GalleryAdmin.toggleThumbnails('${p.id}')" style="font-size: 0.7rem; padding: 3px 8px;">
+                ▼ Show ${images.length} images
+              </button>
+              <div id="thumbnails-${p.id}" style="display: none; margin-top: 8px; display: none; flex-wrap: wrap; gap: 5px; max-width: 300px;">
+                ${images.map(img => `
+                  <img src="${img.image_url}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 3px; border: 1px solid #ddd;">
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+        
+        return `
+          <tr>
+            <td>${p.display_order || 0}</td>
+            <td>
+              <strong>${p.title}</strong>
+              ${thumbnailsHtml}
+            </td>
+            <td>${p.address}</td>
+            <td>${images.length} images</td>
+            <td>
+              <button class="btn-small" onclick="GalleryAdmin.openImagesModal('${p.id}', '${p.title.replace(/'/g, "\\'")}')">📷 Images</button>
+              <button class="btn-small" onclick="GalleryAdmin.editProject('${p.id}')">✏️ Edit</button>
+              <button class="btn-small btn-danger-small" onclick="GalleryAdmin.deleteProject('${p.id}')">🗑️ Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
       
     } catch (error) {
       console.error('Error loading projects:', error);
       tbody.innerHTML = '<tr><td colspan="5" style="color: red;">Error loading projects</td></tr>';
+    }
+  },
+  
+  toggleThumbnails(projectId) {
+    const container = document.getElementById(`thumbnails-${projectId}`);
+    const btn = container.previousElementSibling;
+    
+    if (container.style.display === 'none' || container.style.display === '') {
+      container.style.display = 'flex';
+      btn.innerHTML = btn.innerHTML.replace('▼ Show', '▲ Hide');
+    } else {
+      container.style.display = 'none';
+      btn.innerHTML = btn.innerHTML.replace('▲ Hide', '▼ Show');
     }
   },
   
