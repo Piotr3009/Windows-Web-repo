@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Contact Skylon Timber & Glazing - Book a measurement visit or send us a message.">
+    <title>Contact | Skylon Timber & Glazing</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+    
+    <style>
+        .login-button-top {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .login-button-top a {
+            display: inline-block;
+            padding: 12px 25px;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .login-button-top a:hover {
+            background: #1a4d36;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        .contact-intro {
+            background: linear-gradient(135deg, #f7f9fa 0%, #ffffff 100%);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: 8px;
+            margin: 2rem 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        
+        .contact-intro h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: #0f2d22;
+            margin-bottom: 1rem;
+        }
+        
+        .contact-intro p {
+            font-size: 1.1rem;
+            color: #555;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        @media (max-width: 900px) {
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .contact-section {
+            background: var(--light-gray);
+            padding: 2rem;
+            border-radius: 8px;
+        }
+        
+        .contact-section h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+        
+        /* Appointment Booking */
+        .slots-container {
+            margin-top: 1rem;
+        }
+        
+        .slot-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .slot-item:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .slot-item.selected {
+            border-color: var(--secondary-color);
+            background: #fffdf5;
+        }
+        
+        .slot-item.unavailable {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f5f5f5;
+        }
+        
+        .slot-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            accent-color: var(--primary-color);
+        }
+        
+        .slot-info {
+            flex: 1;
+        }
+        
+        .slot-date {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .slot-time {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .slots-help {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 1rem;
+            padding: 10px;
+            background: #fff3cd;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .no-slots {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        
+        /* Contact Form */
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Raleway', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .btn-submit {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 5px;
+            font-family: 'Raleway', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-submit:hover {
+            background: #1a4d36;
+            transform: translateY(-2px);
+        }
+        
+        .btn-submit:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        .footer-new {
+            background: #0f2d22;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+        
+        .footer-new p {
+            margin: 0.5rem 0;
+        }
+        
+        .footer-new .footer-links {
+            margin-top: 1rem;
+        }
+        
+        .footer-new .footer-links a {
+            color: #c9a648;
+            text-decoration: none;
+            margin: 0 1rem;
+            transition: color 0.3s;
+        }
+        
+        .footer-new .footer-links a:hover {
+            color: #b08f3a;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-button-top">
+        <a href="login.html" class="auth-required">Login / Register</a>
+    </div>
+
+    <!-- Header -->
+    <header class="hero">
+        <h1 class="logo-line1 gold-shimmer">SKYLON</h1>
+        <p class="logo-line2 gold-shimmer">Timber & Glazing</p>
+        <p class="logo-line3 gold-shimmer">Traditional Sash Windows for London's Period Homes</p>
+    </header>
+
+    <!-- Menu -->
+    <div id="unified-menu-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container">
+        
+        <section class="contact-intro">
+            <h2>Get In Touch</h2>
+            <p>Ready to discuss your window project? Book a measurement visit or send us a message. Our team will get back to you within 24 hours.</p>
+        </section>
+
+        <div class="contact-grid">
+            
+            <!-- Appointment Booking -->
+            <div class="contact-section">
+                <h3>📅 Book a Measurement Visit</h3>
+                <p style="color: #666; margin-bottom: 1rem;">Select up to 3 preferred time slots and we'll confirm your appointment.</p>
+                
+                <div id="slots-container" class="slots-container">
+                    <div class="no-slots">Loading available slots...</div>
+                </div>
+                
+                <div class="slots-help">
+                    <strong>How it works:</strong> Choose up to 3 slots that work for you. We'll contact you to confirm one of your preferred times.
+                </div>
+            </div>
+            
+            <!-- Contact Form -->
+            <div class="contact-section">
+                <h3>✉️ Send Us a Message</h3>
+                
+                <div id="success-message" class="success-message">
+                    Thank you! Your request has been submitted. We'll contact you shortly.
+                </div>
+                
+                <form id="contact-form" class="contact-form">
+                    <div class="form-group">
+                        <label for="customer-name">Full Name *</label>
+                        <input type="text" id="customer-name" required placeholder="John Smith">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customer-email">Email *</label>
+                        <input type="email" id="customer-email" required placeholder="john@example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customer-phone">Phone</label>
+                        <input type="tel" id="customer-phone" placeholder="07123 456789">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customer-message">Message</label>
+                        <textarea id="customer-message" placeholder="Tell us about your project, property type, number of windows, etc."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn-submit" id="submit-btn">Submit Request</button>
+                </form>
+            </div>
+            
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-new">
+        <p>&copy; 2025 Skylon Timber & Glazing House. All rights reserved.</p>
+        <p>A trading name of Skylon Joinery LTD</p>
+        <div class="footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="contact.html">Contact Us</a>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/menu-loader.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        const authSystem = new AuthSystem();
+        
+        let selectedSlots = [];
+        const MAX_SLOTS = 3;
+        
+        // Load available slots
+        async function loadSlots() {
+            const container = document.getElementById('slots-container');
+            
+            try {
+                // Get slots from today onwards that are available
+                const today = new Date().toISOString().split('T')[0];
+                
+                const { data: slots, error } = await window.supabaseClient
+                    .from('appointment_slots')
+                    .select('*')
+                    .eq('is_available', true)
+                    .gte('slot_date', today)
+                    .order('slot_date', { ascending: true })
+                    .order('slot_time', { ascending: true })
+                    .limit(10);
+                
+                if (error) throw error;
+                
+                if (!slots || slots.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-slots">
+                            <p>No available slots at the moment.</p>
+                            <p style="font-size: 0.9rem; margin-top: 10px;">Please use the contact form and we'll arrange a suitable time.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = slots.map(slot => {
+                    const date = new Date(slot.slot_date);
+                    const dateStr = date.toLocaleDateString('en-GB', { 
+                        weekday: 'long', 
+                        day: 'numeric', 
+                        month: 'long' 
+                    });
+                    
+                    return `
+                        <div class="slot-item" data-slot-id="${slot.id}" onclick="toggleSlot('${slot.id}')">
+                            <input type="checkbox" class="slot-checkbox" id="slot-${slot.id}">
+                            <div class="slot-info">
+                                <div class="slot-date">${dateStr}</div>
+                                <div class="slot-time">${slot.slot_time}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Error loading slots:', error);
+                container.innerHTML = `
+                    <div class="no-slots">
+                        <p>Error loading slots. Please try refreshing the page.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function toggleSlot(slotId) {
+            const slotItem = document.querySelector(`[data-slot-id="${slotId}"]`);
+            const checkbox = document.getElementById(`slot-${slotId}`);
+            
+            if (selectedSlots.includes(slotId)) {
+                // Deselect
+                selectedSlots = selectedSlots.filter(id => id !== slotId);
+                slotItem.classList.remove('selected');
+                checkbox.checked = false;
+            } else {
+                // Select (max 3)
+                if (selectedSlots.length >= MAX_SLOTS) {
+                    alert(`You can select up to ${MAX_SLOTS} slots. Please deselect one first.`);
+                    return;
+                }
+                selectedSlots.push(slotId);
+                slotItem.classList.add('selected');
+                checkbox.checked = true;
+            }
+        }
+        
+        // Handle form submission
+        document.getElementById('contact-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
+            const formData = {
+                customer_name: document.getElementById('customer-name').value.trim(),
+                email: document.getElementById('customer-email').value.trim(),
+                phone: document.getElementById('customer-phone').value.trim() || null,
+                message: document.getElementById('customer-message').value.trim() || null,
+                preferred_slots: selectedSlots.length > 0 ? selectedSlots : null,
+                status: 'pending'
+            };
+            
+            try {
+                const { error } = await window.supabaseClient
+                    .from('appointment_requests')
+                    .insert([formData]);
+                
+                if (error) throw error;
+                
+                // Success
+                document.getElementById('contact-form').style.display = 'none';
+                document.getElementById('success-message').classList.add('show');
+                
+                // Reset slots
+                selectedSlots = [];
+                document.querySelectorAll('.slot-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                document.querySelectorAll('.slot-checkbox').forEach(cb => {
+                    cb.checked = false;
+                });
+                
+            } catch (error) {
+                console.error('Error submitting request:', error);
+                alert('Error submitting request. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Request';
+            }
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', loadSlots);
+    </script>
+</body>
+</html>
