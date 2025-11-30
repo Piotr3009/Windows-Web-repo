@@ -510,8 +510,8 @@
       <div class="config-section">
         <h3>Step 2: Georgian Bars</h3>
         <div class="bars-group">
-          <div class="bars-inline-group">
-            <h4>Upper Sash Bars:</h4>
+          <h4>Upper Sash Bars:</h4>
+          <div class="input-group">
             <select id="upper-bars" class="detail-select" data-detail-type="bars">
               <option value="none">No Bars</option>
               <option value="2x2">2x2 Pattern</option>
@@ -531,8 +531,8 @@
         </div>
         
         <div class="bars-group">
-          <div class="bars-inline-group">
-            <h4>Lower Sash Bars:</h4>
+          <h4>Lower Sash Bars:</h4>
+          <div class="input-group">
             <select id="lower-bars" class="detail-select" data-detail-type="bars">
               <option value="none">No Bars</option>
               <option value="2x2">2x2 Pattern</option>
@@ -1272,6 +1272,18 @@
     <div class="gallery-header">
       <h2>Ironmongery Gallery</h2>
       <button id="galleryClose" class="gallery-close" aria-label="Close">&times;</button>
+    </div>
+
+    <!-- Type Selector (NEW) -->
+    <div class="type-selector">
+      <button class="type-btn active" data-type="standard">Standard</button>
+      <button class="type-btn" data-type="pas24">PAS24</button>
+      <button class="type-btn" data-type="horns">Windows Horns</button>
+    </div>
+    
+    <!-- PAS24 Info (hidden by default) -->
+    <div id="pas24-info-box" class="pas24-info-box" style="display: none;">
+      <p>⚠️ For PAS24 certified windows, select Sash Lock here. For other hardware (Finger Lifts, Pull Handles, Stoppers) please choose from <strong>Standard</strong> list.</p>
     </div>
 
     <!-- Color Filters -->

@@ -1372,6 +1372,49 @@ h1, h2, h3, h4, h5, h6 {
   transform: rotate(90deg);
 }
 
+/* Type Selector (NEW) */
+.type-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.type-btn {
+  padding: 12px 30px;
+  background: white;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.type-btn:hover {
+  background: rgba(15, 49, 36, 0.1);
+}
+
+.type-btn.active {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* PAS24 Info Box */
+.pas24-info-box {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 8px;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+}
+
+.pas24-info-box p {
+  margin: 0;
+  color: #856404;
+  font-size: 0.95rem;
+}
+
 /* Filters */
 .gallery-filters {
   display: flex;

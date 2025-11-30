@@ -15,6 +15,7 @@ class IronmongeryGallery {
     // Format: { category: { product: {...}, quantity: 1 } }
     this.currentCategory = 'locks';
     this.currentFinish = 'all';
+    this.currentType = 'standard'; // NEW: standard, pas24, horns
     this.isAdminMode = false;
     
     this.init();
@@ -35,6 +36,14 @@ class IronmongeryGallery {
     // Confirm button
     this.confirmBtn?.addEventListener('click', () => this.confirmSelection());
 
+    // Type selector (NEW)
+    document.querySelectorAll('.type-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const type = e.target.dataset.type;
+        this.switchType(type);
+      });
+    });
+
     // Category tabs
     document.querySelectorAll('.category-tab').forEach(tab => {
       tab.addEventListener('click', (e) => {
@@ -51,6 +60,52 @@ class IronmongeryGallery {
       });
     });
   }
+  
+  switchType(type) {
+    this.currentType = type;
+    
+    // Update active button
+    document.querySelectorAll('.type-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.type === type);
+    });
+    
+    // Show/hide PAS24 info box
+    const pas24Info = document.getElementById('pas24-info-box');
+    if (pas24Info) {
+      pas24Info.style.display = type === 'pas24' ? 'block' : 'none';
+    }
+    
+    // Update category tabs visibility
+    const categoryTabs = document.querySelectorAll('.category-tab');
+    categoryTabs.forEach(tab => {
+      const category = tab.dataset.category;
+      
+      if (type === 'pas24') {
+        // PAS24: only locks
+        tab.style.display = category === 'locks' ? 'block' : 'none';
+      } else if (type === 'horns') {
+        // Horns: only horns
+        tab.style.display = category === 'horns' ? 'block' : 'none';
+      } else {
+        // Standard: all except horns
+        tab.style.display = category !== 'horns' ? 'block' : 'none';
+      }
+    });
+    
+    // Set default category for type
+    if (type === 'pas24') {
+      this.switchCategory('locks');
+    } else if (type === 'horns') {
+      this.switchCategory('horns');
+    } else {
+      // Standard - if current category is horns, switch to locks
+      if (this.currentCategory === 'horns') {
+        this.switchCategory('locks');
+      } else {
+        this.renderProducts();
+      }
+    }
+  }
 
   open() {
     // Reload products from localStorage (in case admin added new products)
@@ -63,6 +118,9 @@ class IronmongeryGallery {
     
     // Load current selections from configurator
     this.loadCurrentSelections();
+    
+    // Set default type view
+    this.switchType('standard');
     
     // Render products
     this.renderProducts();
