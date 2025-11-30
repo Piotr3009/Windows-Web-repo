@@ -359,8 +359,16 @@ class ConfiguratorCore {
     });
   }
   
-  // Reset sekwencji (np. przy nowej konfiguracji)
+  // Reset sekwencji (tylko przyciski, zachowaj konfigurację)
   resetApplySequence() {
+    this.appliedSections = {};
+    localStorage.removeItem('byow_applied_sections');
+    // NIE usuwaj byow_saved_config - zachowaj parametry dla następnego okna
+    this.updateApplyButtonsState();
+  }
+  
+  // Pełny reset (przy całkowicie nowej konfiguracji)
+  fullReset() {
     this.appliedSections = {};
     localStorage.removeItem('byow_applied_sections');
     localStorage.removeItem('byow_saved_config');
