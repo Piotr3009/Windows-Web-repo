@@ -206,6 +206,17 @@ class IronmongeryGallery {
         p.color?.toLowerCase() === this.currentFinish.toLowerCase()
       );
     }
+    
+    // Filter by PAS24 type (only for locks category)
+    if (this.currentCategory === 'locks') {
+      if (this.currentType === 'pas24') {
+        // Show only PAS24 certified locks
+        products = products.filter(p => p.is_pas24 === true || p.isPAS24 === true);
+      } else if (this.currentType === 'standard') {
+        // Show only non-PAS24 locks
+        products = products.filter(p => p.is_pas24 !== true && p.isPAS24 !== true);
+      }
+    }
 
     // Group products by category (dla wyświetlania w kolumnach)
     const productsByCategory = {};
@@ -218,6 +229,27 @@ class IronmongeryGallery {
 
     // Render w kolumnach
     let html = '';
+    
+    // Check if products is empty
+    if (products.length === 0) {
+      html = `
+        <div class="no-products-message" style="
+          text-align: center;
+          padding: 60px 20px;
+          color: #666;
+        ">
+          <div style="font-size: 3rem; margin-bottom: 15px;">📦</div>
+          <h3 style="color: #333; margin-bottom: 10px;">No products available</h3>
+          <p style="margin: 0;">
+            ${this.currentType === 'standard' && this.currentCategory === 'locks' 
+              ? 'Standard Sash Locks not yet added. Please add them in Admin Panel or use PAS24 locks.' 
+              : 'No products match your current filters.'}
+          </p>
+        </div>
+      `;
+      this.productsGrid.innerHTML = html;
+      return;
+    }
     
     for (const [category, categoryProducts] of Object.entries(productsByCategory)) {
       if (categoryProducts.length === 0) continue;
