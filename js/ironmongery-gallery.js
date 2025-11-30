@@ -481,7 +481,32 @@ class IronmongeryGallery {
     console.log('Delete product:', productId);
     
     try {
-      // Delete from Supabase
+      // 1. Get product to have image_url
+      const { data: product, error: fetchError } = await window.supabaseClient
+        .from('ironmongery_products')
+        .select('image_url')
+        .eq('id', productId)
+        .single();
+      
+      if (fetchError) throw fetchError;
+      
+      // 2. Delete image from bucket if exists
+      if (product?.image_url && product.image_url.includes('ironmongery-images')) {
+        const fileName = product.image_url.split('/').pop();
+        if (fileName) {
+          const { error: storageError } = await window.supabaseClient.storage
+            .from('ironmongery-images')
+            .remove([fileName]);
+          
+          if (storageError) {
+            console.warn('Could not delete image from storage:', storageError);
+          } else {
+            console.log('Image deleted from bucket:', fileName);
+          }
+        }
+      }
+      
+      // 3. Delete from DB
       const { error } = await window.supabaseClient
         .from('ironmongery_products')
         .delete()
