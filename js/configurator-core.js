@@ -472,8 +472,111 @@ class ConfiguratorCore {
     if (estimate) {
       this.modules.storage.saveLastConfig(config);
       const count = this.modules.storage.getEstimates().length;
-      alert(`${config.quantity} window(s) added!\nTotal in estimate: ${count}`);
+      
+      // Pokaż ładny modal zamiast alert
+      this.showWindowAddedModal(config.quantity, count, config.windowSymbol || 'A');
     }
+  }
+  
+  showWindowAddedModal(quantity, totalCount, currentSymbol) {
+    // Usuń poprzedni modal jeśli istnieje
+    const existing = document.querySelector('.window-added-modal-overlay');
+    if (existing) existing.remove();
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'window-added-modal-overlay';
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    `;
+    
+    const modal = document.createElement('div');
+    modal.className = 'window-added-modal';
+    modal.style.cssText = `
+      background: white;
+      padding: 30px 40px;
+      border-radius: 12px;
+      max-width: 450px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    `;
+    
+    modal.innerHTML = `
+      <div style="font-size: 3rem; margin-bottom: 15px;">✅</div>
+      <h3 style="color: #0F3124; margin-bottom: 10px; font-family: 'Playfair Display', serif;">
+        ${quantity} Window(s) Added!
+      </h3>
+      <p style="color: #666; margin-bottom: 5px;">
+        Total in estimate: <strong>${totalCount}</strong> window configuration(s)
+      </p>
+      <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin: 20px 0; text-align: left;">
+        <p style="color: #856404; margin: 0 0 10px 0; font-weight: 600;">
+          💡 Want to add more windows?
+        </p>
+        <p style="color: #856404; margin: 0 0 8px 0; font-size: 0.9rem;">
+          • Keep same selections or change some options
+        </p>
+        <p style="color: #856404; margin: 0; font-size: 0.9rem;">
+          • <strong>Remember to change window symbol</strong> (current: ${currentSymbol})
+        </p>
+      </div>
+      <div style="display: flex; gap: 15px; justify-content: center;">
+        <button id="modal-add-another" style="
+          padding: 12px 25px;
+          background: #0F3124;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          font-weight: 600;
+          cursor: pointer;
+        ">Add Another Window</button>
+        <button id="modal-view-estimate" style="
+          padding: 12px 25px;
+          background: white;
+          color: #0F3124;
+          border: 2px solid #0F3124;
+          border-radius: 6px;
+          font-weight: 600;
+          cursor: pointer;
+        ">View Estimate</button>
+      </div>
+    `;
+    
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    
+    // Event listeners
+    document.getElementById('modal-add-another').addEventListener('click', () => {
+      overlay.remove();
+      // Scroll do góry formularza
+      document.querySelector('.config-section')?.scrollIntoView({ behavior: 'smooth' });
+    });
+    
+    document.getElementById('modal-view-estimate').addEventListener('click', () => {
+      overlay.remove();
+      // Scroll do sekcji estimate lub otwórz dashboard
+      const estimateSection = document.querySelector('.estimate-selector-section');
+      if (estimateSection) {
+        estimateSection.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.location.href = 'customer-dashboard.html';
+      }
+    });
+    
+    // Zamknij po kliknięciu w tło
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.remove();
+      }
+    });
   }
 
   saveConfiguration() {
