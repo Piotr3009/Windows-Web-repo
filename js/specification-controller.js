@@ -350,6 +350,8 @@ class SpecificationController {
   applyBars() {
     const upperBars = document.getElementById('upper-bars').value;
     const lowerBars = document.getElementById('lower-bars').value;
+    const upperBarPosition = document.getElementById('upper-bar-position')?.value;
+    const lowerBarPosition = document.getElementById('lower-bar-position')?.value;
 
     // Get bar names
     const barNames = {
@@ -369,10 +371,36 @@ class SpecificationController {
     document.getElementById('spec-upper-bars').textContent = barNames[upperBars] || upperBars;
     document.getElementById('spec-lower-bars').textContent = barNames[lowerBars] || lowerBars;
     
+    // Show distance from edge for vertical bars
+    const distanceRow = document.getElementById('spec-bar-distance-row');
+    const distanceValue = document.getElementById('spec-bar-distance');
+    const verticalBarsSelected = ['1-vertical', '2-vertical'].includes(upperBars) || ['1-vertical', '2-vertical'].includes(lowerBars);
+    
+    if (distanceRow && distanceValue && verticalBarsSelected) {
+      // Get the appropriate distance value
+      let distance = '';
+      if (['1-vertical', '2-vertical'].includes(upperBars) && upperBarPosition) {
+        distance = upperBarPosition + 'mm';
+      } else if (['1-vertical', '2-vertical'].includes(lowerBars) && lowerBarPosition) {
+        distance = lowerBarPosition + 'mm';
+      }
+      
+      if (distance) {
+        distanceValue.textContent = distance;
+        distanceRow.style.display = 'flex';
+      } else {
+        distanceRow.style.display = 'none';
+      }
+    } else if (distanceRow) {
+      distanceRow.style.display = 'none';
+    }
+    
     // ✅ AKTUALIZUJ window.currentConfig
     if (window.currentConfig) {
       window.currentConfig.upperBars = upperBars;
       window.currentConfig.lowerBars = lowerBars;
+      window.currentConfig.upperBarPosition = upperBarPosition;
+      window.currentConfig.lowerBarPosition = lowerBarPosition;
     }
 
     this.showAppliedFeedback('apply-bars');

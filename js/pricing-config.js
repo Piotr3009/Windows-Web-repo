@@ -87,6 +87,14 @@ const pricingConfig = {
       'dual': 0.10        // +10% od ceny bazowej
     },
     
+    // Color surcharges (based on color choice)
+    colorSurcharges: {
+      'white': 0,         // Pure White - bez dopłaty
+      'oak': 0.20,        // Oak - +20%
+      'custom': 0.10,     // Custom Color - +10%
+      'other': 0.05       // Inne kolory - +5%
+    },
+    
     // Security
     pas24: {
       'no': 0,
@@ -96,10 +104,10 @@ const pricingConfig = {
   
   // Rabaty ilościowe
   quantityDiscounts: [
-    { minQty: 1, discount: 0 },     // 1-4 okna: 0%
-    { minQty: 5, discount: 0.05 },  // 5-9 okien: -5%
-    { minQty: 10, discount: 0.10 }, // 10+ okien: -10%
-    { minQty: 20, discount: 0.15 }  // 20+ okien: -15%
+    { minQty: 1, discount: 0 },      // 1-5 okna: 0%
+    { minQty: 6, discount: 0.05 },   // 6-11 okien: -5%
+    { minQty: 12, discount: 0.10 },  // 12-23 okien: -10%
+    { minQty: 24, discount: 0.15 }   // 24+ okien: -15%
   ],
   
   // VAT

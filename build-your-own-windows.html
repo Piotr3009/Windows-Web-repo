@@ -695,6 +695,12 @@
               <div class="color-option" style="background-image: url('configurator-overlay/img/oak-pattern.jpg'); background-size: cover;" data-color="oak" data-name="Oak" data-ral="Natural Oak"></div>
               <span class="color-name">Oak</span>
             </div>
+            <div class="color-option-wrapper">
+              <div class="color-option custom-color-btn" style="background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #ffe66d, #95e1d3); position: relative;" data-color="custom" data-name="Custom Color" data-ral="Custom RAL">
+                <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 18px; color: #333; text-shadow: 0 0 3px white;">+</span>
+              </div>
+              <span class="color-name">Custom Color</span>
+            </div>
           </div>
           <div class="color-preview-info" id="single-color-preview-info">
             <div class="preview-item">
@@ -745,6 +751,16 @@
                 <div class="color-option interior-color" style="background-color: #222D5A;" data-color="royal" data-name="Royal Blue" data-ral="RAL 5002"></div>
                 <span class="color-name">Royal Blue</span>
               </div>
+              <div class="color-option-wrapper">
+                <div class="color-option interior-color" style="background-image: url('configurator-overlay/img/oak-pattern.jpg'); background-size: cover;" data-color="oak" data-name="Oak" data-ral="Natural Oak"></div>
+                <span class="color-name">Oak</span>
+              </div>
+              <div class="color-option-wrapper">
+                <div class="color-option interior-color custom-color-btn" style="background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #ffe66d, #95e1d3); position: relative;" data-color="custom" data-name="Custom Color" data-ral="Custom RAL">
+                  <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 18px; color: #333; text-shadow: 0 0 3px white;">+</span>
+                </div>
+                <span class="color-name">Custom Color</span>
+              </div>
             </div>
           </div>
           <div class="dual-color-section">
@@ -781,6 +797,16 @@
               <div class="color-option-wrapper">
                 <div class="color-option exterior-color" style="background-color: #222D5A;" data-color="royal" data-name="Royal Blue" data-ral="RAL 5002"></div>
                 <span class="color-name">Royal Blue</span>
+              </div>
+              <div class="color-option-wrapper">
+                <div class="color-option exterior-color" style="background-image: url('configurator-overlay/img/oak-pattern.jpg'); background-size: cover;" data-color="oak" data-name="Oak" data-ral="Natural Oak"></div>
+                <span class="color-name">Oak</span>
+              </div>
+              <div class="color-option-wrapper">
+                <div class="color-option exterior-color custom-color-btn" style="background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #ffe66d, #95e1d3); position: relative;" data-color="custom" data-name="Custom Color" data-ral="Custom RAL">
+                  <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 18px; color: #333; text-shadow: 0 0 3px white;">+</span>
+                </div>
+                <span class="color-name">Custom Color</span>
               </div>
             </div>
           </div>
@@ -906,7 +932,7 @@
             </div>
             <div class="radio-option">
               <input type="radio" id="laminated-glass" name="glass-spec" value="laminated">
-              <label for="laminated-glass" class="radio-label">Laminated (Security)</label>
+              <label for="laminated-glass" class="radio-label">Laminated (Extra Security)</label>
             </div>
           </div>
         </div>
@@ -943,8 +969,16 @@
         <h3>Step 10: Window Quantity</h3>
         <div class="input-group">
           <label for="window-quantity">Number of windows with this configuration:</label>
-          <input type="number" id="window-quantity" min="1" max="20" value="1" step="1">
+          <input type="number" id="window-quantity" min="1" max="100" value="1" step="1">
           <p class="quantity-info">For multiple identical windows with the same configuration</p>
+          <div class="quantity-discounts" style="margin-top: 10px; padding: 12px; background: #f8f9fa; border-radius: 6px; border-left: 3px solid var(--primary-color);">
+            <p style="margin: 0 0 8px 0; font-weight: 600; color: var(--primary-color);">💰 Quantity Discounts:</p>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: #555;">
+              <li>6+ windows: <strong>5% off</strong></li>
+              <li>12+ windows: <strong>10% off</strong></li>
+              <li>24+ windows: <strong>15% off</strong></li>
+            </ul>
+          </div>
         </div>
       </div>
       
@@ -999,6 +1033,10 @@
           <div class="spec-item">
             <span class="spec-label">Lower Sash:</span>
             <span class="spec-value" id="spec-lower-bars">-</span>
+          </div>
+          <div class="spec-item" id="spec-bar-distance-row" style="display: none;">
+            <span class="spec-label">Distance from Edge:</span>
+            <span class="spec-value" id="spec-bar-distance">-</span>
           </div>
         </div>
         
@@ -1314,8 +1352,13 @@
 
     <!-- Footer with Total -->
     <div class="gallery-footer">
-      <div class="selection-total">
-        Selection Total: <span id="selectionTotal">£0.00</span>
+      <div class="selection-summary">
+        <div class="selection-total">
+          Selection Total: <span id="selectionTotal">£0.00</span>
+        </div>
+        <div class="selected-items-preview" id="selectedItemsPreview">
+          <!-- Miniaturki wybranych produktów będą tutaj -->
+        </div>
       </div>
       <button id="confirmSelection" class="btn-confirm-selection">
         Confirm Selection

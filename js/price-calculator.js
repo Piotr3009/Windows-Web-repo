@@ -228,6 +228,43 @@ class PriceCalculator {
       }
     }
     
+    // Color surcharge based on color choice
+    if (options.colorSurcharges) {
+      let colorSurcharge = 0;
+      
+      // Get the colors being used
+      const colorsToCheck = [];
+      if (configuration.colorType === 'single' && configuration.colorSingle) {
+        colorsToCheck.push(configuration.colorSingle);
+      } else if (configuration.colorType === 'dual') {
+        if (configuration.colorInterior) colorsToCheck.push(configuration.colorInterior);
+        if (configuration.colorExterior) colorsToCheck.push(configuration.colorExterior);
+      }
+      
+      // Find the highest surcharge from selected colors
+      colorsToCheck.forEach(color => {
+        let surcharge = 0;
+        if (color === 'white') {
+          surcharge = options.colorSurcharges.white || 0;
+        } else if (color === 'oak') {
+          surcharge = options.colorSurcharges.oak || 0.20;
+        } else if (color === 'custom') {
+          surcharge = options.colorSurcharges.custom || 0.10;
+        } else {
+          surcharge = options.colorSurcharges.other || 0.05;
+        }
+        if (surcharge > colorSurcharge) {
+          colorSurcharge = surcharge;
+        }
+      });
+      
+      if (colorSurcharge > 0) {
+        const surchargePrice = basePrice * colorSurcharge;
+        additionalPrice += surchargePrice;
+        console.log('Color surcharge: ' + (colorSurcharge * 100) + '% × £' + basePrice.toFixed(2) + ' = £' + surchargePrice.toFixed(2));
+      }
+    }
+    
     // PAS24
     if (configuration.pas24 && options.pas24[configuration.pas24]) {
       const pas24Price = options.pas24[configuration.pas24];

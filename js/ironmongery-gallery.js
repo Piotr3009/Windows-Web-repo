@@ -520,10 +520,53 @@ class IronmongeryGallery {
       this.totalElement.textContent = `£${total.toFixed(2)}`;
     }
 
+    // Render selected items preview
+    this.renderSelectedItemsPreview();
+
     // Enable/disable confirm button
     if (this.confirmBtn) {
       this.confirmBtn.disabled = Object.keys(this.selectedProducts).length === 0;
     }
+  }
+
+  renderSelectedItemsPreview() {
+    const previewContainer = document.getElementById('selectedItemsPreview');
+    if (!previewContainer) return;
+
+    const selectedEntries = Object.entries(this.selectedProducts);
+    
+    if (selectedEntries.length === 0) {
+      previewContainer.innerHTML = '<span style="color: #888; font-size: 0.85rem;">No items selected</span>';
+      return;
+    }
+
+    const html = selectedEntries.map(([category, selection]) => {
+      const product = selection.product;
+      const qty = selection.quantity;
+      const price = (product.price_net || product.price || 0) * qty;
+      const imgSrc = product.image || product.image_url || 'img/placeholder-ironmongery.jpg';
+      
+      return `
+        <div class="selected-item-mini" style="
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 6px 10px;
+          background: #f5f5f5;
+          border-radius: 6px;
+          font-size: 0.8rem;
+        ">
+          <img src="${imgSrc}" alt="${product.name}" style="width: 35px; height: 35px; object-fit: contain; border-radius: 4px; background: white;">
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${product.name}</div>
+            <div style="color: #666;">×${qty} = £${price.toFixed(2)}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    previewContainer.innerHTML = html;
+    previewContainer.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;';
   }
 
   zoomImage(imageSrc) {
