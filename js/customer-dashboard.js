@@ -210,6 +210,35 @@ class CustomerDashboard {
         const statusConfig = this.getStatusConfig(order.status);
         const createdDate = new Date(order.created_at).toLocaleDateString('en-GB');
         const itemCount = order.estimate_items?.length || 0;
+        
+        // Check if estimate is in draft/saved state - admin cannot see it
+        const isDraft = order.status === 'draft' || order.status === 'saved';
+        
+        // Warning message for draft estimates
+        const draftWarning = isDraft ? `
+            <div class="draft-warning" style="
+                background: #fff3cd;
+                border: 2px solid #ffc107;
+                border-radius: 8px;
+                padding: 12px 15px;
+                margin-bottom: 15px;
+                text-align: center;
+            ">
+                <p style="margin: 0 0 8px 0; color: #856404; font-weight: 600;">
+                    ⚠️ This estimate is NOT visible to our team yet!
+                </p>
+                <p style="margin: 0 0 12px 0; color: #856404; font-size: 0.9rem;">
+                    Click "Submit for Quote" to send it for review and receive a formal quotation.
+                </p>
+                <button class="btn" onclick="dashboard.submitEstimate('${order.id}')" style="
+                    background: #28a745;
+                    padding: 10px 25px;
+                    font-size: 1rem;
+                ">
+                    📤 Submit for Quote
+                </button>
+            </div>
+        ` : '';
 
         return `
             <div class="order-card" data-order-id="${order.id}">
@@ -222,6 +251,8 @@ class CustomerDashboard {
                 </div>
 
                 <div class="order-body">
+                    ${draftWarning}
+                    
                     <div class="order-info">
                         <div class="info-row">
                             <span class="info-label">Windows:</span>
@@ -269,9 +300,11 @@ class CustomerDashboard {
 
     // Render order progress timeline
     renderOrderProgress(order) {
+        const isDraft = order.status === 'draft' || order.status === 'saved';
+        
         const timeline = [
-            { status: 'saved', label: 'Saved Estimate', icon: '📋' },
-            { status: 'pending', label: 'Pending', icon: '⏳' },
+            { status: 'draft', label: 'Saved Estimate', icon: '📋' },
+            { status: 'sent', label: 'Submitted', icon: '📤' },
             { status: 'confirmed', label: 'Confirmed', icon: '✓' },
             { status: 'in_production', label: 'Production', icon: '🔨' },
             { status: 'completed', label: 'Completed', icon: '✅' }
@@ -281,12 +314,18 @@ class CustomerDashboard {
 
         return `
             <div class="order-timeline">
-                ${timeline.map((step, index) => `
-                    <div class="timeline-step ${index <= currentIndex ? 'active' : ''} ${index === currentIndex ? 'current' : ''}">
-                        <div class="timeline-icon">${step.icon}</div>
-                        <div class="timeline-label">${step.label}</div>
-                    </div>
-                `).join('')}
+                ${timeline.map((step, index) => {
+                    // Special styling for Submit step when draft
+                    const needsAction = isDraft && step.status === 'sent';
+                    
+                    return `
+                        <div class="timeline-step ${index <= currentIndex ? 'active' : ''} ${index === currentIndex ? 'current' : ''} ${needsAction ? 'needs-action' : ''}">
+                            <div class="timeline-icon">${step.icon}</div>
+                            <div class="timeline-label">${step.label}</div>
+                            ${needsAction ? '<div class="action-arrow" style="color: #dc3545; font-size: 0.75rem; font-weight: 600;">⬆ Click above</div>' : ''}
+                        </div>
+                    `;
+                }).join('')}
             </div>
         `;
     }
@@ -294,10 +333,15 @@ class CustomerDashboard {
     // Get status configuration
     getStatusConfig(status) {
         const configs = {
-            draft: { label: 'Draft', color: '#6c757d' },
-            sent: { label: 'Sent to supplier - waiting for confirmation', color: '#17a2b8' },
+            draft: { label: 'DRAFT', color: '#6c757d' },
+            saved: { label: 'DRAFT', color: '#6c757d' },
+            sent: { label: 'Submitted - Awaiting Quote', color: '#17a2b8' },
+            pending: { label: 'Pending Review', color: '#ffc107' },
             approved: { label: 'Approved', color: '#28a745' },
+            confirmed: { label: 'Confirmed', color: '#28a745' },
+            in_production: { label: 'In Production', color: '#007bff' },
             ordered: { label: 'In Production', color: '#007bff' },
+            completed: { label: 'Completed', color: '#28a745' },
             cancelled: { label: 'Cancelled', color: '#dc3545' }
         };
         return configs[status] || configs.draft;
