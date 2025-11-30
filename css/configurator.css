@@ -523,14 +523,18 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 0 0 2px var(--white), 0 0 0 4px var(--secondary-color);
 }
 
-.btn-apply.btn-locked,
-.btn-apply:disabled {
-  background-color: #ccc;
-  color: #888;
-  cursor: not-allowed;
+.btn-apply.btn-locked {
+  background-color: #ccc !important;
+  color: #888 !important;
+  cursor: not-allowed !important;
   opacity: 0.7;
   transform: none !important;
   box-shadow: none !important;
+}
+
+.btn-apply.btn-locked:hover {
+  background-color: #ccc !important;
+  transform: none !important;
 }
 
 .btn-apply.btn-locked::after {
@@ -569,27 +573,6 @@ h1, h2, h3, h4, h5, h6 {
 .btn-pas24-info:hover {
   background: var(--secondary-color) !important;
   color: var(--primary-color) !important;
-}
-
-/* Georgian Bars Inline Group */
-.bars-inline-group {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 10px;
-}
-
-.bars-inline-group h4 {
-  margin: 0;
-  white-space: nowrap;
-  font-size: 0.95rem;
-  min-width: 120px;
-}
-
-.bars-inline-group select {
-  flex: 1;
-  padding: 8px;
-  font-size: 0.85rem;
 }
 
 /* Georgian Bars */

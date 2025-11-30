@@ -165,15 +165,30 @@ class ConfiguratorCore {
     // Pobierz zapisany stan z localStorage
     this.appliedSections = JSON.parse(localStorage.getItem('byow_applied_sections') || '{}');
     
+    // Załaduj zapisaną konfigurację
+    this.loadSavedConfiguration();
+    
     applyButtons.forEach(({ id, handler, order }) => {
       const btn = document.getElementById(id);
       if (!btn) return;
       
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        // Sprawdź czy button jest zablokowany
+        if (btn.classList.contains('btn-locked')) {
+          e.preventDefault();
+          e.stopPropagation();
+          this.showLockedMessage();
+          return;
+        }
+        
         handler();
         // Zapisz że ta sekcja została zatwierdzona
         this.appliedSections[id] = true;
         localStorage.setItem('byow_applied_sections', JSON.stringify(this.appliedSections));
+        
+        // Zapisz całą konfigurację okna
+        this.saveConfiguration();
+        
         // Odblokuj następny button
         this.updateApplyButtonsState();
       });
@@ -183,6 +198,147 @@ class ConfiguratorCore {
     this.updateApplyButtonsState();
   }
   
+  showLockedMessage() {
+    // Usuń poprzedni komunikat jeśli istnieje
+    const existing = document.querySelector('.locked-message');
+    if (existing) existing.remove();
+    
+    // Pokaż komunikat
+    const msg = document.createElement('div');
+    msg.className = 'locked-message';
+    msg.innerHTML = '⚠️ Please confirm previous selection first';
+    msg.style.cssText = `
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff3cd;
+      color: #856404;
+      border: 2px solid #ffc107;
+      padding: 12px 25px;
+      border-radius: 8px;
+      font-weight: 600;
+      z-index: 10000;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    `;
+    document.body.appendChild(msg);
+    
+    setTimeout(() => {
+      msg.style.opacity = '0';
+      msg.style.transition = 'opacity 0.3s';
+      setTimeout(() => msg.remove(), 300);
+    }, 2500);
+  }
+  
+  saveConfiguration() {
+    // Zapisz całą konfigurację do localStorage
+    const config = window.currentConfig || this.state?.get() || {};
+    localStorage.setItem('byow_saved_config', JSON.stringify(config));
+    console.log('💾 Configuration saved to localStorage:', config);
+  }
+  
+  loadSavedConfiguration() {
+    // Wczytaj zapisaną konfigurację
+    const savedConfig = localStorage.getItem('byow_saved_config');
+    if (savedConfig) {
+      try {
+        const config = JSON.parse(savedConfig);
+        if (window.currentConfig) {
+          Object.assign(window.currentConfig, config);
+        }
+        console.log('📂 Configuration loaded from localStorage:', config);
+        
+        // Odtwórz wartości w formularzu
+        this.restoreFormValues(config);
+      } catch (e) {
+        console.error('Error loading saved config:', e);
+      }
+    }
+  }
+  
+  restoreFormValues(config) {
+    // Wymiary
+    if (config.width) {
+      const widthSelect = document.getElementById('width-select');
+      if (widthSelect) widthSelect.value = config.width;
+    }
+    if (config.height) {
+      const heightSelect = document.getElementById('height-select');
+      if (heightSelect) heightSelect.value = config.height;
+    }
+    
+    // Measurement type
+    if (config.measurementType) {
+      const radio = document.getElementById(config.measurementType);
+      if (radio) radio.checked = true;
+    }
+    
+    // Bars
+    if (config.upperBars) {
+      const upperBars = document.getElementById('upper-bars');
+      if (upperBars) upperBars.value = config.upperBars;
+    }
+    if (config.lowerBars) {
+      const lowerBars = document.getElementById('lower-bars');
+      if (lowerBars) lowerBars.value = config.lowerBars;
+    }
+    
+    // Frame type
+    if (config.frameType) {
+      const radio = document.querySelector(`input[name="frame-type"][value="${config.frameType}"]`);
+      if (radio) radio.checked = true;
+    }
+    
+    // Glass type
+    if (config.glassType) {
+      const radio = document.querySelector(`input[name="glass-type"][value="${config.glassType}"]`);
+      if (radio) radio.checked = true;
+    }
+    
+    // Color type
+    if (config.colorType) {
+      const radio = document.querySelector(`input[name="color-type"][value="${config.colorType}"]`);
+      if (radio) radio.checked = true;
+    }
+    
+    // Opening type
+    if (config.openingType) {
+      const radio = document.querySelector(`input[name="opening-type"][value="${config.openingType}"]`);
+      if (radio) radio.checked = true;
+    }
+    
+    // PAS24
+    if (config.pas24) {
+      const radio = document.querySelector(`input[name="pas24"][value="${config.pas24}"]`);
+      if (radio) radio.checked = true;
+    }
+    
+    // Glass spec
+    if (config.glassSpec) {
+      const radio = document.querySelector(`input[name="glass-spec"][value="${config.glassSpec}"]`);
+      if (radio) radio.checked = true;
+    }
+    
+    // Glass finish
+    if (config.glassFinish) {
+      const radio = document.querySelector(`input[name="glass-finish"][value="${config.glassFinish}"]`);
+      if (radio) radio.checked = true;
+    }
+    
+    // Quantity
+    if (config.quantity) {
+      const qtyInput = document.getElementById('quantity');
+      if (qtyInput) qtyInput.value = config.quantity;
+    }
+    
+    // Ironmongery - przywróć z config
+    if (config.ironmongery) {
+      window.currentConfig.ironmongery = config.ironmongery;
+    }
+    
+    console.log('📋 Form values restored');
+  }
+  
   updateApplyButtonsState() {
     this.applyButtonsOrder.forEach(({ id, order }) => {
       const btn = document.getElementById(id);
@@ -190,7 +346,6 @@ class ConfiguratorCore {
       
       // Pierwszy button zawsze odblokowany
       if (order === 1) {
-        btn.disabled = false;
         btn.classList.remove('btn-locked');
         return;
       }
@@ -198,10 +353,8 @@ class ConfiguratorCore {
       // Sprawdź czy poprzedni jest zatwierdzony
       const prevButton = this.applyButtonsOrder.find(b => b.order === order - 1);
       if (prevButton && this.appliedSections[prevButton.id]) {
-        btn.disabled = false;
         btn.classList.remove('btn-locked');
       } else {
-        btn.disabled = true;
         btn.classList.add('btn-locked');
       }
     });
@@ -211,6 +364,7 @@ class ConfiguratorCore {
   resetApplySequence() {
     this.appliedSections = {};
     localStorage.removeItem('byow_applied_sections');
+    localStorage.removeItem('byow_saved_config');
     this.updateApplyButtonsState();
   }
 
