@@ -216,6 +216,29 @@
         
       </div>
       
+      <!-- Booked Appointments List -->
+      <div style="margin-top: 25px; border-top: 2px solid #ddd; padding-top: 20px;">
+        <h4 style="margin-bottom: 15px; color: var(--admin-primary);">📅 Upcoming Booked Appointments</h4>
+        <div class="products-table-container">
+          <table class="products-table" id="booked-appointments-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Customer</th>
+                <th>Address</th>
+                <th>Assigned To</th>
+                <th>Notes</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="booked-appointments-tbody">
+              <!-- Loaded by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
     </div>
   </section>
 
@@ -526,6 +549,58 @@ const AdminCalendar = {
     await this.loadData();
     this.render();
     this.loadPendingRequests();
+    this.loadBookedAppointments();
+  },
+  
+  async loadBookedAppointments() {
+    const tbody = document.getElementById('booked-appointments-tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '<tr><td colspan="7">Loading...</td></tr>';
+    
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      const { data: booked, error } = await window.supabaseClient
+        .from('appointment_slots')
+        .select('*')
+        .not('customer_name', 'is', null)
+        .gte('slot_date', today)
+        .order('slot_date', { ascending: true })
+        .order('slot_time', { ascending: true });
+      
+      if (error) throw error;
+      
+      if (!booked || booked.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #666;">No upcoming booked appointments</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = booked.map(slot => {
+        const date = new Date(slot.slot_date);
+        const dateStr = date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+        
+        return `
+          <tr>
+            <td><strong>${dateStr}</strong></td>
+            <td>${slot.slot_time}</td>
+            <td>👤 ${slot.customer_name}</td>
+            <td>${slot.customer_address || '-'}</td>
+            <td>${slot.assigned_to || '<span style="color: #999;">Not assigned</span>'}</td>
+            <td>${slot.notes || '-'}</td>
+            <td>
+              <button class="btn-small" onclick="AdminCalendar.addPerson('${slot.id}')">👤+</button>
+              <button class="btn-small" onclick="AdminCalendar.addNotes('${slot.id}')">📝+</button>
+              <button class="btn-small btn-danger-small" onclick="AdminCalendar.cancelBooking('${slot.id}')">✕ Cancel</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+      
+    } catch (error) {
+      console.error('Error loading booked appointments:', error);
+      tbody.innerHTML = '<tr><td colspan="7" style="color: red;">Error loading appointments</td></tr>';
+    }
   },
   
   async loadData() {
@@ -895,6 +970,7 @@ const AdminCalendar = {
       
       await this.loadData();
       this.render();
+      this.loadBookedAppointments();
       if (this.selectedDate) this.showDayDetail(this.selectedDate);
       
     } catch (error) {
@@ -920,6 +996,35 @@ const AdminCalendar = {
       
       await this.loadData();
       this.render();
+      this.loadBookedAppointments();
+      if (this.selectedDate) this.showDayDetail(this.selectedDate);
+      
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error: ' + error.message);
+    }
+  },
+  
+  async cancelBooking(slotId) {
+    if (!confirm('Cancel this booking? The slot will become available again.')) return;
+    
+    try {
+      const { error } = await window.supabaseClient
+        .from('appointment_slots')
+        .update({ 
+          is_available: true,
+          customer_name: null,
+          customer_address: null,
+          assigned_to: null,
+          notes: null
+        })
+        .eq('id', slotId);
+      
+      if (error) throw error;
+      
+      await this.loadData();
+      this.render();
+      this.loadBookedAppointments();
       if (this.selectedDate) this.showDayDetail(this.selectedDate);
       
     } catch (error) {
@@ -1010,6 +1115,7 @@ const AdminCalendar = {
       await this.loadData();
       this.render();
       this.loadPendingRequests();
+      this.loadBookedAppointments();
       if (this.selectedDate) this.showDayDetail(this.selectedDate);
       
     } catch (error) {
