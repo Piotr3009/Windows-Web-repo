@@ -711,9 +711,18 @@ const AdminCalendar = {
           <div class="admin-slot-customer">
             👤 ${slot.customer_name}<br>
             ${slot.customer_address ? '📍 ' + slot.customer_address + '<br>' : ''}
-            ${slot.assigned_to ? '🚗 ' + slot.assigned_to : ''}
+            ${slot.assigned_to ? '🚗 ' + slot.assigned_to + '<br>' : ''}
+            ${slot.notes ? '📝 ' + slot.notes : ''}
           </div>
         `;
+      } else {
+        // Show assigned_to and notes even for non-booked slots
+        let extraInfo = [];
+        if (slot.assigned_to) extraInfo.push('🚗 ' + slot.assigned_to);
+        if (slot.notes) extraInfo.push('📝 ' + slot.notes);
+        if (extraInfo.length > 0) {
+          customerInfo = `<div class="admin-slot-customer">${extraInfo.join('<br>')}</div>`;
+        }
       }
       
       return `
@@ -723,14 +732,12 @@ const AdminCalendar = {
             ${customerInfo}
           </div>
           <div class="admin-slot-actions">
-            ${slot.customer_name ? `
-              <button class="btn-small" onclick="AdminCalendar.editSlot('${slot.id}')">✏️</button>
-            ` : `
-              <button class="btn-small" onclick="AdminCalendar.toggleAvailability('${slot.id}', ${slot.is_available})">
-                ${slot.is_available ? '🔒' : '🔓'}
-              </button>
-            `}
-            <button class="btn-small btn-danger-small" onclick="AdminCalendar.deleteSlot('${slot.id}')">🗑️</button>
+            <button class="btn-small" onclick="AdminCalendar.addPerson('${slot.id}')" title="Add Person">👤+</button>
+            <button class="btn-small" onclick="AdminCalendar.addNotes('${slot.id}')" title="Add Notes">📝+</button>
+            <button class="btn-small" onclick="AdminCalendar.toggleAvailability('${slot.id}', ${slot.is_available})" title="${slot.is_available ? 'Block' : 'Unblock'}">
+              ${slot.is_available ? '🔒' : '🔓'}
+            </button>
+            <button class="btn-small btn-danger-small" onclick="AdminCalendar.deleteSlot('${slot.id}')" title="Delete">🗑️</button>
           </div>
         </div>
       `;
@@ -871,27 +878,48 @@ const AdminCalendar = {
     }
   },
   
-  async editSlot(slotId) {
+  async addPerson(slotId) {
     const slot = Object.values(this.slots).flat().find(s => s.id === slotId);
     if (!slot) return;
     
     const assignedTo = prompt('Who will do the measurement?', slot.assigned_to || '');
     if (assignedTo === null) return;
     
-    const notes = prompt('Notes:', slot.notes || '');
-    
     try {
       const { error } = await window.supabaseClient
         .from('appointment_slots')
-        .update({ 
-          assigned_to: assignedTo,
-          notes: notes 
-        })
+        .update({ assigned_to: assignedTo || null })
         .eq('id', slotId);
       
       if (error) throw error;
       
       await this.loadData();
+      this.render();
+      if (this.selectedDate) this.showDayDetail(this.selectedDate);
+      
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error: ' + error.message);
+    }
+  },
+  
+  async addNotes(slotId) {
+    const slot = Object.values(this.slots).flat().find(s => s.id === slotId);
+    if (!slot) return;
+    
+    const notes = prompt('Notes:', slot.notes || '');
+    if (notes === null) return;
+    
+    try {
+      const { error } = await window.supabaseClient
+        .from('appointment_slots')
+        .update({ notes: notes || null })
+        .eq('id', slotId);
+      
+      if (error) throw error;
+      
+      await this.loadData();
+      this.render();
       if (this.selectedDate) this.showDayDetail(this.selectedDate);
       
     } catch (error) {
