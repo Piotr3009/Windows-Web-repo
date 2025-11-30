@@ -2,7 +2,7 @@
 
 ## 📋 Opis Projektu
 
-Konfigurator okien drewnianych Skylon Timber & Glazing House z nowym układem 3-kolumnowym, zaprojektowanym dla lepszego wykorzystania przestrzeni ekranu i poprawy user experience.
+Konfigurator okien drewnianych Skylon Timber & Glazing z nowym układem 3-kolumnowym, zaprojektowanym dla lepszego wykorzystania przestrzeni ekranu i poprawy user experience.
 
 ## 🎯 Cel Zmian
 
@@ -244,4 +244,4 @@ W razie problemów lub pytań:
 **Wersja:** 1.0.0  
 **Data:** 2025-01-XX  
 **Author:** Claude & Piotr  
-**License:** Proprietary - Skylon Timber & Glazing House
+**License:** Proprietary - Skylon Timber & Glazing
