@@ -7,7 +7,7 @@ const AdminController = {
     console.log('Admin Controller initialized');
     await this.loadAllData();
     this.setupEventListeners();
-    this.renderIronmongeryTable();
+    await this.renderIronmongeryTable();
     this.renderHornsGrid();
   },
 
@@ -197,9 +197,9 @@ const AdminController = {
     delete form.dataset.editId;
   },
 
-  addProduct: function() {
+  addProduct: async function() {
     const form = document.getElementById('add-product-form');
-    const editId = form.dataset.editId; // Sprawdź czy to edycja
+    const editId = form.dataset.editId;
     
     const category = document.getElementById('product-category').value;
     const name = document.getElementById('product-name').value;
@@ -208,7 +208,6 @@ const AdminController = {
     const description = document.getElementById('product-description').value;
     const isPAS24 = document.getElementById('product-pas24').checked;
     const recommended = document.getElementById('product-recommended').checked;
-    const mandatory = document.getElementById('product-mandatory').checked;
     const imageFile = document.getElementById('product-image').files[0];
 
     // Validation
@@ -227,118 +226,134 @@ const AdminController = {
       }
     }
     
-    // Jeśli edycja i nie ma nowego zdjęcia, zachowaj stare
-    if (editId && !imageFile) {
-      const products = JSON.parse(localStorage.getItem(this.STORAGE_KEYS.IRONMONGERY_PRODUCTS) || '[]');
-      const oldProduct = products.find(p => p.id === editId);
-      
-      this.saveProduct({
-        id: editId, // Użyj starego ID
-        category,
-        name,
-        color,
-        prices: { net: priceNet, vat: 0 },
-        description,
-        isPAS24,
-        recommended,
-        mandatory,
-        type: stopperType,
-        image: oldProduct?.image || 'img/placeholder.png'
-      }, editId);
-      return;
-    }
+    // Prepare product data
+    const productData = {
+      category,
+      name,
+      color,
+      price_net: priceNet,
+      price_vat: priceNet * 1.2,
+      description,
+      is_pas24: isPAS24,
+      recommended,
+      type: stopperType
+    };
 
-    // Read image
+    // Handle image upload
     if (imageFile) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.saveProduct({
-          id: editId || Date.now().toString(),
-          category,
-          name,
-          color,
-          prices: { net: priceNet, vat: 0 },
-          description,
-          isPAS24,
-          recommended,
-          mandatory,
-          type: stopperType,
-          image: e.target.result // Base64
-        }, editId);
-      };
-      reader.readAsDataURL(imageFile);
-    } else {
-      this.saveProduct({
-        id: editId || Date.now().toString(),
-        category,
-        name,
-        color,
-        prices: { net: priceNet, vat: 0 },
-        description,
-        isPAS24,
-        recommended,
-        mandatory,
-        type: stopperType,
-        image: 'img/placeholder.png'
-      }, editId);
+      try {
+        const fileName = `ironmongery_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${imageFile.name.split('.').pop()}`;
+        
+        const { error: uploadError } = await window.supabaseClient.storage
+          .from('ironmongery-images')
+          .upload(fileName, imageFile);
+        
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          // Fallback - use placeholder
+          productData.image_url = 'img/placeholder.png';
+        } else {
+          const { data: { publicUrl } } = window.supabaseClient.storage
+            .from('ironmongery-images')
+            .getPublicUrl(fileName);
+          productData.image_url = publicUrl;
+        }
+      } catch (err) {
+        console.error('Image upload failed:', err);
+        productData.image_url = 'img/placeholder.png';
+      }
+    } else if (!editId) {
+      productData.image_url = 'img/placeholder.png';
+    }
+
+    // Save to DB
+    await this.saveProduct(productData, editId);
+  },
+
+  saveProduct: async function(productData, editId) {
+    try {
+      if (editId) {
+        // Update existing
+        const { error } = await window.supabaseClient
+          .from('ironmongery_products')
+          .update(productData)
+          .eq('id', editId);
+        
+        if (error) throw error;
+        alert('Product updated successfully!');
+      } else {
+        // Insert new
+        const { error } = await window.supabaseClient
+          .from('ironmongery_products')
+          .insert([productData]);
+        
+        if (error) throw error;
+        alert('Product added successfully!');
+      }
+      
+      this.closeAddProductModal();
+      await this.renderIronmongeryTable();
+      
+    } catch (err) {
+      console.error('Error saving product:', err);
+      alert('Error saving product: ' + err.message);
     }
   },
 
-  saveProduct: function(product, editId) {
-    // Get existing products
-    let products = JSON.parse(localStorage.getItem(this.STORAGE_KEYS.IRONMONGERY_PRODUCTS) || '[]');
-    
-    if (editId) {
-      // Edycja - usuń stary i dodaj nowy
-      products = products.filter(p => p.id !== editId);
-      products.push(product);
-      alert('Product updated successfully!');
-    } else {
-      // Dodawanie nowego
-      products.push(product);
-      alert('Product added successfully!');
-    }
-    
-    // Save
-    localStorage.setItem(this.STORAGE_KEYS.IRONMONGERY_PRODUCTS, JSON.stringify(products));
-    
-    this.closeAddProductModal();
-    this.renderIronmongeryTable();
-  },
-
-  deleteProduct: function(productId) {
+  deleteProduct: async function(productId) {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
-    let products = JSON.parse(localStorage.getItem(this.STORAGE_KEYS.IRONMONGERY_PRODUCTS) || '[]');
-    products = products.filter(p => p.id !== productId);
-    localStorage.setItem(this.STORAGE_KEYS.IRONMONGERY_PRODUCTS, JSON.stringify(products));
-    
-    alert('Product deleted successfully!');
-    this.renderIronmongeryTable();
+    try {
+      const { error } = await window.supabaseClient
+        .from('ironmongery_products')
+        .delete()
+        .eq('id', productId);
+      
+      if (error) throw error;
+      
+      alert('Product deleted successfully!');
+      await this.renderIronmongeryTable();
+      
+    } catch (err) {
+      console.error('Error deleting product:', err);
+      alert('Error deleting product: ' + err.message);
+    }
   },
 
-  renderIronmongeryTable: function() {
+  renderIronmongeryTable: async function() {
     const tbody = document.getElementById('ironmongery-tbody');
-    const products = JSON.parse(localStorage.getItem(this.STORAGE_KEYS.IRONMONGERY_PRODUCTS) || '[]');
+    
+    try {
+      const { data: products, error } = await window.supabaseClient
+        .from('ironmongery_products')
+        .select('*')
+        .order('category', { ascending: true });
+      
+      if (error) throw error;
 
-    if (products.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No products added yet</td></tr>';
-      return;
+      if (!products || products.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No products added yet</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = products.map(product => `
+        <tr>
+          <td><img src="${product.image_url || 'img/placeholder.png'}" alt="${product.name}" style="max-width: 60px; max-height: 60px;"></td>
+          <td>${this.getCategoryName(product.category)}</td>
+          <td>${product.name}</td>
+          <td>${this.getColorName(product.color)}</td>
+          <td>£${parseFloat(product.price_net).toFixed(2)}</td>
+          <td>
+            <button class="btn-edit" onclick="AdminController.editProduct('${product.id}')">Edit</button>
+            <button class="btn-delete" onclick="AdminController.deleteProduct('${product.id}')">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+      
+    } catch (err) {
+      console.error('Error loading products:', err);
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Error loading products</td></tr>';
     }
-
-    tbody.innerHTML = products.map(product => `
-      <tr>
-        <td><img src="${product.image}" alt="${product.name}"></td>
-        <td>${this.getCategoryName(product.category)}</td>
-        <td>${product.name}</td>
-        <td>${this.getColorName(product.color)}</td>
-        <td>£${product.prices.net.toFixed(2)}</td>
-        <td>
-          <button class="btn-edit" onclick="AdminController.editProduct('${product.id}')">Edit</button>
-          <button class="btn-delete" onclick="AdminController.deleteProduct('${product.id}')">Delete</button>
-        </td>
-      </tr>
-    `).join('');
   },
 
   getCategoryName: function(key) {
@@ -363,43 +378,53 @@ const AdminController = {
     return names[key] || key;
   },
 
-  editProduct: function(productId) {
-    const products = JSON.parse(localStorage.getItem(this.STORAGE_KEYS.IRONMONGERY_PRODUCTS) || '[]');
-    const product = products.find(p => p.id === productId);
-    
-    if (!product) {
-      alert('Product not found');
-      return;
+  editProduct: async function(productId) {
+    try {
+      const { data: product, error } = await window.supabaseClient
+        .from('ironmongery_products')
+        .select('*')
+        .eq('id', productId)
+        .single();
+      
+      if (error) throw error;
+      
+      if (!product) {
+        alert('Product not found');
+        return;
+      }
+      
+      // Wypełnij formularz danymi produktu
+      document.getElementById('product-category').value = product.category;
+      document.getElementById('product-name').value = product.name;
+      document.getElementById('product-color').value = product.color;
+      document.getElementById('product-price-net').value = product.price_net;
+      document.getElementById('product-description').value = product.description || '';
+      document.getElementById('product-pas24').checked = product.is_pas24 || false;
+      document.getElementById('product-recommended').checked = product.recommended || false;
+      
+      // Pokaż stopper type jeśli stopper
+      if (product.category === 'stoppers') {
+        document.getElementById('stopper-type-group').style.display = 'block';
+        document.getElementById('product-stopper-type').value = product.type;
+      }
+      
+      // Otwórz modal
+      this.openAddProductModal();
+      
+      // Zmień tytuł i przycisk
+      const titleEl = document.querySelector('#add-product-modal h2');
+      if (titleEl) titleEl.textContent = 'Edit Product';
+      
+      const submitBtn = document.querySelector('#add-product-form button[type="submit"]');
+      if (submitBtn) submitBtn.textContent = 'Update Product';
+      
+      // Zapisz ID edytowanego produktu
+      document.getElementById('add-product-form').dataset.editId = productId;
+      
+    } catch (err) {
+      console.error('Error loading product:', err);
+      alert('Error loading product: ' + err.message);
     }
-    
-    // Wypełnij formularz danymi produktu
-    document.getElementById('product-category').value = product.category;
-    document.getElementById('product-name').value = product.name;
-    document.getElementById('product-color').value = product.color;
-    document.getElementById('product-price-net').value = product.prices.net;
-    document.getElementById('product-description').value = product.description || '';
-    document.getElementById('product-pas24').checked = product.isPAS24 || false;
-    document.getElementById('product-recommended').checked = product.recommended || false;
-    document.getElementById('product-mandatory').checked = product.mandatory || false;
-    
-    // Pokaż stopper type jeśli stopper
-    if (product.category === 'stoppers') {
-      document.getElementById('stopper-type-group').style.display = 'block';
-      document.getElementById('product-stopper-type').value = product.type;
-    }
-    
-    // Otwórz modal
-    this.openAddProductModal();
-    
-    // Zmień tytuł i przycisk
-    const titleEl = document.querySelector('#add-product-modal h2');
-    if (titleEl) titleEl.textContent = 'Edit Product';
-    
-    const submitBtn = document.querySelector('#add-product-form button[type="submit"]');
-    if (submitBtn) submitBtn.textContent = 'Update Product';
-    
-    // Zapisz ID edytowanego produktu
-    document.getElementById('add-product-form').dataset.editId = productId;
   },
 
   // SECTION 8: HORNS
