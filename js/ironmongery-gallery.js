@@ -330,6 +330,16 @@ class IronmongeryGallery {
 
     // Add click handlers
     this.productsGrid.querySelectorAll('.product-card').forEach(card => {
+      // Add button
+      const addBtn = card.querySelector('.add-btn[data-action="add"]');
+      if (addBtn) {
+        addBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const productId = card.dataset.productId;
+          this.toggleProduct(productId, 'select');
+        });
+      }
+      
       // Quantity buttons
       const minusBtn = card.querySelector('.qty-btn[data-action="minus"]');
       const plusBtn = card.querySelector('.qty-btn[data-action="plus"]');
@@ -358,8 +368,8 @@ class IronmongeryGallery {
           return;
         }
         
-        // Jeśli kliknięto quantity button - nie toggleuj
-        if (e.target.classList.contains('qty-btn')) {
+        // Jeśli kliknięto quantity button lub add button - nie toggleuj
+        if (e.target.classList.contains('qty-btn') || e.target.classList.contains('add-btn')) {
           return;
         }
         
@@ -429,11 +439,31 @@ class IronmongeryGallery {
         <div class="product-card-price">£${price.toFixed(2)}</div>
         ${isSelected ? `
           <div class="quantity-controls" style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px;">
-            <button class="qty-btn" data-action="minus" style="width: 25px; height: 25px; border: 1px solid var(--primary-color); background: white; color: var(--primary-color); border-radius: 4px; cursor: pointer; font-weight: bold;">−</button>
+            <button class="qty-btn" data-action="minus" style="width: 28px; height: 28px; border: 1px solid var(--primary-color); background: white; color: var(--primary-color); border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px;">−</button>
             <span class="qty-display" style="min-width: 30px; text-align: center; font-weight: 600; color: var(--primary-color);">${quantity}</span>
-            <button class="qty-btn" data-action="plus" style="width: 25px; height: 25px; border: 1px solid var(--primary-color); background: var(--primary-color); color: white; border-radius: 4px; cursor: pointer; font-weight: bold;">+</button>
+            <button class="qty-btn" data-action="plus" style="width: 28px; height: 28px; border: 1px solid var(--primary-color); background: var(--primary-color); color: white; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px;">+</button>
           </div>
-        ` : ''}
+        ` : `
+          <button class="add-btn" data-action="add" style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            width: 100%;
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: background 0.2s;
+          ">
+            <span style="font-size: 14px;">+</span> Add
+          </button>
+        `}
       </div>
     `;
   }
