@@ -181,9 +181,6 @@ class ConfiguratorCore {
     // Pobierz zapisany stan z localStorage
     this.appliedSections = JSON.parse(localStorage.getItem('byow_applied_sections') || '{}');
     
-    // Załaduj zapisaną konfigurację
-    this.loadSavedConfiguration();
-    
     applyButtons.forEach(({ id, handler, order }) => {
       const btn = document.getElementById(id);
       if (!btn) return;
@@ -633,6 +630,17 @@ class ConfiguratorCore {
     // Merge state with currentConfig (currentConfig has color data)
     const stateConfig = this.state.get();
     const config = { ...stateConfig, ...window.currentConfig };
+    
+    // Mapowanie nazw kolorów dla wizualizacji
+    if (config.colorSingle && !config.singleColor) {
+      config.singleColor = config.colorSingle;
+    }
+    if (config.colorInterior && !config.interiorColor) {
+      config.interiorColor = config.colorInterior;
+    }
+    if (config.colorExterior && !config.exteriorColor) {
+      config.exteriorColor = config.colorExterior;
+    }
     
     // Calculate price
     const priceData = this.modules.price.calculate(config);
