@@ -562,7 +562,7 @@ class ConfiguratorCore {
       const btn = document.getElementById(id);
       if (!btn) return;
       
-      // Przywróć wygląd "Applied" jeśli sekcja była zatwierdzona
+      // Przywróć stan 'applied' jeśli sekcja była zatwierdzona
       if (this.appliedSections[id]) {
         btn.textContent = '✓ Applied';
         btn.classList.add('applied');

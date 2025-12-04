@@ -702,9 +702,6 @@ class SpecificationController {
       localStorage.setItem('lastWindowConfig', JSON.stringify(window.currentConfig));
       console.log('💾 Auto-saved after', buttonId);
     }
-
-    // NIE USUWAMY klasy applied - zostaje aż użytkownik coś zmieni
-    // setTimeout został usunięty
   }
 }
 
