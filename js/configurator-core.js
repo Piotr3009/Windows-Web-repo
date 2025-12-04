@@ -279,6 +279,9 @@ class ConfiguratorCore {
         // Odtwórz wartości w formularzu
         this.restoreFormValues(config);
         
+        // Odtwórz panel specyfikacji
+        this.restoreSpecification(config);
+        
         // Przywróć stan applied sections jeśli były
         const appliedSections = localStorage.getItem('byow_applied_sections');
         if (appliedSections) {
@@ -414,6 +417,147 @@ class ConfiguratorCore {
     }
     
     console.log('📋 Form values restored');
+  }
+  
+  restoreSpecification(config) {
+    // Odtwórz panel specyfikacji z zapisanych danych
+    
+    // Dimensions
+    if (config.width && config.height) {
+      const specDim = document.getElementById('spec-dimensions');
+      if (specDim) {
+        specDim.style.display = 'block';
+        const specWidth = document.getElementById('spec-width');
+        const specHeight = document.getElementById('spec-height');
+        const specMeasurement = document.getElementById('spec-measurement');
+        if (specWidth) specWidth.textContent = `${config.width}mm`;
+        if (specHeight) specHeight.textContent = `${config.height}mm`;
+        if (specMeasurement) {
+          specMeasurement.textContent = config.measurementType === 'brick-to-brick' ? 'Structural Opening' : 'Frame Dimensions';
+        }
+      }
+    }
+    
+    // Bars
+    if (config.upperBars || config.lowerBars) {
+      const specBars = document.getElementById('spec-bars');
+      if (specBars) {
+        specBars.style.display = 'block';
+        const barNames = { 'none': 'No Bars', '2h': '2 Horizontal', '3h': '3 Horizontal', 'ь2v': '2 Vertical', '3v': '3 Vertical', 'georgian': 'Georgian' };
+        const specUpper = document.getElementById('spec-upper-bars');
+        const specLower = document.getElementById('spec-lower-bars');
+        if (specUpper) specUpper.textContent = barNames[config.upperBars] || config.upperBars || 'No Bars';
+        if (specLower) specLower.textContent = barNames[config.lowerBars] || config.lowerBars || 'No Bars';
+      }
+    }
+    
+    // Frame
+    if (config.frameType) {
+      const specFrame = document.getElementById('spec-frame');
+      if (specFrame) {
+        specFrame.style.display = 'block';
+        const specFrameType = document.getElementById('spec-frame-type');
+        if (specFrameType) {
+          specFrameType.textContent = config.frameType === 'standard' ? 'Standard Frame (165mm)' : 'Slim Frame (145mm)';
+        }
+      }
+    }
+    
+    // Color
+    if (config.colorType) {
+      const specColor = document.getElementById('spec-color');
+      if (specColor) {
+        specColor.style.display = 'block';
+        
+        if (config.colorType === 'single') {
+          const specSingle = document.getElementById('spec-single-color');
+          const specDual = document.getElementById('spec-dual-color');
+          if (specSingle) specSingle.style.display = 'block';
+          if (specDual) specDual.style.display = 'none';
+          
+          const specColorName = document.getElementById('spec-color-name');
+          if (specColorName && config.colorSingleName) {
+            specColorName.textContent = config.colorSingleName;
+          }
+        } else if (config.colorType === 'dual') {
+          const specSingle = document.getElementById('spec-single-color');
+          const specDual = document.getElementById('spec-dual-color');
+          if (specSingle) specSingle.style.display = 'none';
+          if (specDual) specDual.style.display = 'block';
+          
+          const specInterior = document.getElementById('spec-interior-color');
+          const specExterior = document.getElementById('spec-exterior-color');
+          if (specInterior && config.colorInteriorName) {
+            specInterior.textContent = config.colorInteriorName;
+          }
+          if (specExterior && config.colorExteriorName) {
+            specExterior.textContent = config.colorExteriorName;
+          }
+        }
+      }
+    }
+    
+    // Glass
+    if (config.glassType) {
+      const specGlass = document.getElementById('spec-glass');
+      if (specGlass) {
+        specGlass.style.display = 'block';
+        const glassNames = { 'double': 'Double Glazed', 'triple': 'Triple Glazed' };
+        const specGlassType = document.getElementById('spec-glass-type');
+        if (specGlassType) specGlassType.textContent = glassNames[config.glassType] || config.glassType;
+      }
+    }
+    
+    // Opening
+    if (config.openingType) {
+      const specOpening = document.getElementById('spec-opening');
+      if (specOpening) {
+        specOpening.style.display = 'block';
+        const openingNames = { 'tilt-only': 'Tilt Only', 'sliding': 'Sliding Sash', 'fixed': 'Fixed' };
+        const specOpeningType = document.getElementById('spec-opening-type');
+        if (specOpeningType) specOpeningType.textContent = openingNames[config.openingType] || config.openingType;
+      }
+    }
+    
+    // PAS24
+    if (config.pas24) {
+      const specPas24 = document.getElementById('spec-pas24');
+      if (specPas24) {
+        specPas24.style.display = 'block';
+        const specPas24Value = document.getElementById('spec-pas24-value');
+        if (specPas24Value) {
+          specPas24Value.textContent = config.pas24 === 'yes' ? 'Yes - PAS 24 Compliant' : 'No - Standard Security';
+        }
+      }
+    }
+    
+    // Details / Ironmongery
+    if (config.ironmongery && Object.keys(config.ironmongery).length > 0) {
+      const specDetails = document.getElementById('spec-details');
+      if (specDetails) {
+        specDetails.style.display = 'block';
+        const specIronmongeryItem = document.getElementById('spec-ironmongery-item');
+        const specIronmongery = document.getElementById('spec-ironmongery');
+        if (specIronmongeryItem) specIronmongeryItem.style.display = 'flex';
+        if (specIronmongery) {
+          const productNames = Object.values(config.ironmongery)
+            .filter(item => item && item.name)
+            .map(item => item.name)
+            .join(', ');
+          specIronmongery.textContent = productNames || 'Selected';
+        }
+      }
+    }
+    
+    // Glass Spec
+    if (config.glassSpec) {
+      const specGlassSpec = document.getElementById('spec-glass-spec');
+      if (specGlassSpec) {
+        specGlassSpec.style.display = 'block';
+      }
+    }
+    
+    console.log('📋 Specification panel restored');
   }
   
   updateApplyButtonsState() {
