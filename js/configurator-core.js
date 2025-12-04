@@ -13,9 +13,9 @@ class ConfiguratorCore {
       this.checkDependencies();
       await this.initializeModules();
       this.attachEventHandlers();
+      this.isInitialized = true;  // Ustawić PRZED loadSavedConfiguration i updateAll
       this.loadSavedConfiguration();
       this.updateAll();
-      this.isInitialized = true;
       
       // Auto-save przy zamykaniu strony
       window.addEventListener('beforeunload', () => {
@@ -264,6 +264,13 @@ class ConfiguratorCore {
     if (savedConfig) {
       try {
         const config = JSON.parse(savedConfig);
+        
+        // Aktualizuj state
+        if (this.state) {
+          this.state.update(config);
+        }
+        
+        // Aktualizuj currentConfig
         if (window.currentConfig) {
           Object.assign(window.currentConfig, config);
         }
@@ -489,7 +496,12 @@ class ConfiguratorCore {
     // AUTO-SAVE - zapisz do localStorage przy każdej zmianie
     if (this.modules.storage) {
       this.modules.storage.saveLastConfig(config);
-      console.log('🔄 Auto-saved configuration');
+    }
+    // Backup: bezpośredni zapis do localStorage
+    try {
+      localStorage.setItem('lastWindowConfig', JSON.stringify(config));
+    } catch (e) {
+      console.warn('Auto-save to localStorage failed:', e);
     }
     
     // Update bars if needed
@@ -502,18 +514,7 @@ class ConfiguratorCore {
     }
   }
 
-  loadSavedConfiguration() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const loadLast = urlParams.get('loadLast');
-    
-    let savedConfig = loadLast === 'true' 
-      ? this.modules.storage.loadLastConfig()
-      : this.modules.storage.loadConfig();
-    
-    if (savedConfig) {
-      this.loadConfiguration(savedConfig);
-    }
-  }
+  // loadSavedConfiguration jest zdefiniowana wcześniej w klasie (linia ~255)
 
   loadConfiguration(config) {
     this.state.update(config);
