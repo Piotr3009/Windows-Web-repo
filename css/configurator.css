@@ -316,7 +316,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Config Sections - COMPRESSED 25% */
 .config-section {
   margin-bottom: 22px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 3px solid var(--secondary-color);
   padding-bottom: 15px;
   box-shadow: 0 2px 4px -2px rgba(0,0,0,0.1);
 }
@@ -509,12 +509,24 @@ h1, h2, h3, h4, h5, h6 {
   margin-top: 12px;
   font-size: 0.9rem;
   padding: 9px 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(212, 175, 55, 0.5), 0 0 10px rgba(212, 175, 55, 0.3);
+  }
 }
 
 .btn-apply:hover {
   background-color: #0a231a;
   transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  animation: none;
 }
 
 .btn-apply.applied {
