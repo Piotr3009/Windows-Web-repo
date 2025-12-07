@@ -8,6 +8,7 @@ class IronmongeryGallery {
     this.overlay = document.getElementById('ironmongeryOverlay');
     this.closeBtn = document.getElementById('galleryClose');
     this.confirmBtn = document.getElementById('confirmSelection');
+    this.clearBtn = document.getElementById('clearSelection');
     this.productsGrid = document.getElementById('productsGrid');
     this.totalElement = document.getElementById('selectionTotal');
     
@@ -35,6 +36,9 @@ class IronmongeryGallery {
 
     // Confirm button
     this.confirmBtn?.addEventListener('click', () => this.confirmSelection());
+
+    // Clear button
+    this.clearBtn?.addEventListener('click', () => this.clearSelection());
 
     // Type selector (NEW)
     document.querySelectorAll('.type-btn').forEach(btn => {
@@ -581,6 +585,26 @@ class IronmongeryGallery {
     });
     
     document.body.appendChild(modal);
+  }
+
+  clearSelection() {
+    // Wyczyść wszystkie wybory
+    this.selectedProducts = {};
+    
+    // Usuń zaznaczenie z kart produktów
+    document.querySelectorAll('.product-card.selected').forEach(card => {
+      card.classList.remove('selected');
+      // Reset quantity controls
+      const controls = card.querySelector('.quantity-controls');
+      if (controls) {
+        controls.innerHTML = `<button class="btn-add">+ Add</button>`;
+      }
+    });
+    
+    // Zaktualizuj total i preview
+    this.updateTotal();
+    
+    console.log('🗑️ Selection cleared');
   }
 
   confirmSelection() {
