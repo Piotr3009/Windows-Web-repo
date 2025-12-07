@@ -648,7 +648,7 @@ class ConfiguratorCore {
     // Update visualization
     if (this.modules.visual) {
       this.modules.visual.update(config);
-      this.modules.visual.updatePrice(priceData.unitPrice, priceData.totalPrice);
+      this.modules.visual.updatePrice(priceData.unitPrice, priceData.totalPrice, priceData.noDimensions);
     }
     
     // AUTO-SAVE - zapisz do localStorage przy każdej zmianie

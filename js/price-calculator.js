@@ -13,7 +13,21 @@ class PriceCalculator {
   calculate(configuration) {
     if (!configuration) {
       console.error('PriceCalculator: No configuration provided');
-      return { unitPrice: 0, totalPrice: 0, breakdown: {} };
+      return { unitPrice: 0, totalPrice: 0, breakdown: {}, noDimensions: true };
+    }
+
+    // Check if dimensions are entered (0 means not entered)
+    const width = configuration.width;
+    const height = configuration.height;
+    
+    if (!width || width === 0 || !height || height === 0) {
+      return { 
+        unitPrice: 0, 
+        totalPrice: 0, 
+        breakdown: {}, 
+        noDimensions: true,
+        message: 'Enter dimensions'
+      };
     }
 
     // Use actual frame dimensions if available, otherwise calculate them
@@ -28,11 +42,11 @@ class PriceCalculator {
       const measurementType = configuration.measurementType || 'brick-to-brick';
       
       if (measurementType === 'brick-to-brick') {
-        frameWidth = (configuration.width || 1000) + 150;
-        frameHeight = (configuration.height || 1500) + 75;
+        frameWidth = width + 150;
+        frameHeight = height + 75;
       } else {
-        frameWidth = configuration.width || 1000;
-        frameHeight = configuration.height || 1500;
+        frameWidth = width;
+        frameHeight = height;
       }
     }
 

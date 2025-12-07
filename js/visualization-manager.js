@@ -160,11 +160,18 @@ class VisualizationManager {
     UIHelpers.setText(this.elements.heightDisplay, height || 1500);
   }
 
-  updatePrice(unitPrice, totalPrice) {
-    UIHelpers.setText(
-      this.elements.totalPriceDisplay,
-      UIHelpers.formatPrice(totalPrice)
-    );
+  updatePrice(unitPrice, totalPrice, noDimensions = false) {
+    if (noDimensions) {
+      UIHelpers.setText(
+        this.elements.totalPriceDisplay,
+        'Enter dimensions'
+      );
+    } else {
+      UIHelpers.setText(
+        this.elements.totalPriceDisplay,
+        UIHelpers.formatPrice(totalPrice)
+      );
+    }
   }
 
   updateOpeningIndicators(openingType) {
