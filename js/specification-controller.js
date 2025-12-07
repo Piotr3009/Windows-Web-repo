@@ -208,7 +208,7 @@ class SpecificationController {
     const pas24InfoBtn = document.getElementById('pas24-info');
     if (pas24InfoBtn) {
       pas24InfoBtn.addEventListener('click', () => {
-        alert('PAS 24 information page will be created soon.\n\nPAS 24 is the UK standard for enhanced security doors and windows.');
+        window.open('standards-certifications.html', '_blank');
       });
     }
   }
