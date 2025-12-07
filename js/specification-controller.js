@@ -208,7 +208,7 @@ class SpecificationController {
     const pas24InfoBtn = document.getElementById('pas24-info');
     if (pas24InfoBtn) {
       pas24InfoBtn.addEventListener('click', () => {
-        window.open('standards-certifications.html', '_blank');
+        window.open('certifications.html', '_blank');
       });
     }
   }

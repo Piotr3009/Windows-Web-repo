@@ -548,7 +548,7 @@ h1, h2, h3, h4, h5, h6 {
 .btn-ironmongery-gallery {
   background: transparent !important;
   color: var(--primary-color) !important;
-  border: 3px solid #dc3545 !important;
+  border: 1px solid #dc3545 !important;
   padding: 10px 15px;
   font-size: 0.9rem;
   width: 100%;
@@ -556,28 +556,26 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: 0 0 0 2px white, 0 0 0 4px #dc3545;
 }
 
 .btn-ironmongery-gallery:hover {
-  background: #dc3545 !important;
-  color: white !important;
+  background: var(--secondary-color) !important;
+  color: var(--primary-color) !important;
 }
 
-/* PAS24 Info Button - RED BORDER HIGHLIGHT */
+/* PAS24 Info Button - SUBTLE RED BORDER */
 .btn-pas24-info {
   background: transparent !important;
-  color: #dc3545 !important;
-  border: 3px solid #dc3545 !important;
+  color: var(--primary-color) !important;
+  border: 1px solid #dc3545 !important;
   padding: 8px 15px;
   font-size: 0.85rem;
   margin-top: 10px;
-  box-shadow: 0 0 0 2px white, 0 0 0 4px #dc3545;
 }
 
 .btn-pas24-info:hover {
-  background: #dc3545 !important;
-  color: white !important;
+  background: var(--secondary-color) !important;
+  color: var(--primary-color) !important;
 }
 
 /* Georgian Bars */
