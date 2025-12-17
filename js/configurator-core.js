@@ -311,11 +311,17 @@ class ConfiguratorCore {
     // Bars
     if (config.upperBars) {
       const upperBars = document.getElementById('upper-bars');
-      if (upperBars) upperBars.value = config.upperBars;
+      if (upperBars) {
+        upperBars.value = config.upperBars;
+        upperBars.dispatchEvent(new Event('change', { bubbles: true }));
+      }
     }
     if (config.lowerBars) {
       const lowerBars = document.getElementById('lower-bars');
-      if (lowerBars) lowerBars.value = config.lowerBars;
+      if (lowerBars) {
+        lowerBars.value = config.lowerBars;
+        lowerBars.dispatchEvent(new Event('change', { bubbles: true }));
+      }
     }
     
     // Bar positions

@@ -50,8 +50,33 @@ class BarsController {
     // Dodaj event listenery
     this.attachEventListeners();
 
+    // Synchronizuj state z wartościami selectów (domyślnie 'none')
+    this.syncStateFromSelects();
+
     // Pierwsze renderowanie
     this.updateAllVisualizations();
+  }
+
+  syncStateFromSelects() {
+    // Czytaj aktualne wartości z selectów
+    const upperPattern = this.elements.upperSelect?.value || 'none';
+    const lowerPattern = this.elements.lowerSelect?.value || 'none';
+    
+    // Ustaw state
+    this.state.upper.pattern = upperPattern;
+    this.state.lower.pattern = lowerPattern;
+    
+    // Wygeneruj bary na podstawie pattern
+    this.generatePattern('upper', upperPattern);
+    this.generatePattern('lower', lowerPattern);
+    
+    // Zapisz do currentConfig
+    if (window.currentConfig) {
+      window.currentConfig.upperBars = upperPattern;
+      window.currentConfig.lowerBars = lowerPattern;
+    }
+    
+    console.log('Bars synced from selects:', upperPattern, lowerPattern);
   }
 
   initCanvases() {
@@ -647,9 +672,11 @@ class BarsController {
     if (!window.currentConfig) return '#FFFFFF';
 
     if (window.currentConfig.colorType === 'single') {
-      return window.currentConfig.singleColor === 'white' ? '#FFFFFF' : '#D2B48C';
+      const color = window.currentConfig.singleColor || window.currentConfig.colorSingle || 'white';
+      return color === 'white' ? '#FFFFFF' : '#D2B48C';
     } else {
-      return window.currentConfig.interiorColor === 'white' ? '#FFFFFF' : '#D2B48C';
+      const color = window.currentConfig.interiorColor || window.currentConfig.colorInterior || 'white';
+      return color === 'white' ? '#FFFFFF' : '#D2B48C';
     }
   }
 
@@ -673,13 +700,7 @@ class BarsController {
 // Inicjalizuj kontroler po załadowaniu DOM
 document.addEventListener('DOMContentLoaded', function() {
   window.barsController = new BarsController();
-  
-  // Ustaw początkowe wartości w konfiguracji
-  if (window.currentConfig) {
-    window.currentConfig.upperBars = 'none';
-    window.currentConfig.lowerBars = 'none';
-    console.log('Bars controller initialized with default values');
-  }
+  console.log('Bars controller initialized');
 });
 
 // Eksportuj dla kompatybilności wstecznej
