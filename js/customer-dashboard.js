@@ -411,13 +411,13 @@ class CustomerDashboard {
                         ironmongeryThumbnails = `
                             <div class="ironmongery-thumbnails" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;">
                                 ${Object.values(ironData.products).map(p => {
-                                    const imgSrc = p.product.image_url || p.product.image || 'img/placeholder-ironmongery.jpg';
+                                    const imgSrc = p.product.image_url || p.product.image || 'img/placeholder.png';
                                     const qty = p.quantity;
                                     return `
                                         <div style="position: relative; width: 50px; height: 50px;">
                                             <img src="${imgSrc}" 
                                                  style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;"
-                                                 onerror="this.src='img/placeholder-ironmongery.jpg'"
+                                                 onerror="this.src='img/placeholder.png'"
                                                  title="${p.product.name}">
                                             ${qty > 1 ? `<span style="position: absolute; top: -5px; right: -5px; background: var(--primary-color, #0F3124); color: white; font-size: 10px; padding: 2px 5px; border-radius: 50%; min-width: 16px; text-align: center;">${qty}</span>` : ''}
                                         </div>
