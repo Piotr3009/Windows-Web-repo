@@ -194,7 +194,7 @@ class CustomerDashboard {
                     <div class="empty-icon">📋</div>
                     <h3>No orders found</h3>
                     <p>Start by creating a new estimate for your windows</p>
-                    <a href="build-your-own-windows.html">
+                    <a href="online-estimate.html">
                         <button class="btn">Create Estimate</button>
                     </a>
                 </div>
