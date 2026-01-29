@@ -296,6 +296,7 @@ class AuthSystem {
         const authButtons = document.querySelectorAll('.auth-required');
         const dashboardLink = document.getElementById('dashboard-link');
         const loginMenuLink = document.getElementById('login-menu-link');
+        const loginMenuButton = document.getElementById('login-menu-button');
         
         if (user) {
             // User is logged in - pobierz dane z bazy
@@ -315,9 +316,13 @@ class AuthSystem {
                     btn.style.cursor = 'pointer';
                 });
 
-                // Ukryj Login button w menu (user zalogowany)
+                // Login button w menu - zmień na imię użytkownika
+                if (loginMenuButton) {
+                    loginMenuButton.textContent = `👤 ${displayName}`;
+                    loginMenuButton.classList.remove('login-btn');
+                }
                 if (loginMenuLink) {
-                    loginMenuLink.style.display = 'none';
+                    loginMenuLink.href = 'customer-dashboard.html';
                 }
 
                 // Dashboard link - zalogowany użytkownik
@@ -331,14 +336,20 @@ class AuthSystem {
             } catch (error) {
                 console.error('Error fetching user data:', error);
                 // Fallback - pokaż email
+                const fallbackName = user.email.split('@')[0];
+                
                 authButtons.forEach(btn => {
-                    btn.textContent = `👤 ${user.email.split('@')[0]}`;
+                    btn.textContent = `👤 ${fallbackName}`;
                     btn.onclick = () => window.location.href = 'customer-dashboard.html';
                 });
                 
-                // Ukryj Login button w menu (user zalogowany - fallback)
+                // Login button w menu - fallback
+                if (loginMenuButton) {
+                    loginMenuButton.textContent = `👤 ${fallbackName}`;
+                    loginMenuButton.classList.remove('login-btn');
+                }
                 if (loginMenuLink) {
-                    loginMenuLink.style.display = 'none';
+                    loginMenuLink.href = 'customer-dashboard.html';
                 }
                 
                 // Dashboard link - zalogowany użytkownik (fallback)
@@ -356,9 +367,13 @@ class AuthSystem {
                 btn.onclick = () => this.showModal();
             });
             
-            // Pokaż Login button w menu (user niezalogowany)
+            // Login button w menu - pokaż Login / Register
+            if (loginMenuButton) {
+                loginMenuButton.textContent = 'Login / Register';
+                loginMenuButton.classList.add('login-btn');
+            }
             if (loginMenuLink) {
-                loginMenuLink.style.display = '';
+                loginMenuLink.href = 'login.html';
             }
             
             // Dashboard link - niezalogowany użytkownik
