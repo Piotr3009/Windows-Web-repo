@@ -526,10 +526,103 @@
             selectedSlots: [],
             availableSlots: {},
             maxSlots: 3,
+            SLOT_TIMES: ['09:00 - 11:00', '11:00 - 13:00', '13:00 - 15:00', '15:00 - 17:00'],
             
             async init() {
+                await this.cleanupOldSlots(); // Remove past slots
+                await this.autoGenerateSlots(); // Auto-generate missing slots
                 await this.loadAvailableSlots();
                 this.render();
+            },
+            
+            // CLEANUP: Remove slots older than 7 days
+            async cleanupOldSlots() {
+                try {
+                    const cutoffDate = new Date();
+                    cutoffDate.setDate(cutoffDate.getDate() - 7);
+                    
+                    const { error } = await window.supabaseClient
+                        .from('appointment_slots')
+                        .delete()
+                        .lt('slot_date', cutoffDate.toISOString().split('T')[0])
+                        .eq('is_available', true); // Only delete unclaimed slots
+                    
+                    if (error) {
+                        console.warn('Cleanup skipped:', error.message);
+                    }
+                } catch (error) {
+                    console.warn('Cleanup error:', error.message);
+                }
+            },
+            
+            // AUTO-GENERATE SLOTS FOR NEXT 4 WEEKS (Mon-Fri)
+            async autoGenerateSlots() {
+                try {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    // Generate for next 4 weeks (28 days)
+                    const endDate = new Date(today);
+                    endDate.setDate(endDate.getDate() + 28);
+                    
+                    // Get existing slots
+                    const { data: existingSlots, error: fetchError } = await window.supabaseClient
+                        .from('appointment_slots')
+                        .select('slot_date, slot_time')
+                        .gte('slot_date', today.toISOString().split('T')[0]);
+                    
+                    if (fetchError) throw fetchError;
+                    
+                    // Create a Set of existing slot keys for quick lookup
+                    const existingKeys = new Set(
+                        (existingSlots || []).map(s => `${s.slot_date}_${s.slot_time}`)
+                    );
+                    
+                    // Generate missing slots
+                    const slotsToInsert = [];
+                    const currentDate = new Date(today);
+                    currentDate.setDate(currentDate.getDate() + 1); // Start from tomorrow
+                    
+                    while (currentDate <= endDate) {
+                        const dayOfWeek = currentDate.getDay();
+                        
+                        // Only Mon-Fri (1-5)
+                        if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                            const dateStr = currentDate.toISOString().split('T')[0];
+                            
+                            this.SLOT_TIMES.forEach(time => {
+                                const key = `${dateStr}_${time}`;
+                                if (!existingKeys.has(key)) {
+                                    slotsToInsert.push({
+                                        slot_date: dateStr,
+                                        slot_time: time,
+                                        is_available: true
+                                    });
+                                }
+                            });
+                        }
+                        
+                        currentDate.setDate(currentDate.getDate() + 1);
+                    }
+                    
+                    // Insert missing slots (if any)
+                    if (slotsToInsert.length > 0) {
+                        const { error: insertError } = await window.supabaseClient
+                            .from('appointment_slots')
+                            .insert(slotsToInsert);
+                        
+                        if (insertError) {
+                            console.warn('Could not auto-generate slots:', insertError.message);
+                            // Don't throw - this is not critical, slots might already exist
+                        } else {
+                            console.log(`Auto-generated ${slotsToInsert.length} slots for next 4 weeks`);
+                        }
+                    }
+                    
+                } catch (error) {
+                    console.warn('Auto-generate slots skipped:', error.message);
+                    // Don't block page load if auto-generate fails
+                }
             },
             
             async loadAvailableSlots() {

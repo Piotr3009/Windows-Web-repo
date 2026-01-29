@@ -179,10 +179,14 @@
     <div class="section-header">
       <h2>Appointments Management</h2>
       <div>
-        <button class="btn-add" onclick="AdminCalendar.generateSlotsForWeek()">+ Generate Week Slots</button>
+        <button class="btn-add" onclick="AdminCalendar.generateSlotsForWeek()" title="Manually add more slots if needed">+ Add Extra Slots</button>
       </div>
     </div>
     <div class="section-content">
+      <div style="background: #e8f5e9; border: 1px solid #4caf50; border-radius: 8px; padding: 12px; margin-bottom: 15px;">
+        <strong>ℹ️ Auto-Generation Active:</strong> Slots are automatically created for Mon-Fri, 4 weeks ahead. 
+        Use the calendar to <strong>block</strong> specific days (holidays, days off) by clicking a day and toggling availability.
+      </div>
       
       <!-- Admin Calendar -->
       <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
@@ -563,10 +567,69 @@ const AdminCalendar = {
   SLOT_TIMES: ['09:00 - 11:00', '11:00 - 13:00', '13:00 - 15:00', '15:00 - 17:00'],
   
   async init() {
+    await this.autoGenerateSlots(); // Auto-generate slots for next 4 weeks
     await this.loadData();
     this.render();
     this.loadPendingRequests();
     this.loadBookedAppointments();
+  },
+  
+  // AUTO-GENERATE SLOTS FOR NEXT 4 WEEKS (Mon-Fri)
+  async autoGenerateSlots() {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const endDate = new Date(today);
+      endDate.setDate(endDate.getDate() + 28);
+      
+      // Get existing slots
+      const { data: existingSlots } = await window.supabaseClient
+        .from('appointment_slots')
+        .select('slot_date, slot_time')
+        .gte('slot_date', today.toISOString().split('T')[0]);
+      
+      const existingKeys = new Set(
+        (existingSlots || []).map(s => `${s.slot_date}_${s.slot_time}`)
+      );
+      
+      const slotsToInsert = [];
+      const currentDate = new Date(today);
+      currentDate.setDate(currentDate.getDate() + 1);
+      
+      while (currentDate <= endDate) {
+        const dayOfWeek = currentDate.getDay();
+        
+        if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Mon-Fri
+          const dateStr = currentDate.toISOString().split('T')[0];
+          
+          this.SLOT_TIMES.forEach(time => {
+            const key = `${dateStr}_${time}`;
+            if (!existingKeys.has(key)) {
+              slotsToInsert.push({
+                slot_date: dateStr,
+                slot_time: time,
+                is_available: true
+              });
+            }
+          });
+        }
+        
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+      
+      if (slotsToInsert.length > 0) {
+        const { error } = await window.supabaseClient
+          .from('appointment_slots')
+          .insert(slotsToInsert);
+        
+        if (!error) {
+          console.log(`Auto-generated ${slotsToInsert.length} slots`);
+        }
+      }
+    } catch (error) {
+      console.warn('Auto-generate skipped:', error.message);
+    }
   },
   
   async loadBookedAppointments() {
