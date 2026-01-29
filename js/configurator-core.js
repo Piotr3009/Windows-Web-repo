@@ -595,6 +595,7 @@ class ConfiguratorCore {
     this.appliedSections = {};
     localStorage.removeItem('byow_applied_sections');
     // NIE usuwaj byow_saved_config - zachowaj parametry dla następnego okna
+    this.resetButtonTexts();
     this.updateApplyButtonsState();
   }
   
@@ -603,7 +604,67 @@ class ConfiguratorCore {
     this.appliedSections = {};
     localStorage.removeItem('byow_applied_sections');
     localStorage.removeItem('byow_saved_config');
+    this.resetButtonTexts();
     this.updateApplyButtonsState();
+  }
+
+  // Mapa oryginalnych tekstów buttonów
+  getOriginalButtonText(buttonId) {
+    const textMap = {
+      'apply-dimensions': 'Apply Dimensions',
+      'apply-bars': 'Apply Georgian Bars',
+      'apply-frame': 'Apply Frame Type',
+      'apply-color': 'Apply Color',
+      'apply-glass': 'Apply Glass Type',
+      'apply-opening': 'Apply Opening Type',
+      'apply-pas24': 'Apply Security Standard',
+      'apply-details': 'Apply Details',
+      'apply-glass-spec': 'Apply Glass Specification'
+    };
+    return textMap[buttonId] || 'Apply';
+  }
+
+  // Reset wszystkich tekstów buttonów do oryginalnych
+  resetButtonTexts() {
+    this.applyButtonsOrder.forEach(({ id }) => {
+      const btn = document.getElementById(id);
+      if (btn) {
+        btn.textContent = this.getOriginalButtonText(id);
+        btn.classList.remove('applied');
+      }
+    });
+  }
+
+  // NOWA FUNKCJA: Invalidate section when user changes something after Apply
+  // Czyści tę sekcję i WSZYSTKIE następne sekcje
+  invalidateSection(buttonId) {
+    const buttonInfo = this.applyButtonsOrder.find(b => b.id === buttonId);
+    if (!buttonInfo) return;
+    
+    const invalidatedOrder = buttonInfo.order;
+    
+    // Wyczyść tę sekcję i wszystkie następne
+    this.applyButtonsOrder.forEach(({ id, order }) => {
+      if (order >= invalidatedOrder) {
+        // Usuń z appliedSections
+        delete this.appliedSections[id];
+        
+        // Reset tekstu buttona
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.textContent = this.getOriginalButtonText(id);
+          btn.classList.remove('applied');
+        }
+      }
+    });
+    
+    // Zapisz do localStorage
+    localStorage.setItem('byow_applied_sections', JSON.stringify(this.appliedSections));
+    
+    // Zaktualizuj stany (zablokuj następne)
+    this.updateApplyButtonsState();
+    
+    console.log(`Section ${buttonId} invalidated, subsequent sections reset`);
   }
 
   applySection(section) {
@@ -924,6 +985,13 @@ ready(() => {
   window.loadConfiguration = (config) => {
     if (window.configuratorCore?.isInitialized) {
       window.configuratorCore.loadConfiguration(config);
+    }
+  };
+  
+  // Global function to invalidate a section when user changes it after Apply
+  window.invalidateSection = (buttonId) => {
+    if (window.configuratorCore?.isInitialized) {
+      window.configuratorCore.invalidateSection(buttonId);
     }
   };
 });

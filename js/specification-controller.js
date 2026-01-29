@@ -85,7 +85,10 @@ class SpecificationController {
       if (radios.length > 0) {
         radios.forEach(radio => {
           radio.addEventListener('change', () => {
-            button.classList.remove('applied');
+            // Invalidate this section and all subsequent ones
+            if (window.invalidateSection) {
+              window.invalidateSection(buttonId);
+            }
           });
         });
       }
@@ -95,13 +98,19 @@ class SpecificationController {
       if (element) {
         const eventType = element.type === 'checkbox' ? 'change' : 'input';
         element.addEventListener(eventType, () => {
-          button.classList.remove('applied');
+          // Invalidate this section and all subsequent ones
+          if (window.invalidateSection) {
+            window.invalidateSection(buttonId);
+          }
         });
 
         // Dla selectów dodaj też change
         if (element.tagName === 'SELECT') {
           element.addEventListener('change', () => {
-            button.classList.remove('applied');
+            // Invalidate this section and all subsequent ones
+            if (window.invalidateSection) {
+              window.invalidateSection(buttonId);
+            }
           });
         }
       }
@@ -116,7 +125,10 @@ class SpecificationController {
     const singleColorOptions = document.querySelectorAll('#single-color-selector .color-option');
     singleColorOptions.forEach(option => {
       option.addEventListener('click', () => {
-        button.classList.remove('applied');
+        // Invalidate color section and all subsequent ones
+        if (window.invalidateSection) {
+          window.invalidateSection('apply-color');
+        }
       });
     });
 
@@ -124,7 +136,10 @@ class SpecificationController {
     const dualColorOptions = document.querySelectorAll('.interior-color, .exterior-color');
     dualColorOptions.forEach(option => {
       option.addEventListener('click', () => {
-        button.classList.remove('applied');
+        // Invalidate color section and all subsequent ones
+        if (window.invalidateSection) {
+          window.invalidateSection('apply-color');
+        }
       });
     });
   }
