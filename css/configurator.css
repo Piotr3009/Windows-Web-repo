@@ -299,6 +299,10 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 15px;
   text-align: center;
   width: 90%;
+  position: sticky;
+  bottom: 20px;
+  z-index: 100;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
 }
 
 .price-summary h3 {
@@ -1027,6 +1031,23 @@ h1, h2, h3, h4, h5, h6 {
   .modal-content {
     width: 95%;
     margin: 10% auto;
+  }
+  
+  /* Sticky price bar dla mobile - fixed na dole ekranu */
+  .price-summary {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    border-radius: 15px 15px 0 0;
+    padding: 12px 15px;
+    z-index: 1000;
+  }
+  
+  /* Dodaj padding na dole strony żeby content nie był zakryty */
+  .configurator-preview {
+    padding-bottom: 100px;
   }
 }
 

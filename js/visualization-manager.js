@@ -169,7 +169,7 @@ class VisualizationManager {
     } else {
       UIHelpers.setText(
         this.elements.totalPriceDisplay,
-        UIHelpers.formatPrice(totalPrice)
+        '£' + UIHelpers.formatPrice(totalPrice)
       );
     }
   }

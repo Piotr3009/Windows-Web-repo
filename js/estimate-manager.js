@@ -280,42 +280,28 @@ class EstimateManager {
         }
     }
 
-    // Pokaż modal tworzenia nowej wyceny
+    // Pokaż modal tworzenia nowej wyceny (używa tego samego modala co estimate-selector)
     showCreateEstimateModal() {
-        const modal = document.getElementById('create-estimate-modal');
+        const modal = document.getElementById('new-estimate-modal');
         if (modal) {
+            // Clear form
+            const projectNameInput = document.getElementById('new-estimate-project-name');
+            const addressInput = document.getElementById('new-estimate-address');
+            const notesInput = document.getElementById('new-estimate-notes');
+            
+            if (projectNameInput) projectNameInput.value = '';
+            if (addressInput) addressInput.value = '';
+            if (notesInput) notesInput.value = '';
+            
             modal.style.display = 'block';
         }
     }
 
     // Zamknij modal
     closeCreateEstimateModal() {
-        const modal = document.getElementById('create-estimate-modal');
+        const modal = document.getElementById('new-estimate-modal');
         if (modal) {
             modal.style.display = 'none';
-        }
-    }
-
-    // Obsługa formularza tworzenia wyceny
-    async handleCreateEstimateForm(event) {
-        event.preventDefault();
-
-        const projectName = document.getElementById('project-name').value.trim();
-        const deliveryAddress = document.getElementById('delivery-address').value.trim();
-
-        if (!projectName) {
-            this.showToast('Project name is required', 'error');
-            return;
-        }
-
-        try {
-            await this.createNewEstimate(projectName, deliveryAddress);
-            this.closeCreateEstimateModal();
-
-            // Reset formularza
-            document.getElementById('create-estimate-form').reset();
-        } catch (error) {
-            console.error('Error in form submission:', error);
         }
     }
 
@@ -385,27 +371,8 @@ class EstimateManager {
             this.updateLocalStorageCounter();
         }
 
-        // Formularz tworzenia wyceny
-        const form = document.getElementById('create-estimate-form');
-        if (form) {
-            form.addEventListener('submit', (e) => this.handleCreateEstimateForm(e));
-        }
-
-        // Zamknięcie modala
-        const closeBtn = document.querySelector('#create-estimate-modal .close');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => this.closeCreateEstimateModal());
-        }
-
-        // Click outside modal
-        const modal = document.getElementById('create-estimate-modal');
-        if (modal) {
-            window.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    this.closeCreateEstimateModal();
-                }
-            });
-        }
+        // Zamknięcie modala - teraz obsługiwane przez HTML onclick
+        // (new-estimate-modal ma już onclick na przycisku close)
     }
 
     // Pobierz aktualną konfigurację okna
@@ -470,7 +437,10 @@ class EstimateManager {
 
     // Pobierz aktualną cenę
     getCurrentPrice() {
-        const totalPrice = parseFloat(document.getElementById('total-price')?.textContent) || 0;
+        const priceText = document.getElementById('total-price')?.textContent || '0';
+        // Usuń £ i inne znaki nie-numeryczne (oprócz kropki)
+        const cleanPrice = priceText.replace(/[^0-9.]/g, '');
+        const totalPrice = parseFloat(cleanPrice) || 0;
         const quantity = parseInt(document.getElementById('window-quantity')?.value) || 1;
         const unitPrice = quantity > 1 ? totalPrice / quantity : totalPrice;
 
