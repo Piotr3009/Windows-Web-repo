@@ -295,6 +295,7 @@ class AuthSystem {
     async updateUIForAuth(user) {
         const authButtons = document.querySelectorAll('.auth-required');
         const dashboardLink = document.getElementById('dashboard-link');
+        const loginMenuLink = document.getElementById('login-menu-link');
         
         if (user) {
             // User is logged in - pobierz dane z bazy
@@ -314,6 +315,11 @@ class AuthSystem {
                     btn.style.cursor = 'pointer';
                 });
 
+                // Ukryj Login button w menu (user zalogowany)
+                if (loginMenuLink) {
+                    loginMenuLink.style.display = 'none';
+                }
+
                 // Dashboard link - zalogowany użytkownik
                 if (dashboardLink) {
                     dashboardLink.onclick = (e) => {
@@ -330,6 +336,11 @@ class AuthSystem {
                     btn.onclick = () => window.location.href = 'customer-dashboard.html';
                 });
                 
+                // Ukryj Login button w menu (user zalogowany - fallback)
+                if (loginMenuLink) {
+                    loginMenuLink.style.display = 'none';
+                }
+                
                 // Dashboard link - zalogowany użytkownik (fallback)
                 if (dashboardLink) {
                     dashboardLink.onclick = (e) => {
@@ -344,6 +355,11 @@ class AuthSystem {
                 btn.textContent = 'Login / Register';
                 btn.onclick = () => this.showModal();
             });
+            
+            // Pokaż Login button w menu (user niezalogowany)
+            if (loginMenuLink) {
+                loginMenuLink.style.display = '';
+            }
             
             // Dashboard link - niezalogowany użytkownik
             if (dashboardLink) {
