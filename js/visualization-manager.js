@@ -161,17 +161,32 @@ class VisualizationManager {
   }
 
   updatePrice(unitPrice, totalPrice, noDimensions = false) {
-    if (noDimensions) {
-      UIHelpers.setText(
-        this.elements.totalPriceDisplay,
-        'Enter dimensions'
-      );
-    } else {
-      UIHelpers.setText(
-        this.elements.totalPriceDisplay,
-        '£' + UIHelpers.formatPrice(totalPrice)
-      );
+    const priceEl = this.elements.totalPriceDisplay;
+    
+    // Add updating class for animation
+    if (priceEl) {
+      priceEl.classList.add('updating');
     }
+    
+    // Small delay for visual effect
+    setTimeout(() => {
+      if (noDimensions) {
+        UIHelpers.setText(
+          priceEl,
+          'Enter dimensions'
+        );
+      } else {
+        UIHelpers.setText(
+          priceEl,
+          '£' + UIHelpers.formatPrice(totalPrice)
+        );
+      }
+      
+      // Remove updating class
+      if (priceEl) {
+        priceEl.classList.remove('updating');
+      }
+    }, 150);
   }
 
   updateOpeningIndicators(openingType) {
