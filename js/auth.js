@@ -236,6 +236,11 @@ class AuthSystem {
 
             // Track registration
             await this.trackEvent('user_registration', { user_id: authData.user.id });
+            
+            // Google Ads conversion tracking
+            if (typeof gtag === 'function') {
+                gtag('event', 'ads_conversion_Book_appointment_1', {});
+            }
 
             // Sprawdź czy email wymaga potwierdzenia
             const needsEmailConfirmation = authData.user && !authData.user.email_confirmed_at;
