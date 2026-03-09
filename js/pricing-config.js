@@ -1,7 +1,7 @@
 // pricing-config.js - Zaawansowana konfiguracja cennika
 const pricingConfig = {
   // Cena bazowa za m²
-  basePricePerSqm: 900,
+  basePricePerSqm: 800,
   
   // Mnożniki degresywne - im większe okno, tym taniej za m²
   sizeMultipliers: [
